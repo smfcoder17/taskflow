@@ -1,3 +1,27 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  /* Colors */
+  --color-primary: #13ec5b;
+  --color-background-light: #f6f8f6;
+  --color-background-dark: #102216;
+  --color-card-dark: #112217;
+  --color-border-dark: #23482f;
+  --color-border-dark-strong: #326744;
+  --color-text-dark-primary: #ffffff;
+  --color-text-dark-secondary: #92c9a4;
+
+  /* Fonts */
+  --font-family-display: Inter, sans-serif;
+
+  /* Border Radius */
+  --radius-default: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* @plugin 'daisyui' {
+  themes: light --default, dark --prefersdark, lemonade;
+} */
