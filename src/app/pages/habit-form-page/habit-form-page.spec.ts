@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HabitForm } from './habit-form';
+import { HabitFormPage } from './habit-form-page';
 
-describe('HabitForm', () => {
-  let component: HabitForm;
-  let fixture: ComponentFixture<HabitForm>;
+describe('HabitFormPage', () => {
+  let component: HabitFormPage;
+  let fixture: ComponentFixture<HabitFormPage>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HabitForm]
+      imports: [HabitFormPage]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(HabitForm);
+    fixture = TestBed.createComponent(HabitFormPage);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
