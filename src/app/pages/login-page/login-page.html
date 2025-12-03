@@ -1,0 +1,51 @@
+<div class="flex items-center justify-center min-h-screen bg-background-dark text-white p-4">
+  <div class="w-full max-w-md">
+    <div class="flex justify-center items-center gap-2 mb-8">
+      <div class="size-9 text-primary">
+        <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
+        </svg>
+      </div>
+      <h1 class="text-text-dark-primary text-2xl font-bold">HabitFlow</h1>
+    </div>
+
+    @if (loading) {
+    <p>Sending magic link...</p>
+    } @else if (emailSent) {
+    <div class="success-message">
+      <p>Check your email for the magic link!</p>
+      <p>Click the link to sign in.</p>
+    </div>
+    } @else {
+    <div class="bg-card-dark border border-border-dark rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-center text-white mb-2">Welcome Back!</h2>
+      <p class="text-center text-text-dark-secondary mb-6">
+        Login to continue tracking your habits.
+      </p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm font-medium text-text-dark-secondary mb-2"
+            >Email Address</label
+          >
+          <input
+            id="email"
+            formControlName="email"
+            type="email"
+            class="form-input w-full rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50 border border-border-dark-strong bg-background-dark h-12 placeholder:text-white/40 px-4"
+            placeholder="you@example.com"
+          />
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="loginForm.invalid"
+          class="w-full cursor-pointer flex items-center justify-center rounded-lg h-12 px-6 bg-primary text-card-dark text-base font-bold tracking-wide hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Login
+        </button>
+      </form>
+    </div>
+    }
+  </div>
+</div>
