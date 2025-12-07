@@ -17,8 +17,8 @@ import { Router } from '@angular/router';
 export class SupabaseService {
   private supabase: SupabaseClient;
   isLoading = signal(true);
-
   session = signal<Session | null>(null);
+
   constructor(private router: Router) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
       auth: {
@@ -28,22 +28,48 @@ export class SupabaseService {
       },
     });
 
-    // Initialize session
-    this.supabase.auth.getSession().then(({ data: { session } }) => {
-      this.session.set(session);
-    });
+    this.initializeSession();
+  }
 
-    // Listen for auth changes
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event, session);
-      this.session.set(session);
+  private async initializeSession() {
+    try {
+      console.log('🔄 Initializing session...');
 
-      if (event === 'SIGNED_IN' && session) {
-        this.router.navigate(['/dashboard']);
-      } else if (event === 'SIGNED_OUT') {
-        this.router.navigate(['/login']);
+      // Get current session (including from URL after magic link)
+      const { data, error } = await this.supabase.auth.getSession();
+
+      if (error) {
+        console.error('❌ Session error:', error);
+        this.isLoading.set(false);
+        return;
       }
-    });
+
+      if (data?.session) {
+        console.log('✅ Session found:', data.session.user.email);
+        this.session.set(data.session);
+      } else {
+        console.log('ℹ️ No session found');
+      }
+
+      // Listen for auth state changes
+      this.supabase.auth.onAuthStateChange((event, session) => {
+        console.log('🔐 Auth event:', event, session?.user?.email || 'null');
+        this.session.set(session);
+
+        if (event === 'SIGNED_IN' && session) {
+          this.router.navigate(['/dashboard']);
+        } else if (event === 'SIGNED_OUT') {
+          this.router.navigate(['/login']);
+        }
+      });
+
+      // IMPORTANT: Set loading to false AFTER everything is initialized
+      this.isLoading.set(false);
+      console.log('✅ Session initialization complete');
+    } catch (error) {
+      console.error('❌ Initialize session error:', error);
+      this.isLoading.set(false);
+    }
   }
 
   authChanges(callback: (event: AuthChangeEvent, session: Session | null) => void) {
@@ -63,12 +89,18 @@ export class SupabaseService {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
+        shouldCreateUser: true,
       },
     });
   }
 
   signIn(email: string) {
-    return this.supabase.auth.signInWithOtp({ email });
+    return this.supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+      },
+    });
   }
 
   signOut() {

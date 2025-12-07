@@ -54,7 +54,7 @@ export class LoginPage {
     email: ['', [Validators.required, Validators.email]],
   });
 
-  private supabase = inject(SupabaseService);
+  supabase = inject(SupabaseService);
 
   async onSubmit(): Promise<void> {
     try {

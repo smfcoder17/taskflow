@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './components/sidebar-component/sidebar-component';
 import { SupabaseService } from './services/supabase-service';
 import { Session } from '@supabase/supabase-js';
@@ -13,11 +13,11 @@ import { Session } from '@supabase/supabase-js';
 export class App implements OnInit {
   protected readonly title = signal('taskflow');
 
-  constructor(private readonly supabase: SupabaseService) {}
+  constructor(private readonly supabase: SupabaseService, private readonly router: Router) {}
 
   ngOnInit() {}
 
   isLoginPage(): boolean {
-    return this.supabase.session() === null;
+    return this.router.url === '/login';
   }
 }

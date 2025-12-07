@@ -1,21 +1,28 @@
 import { inject } from '@angular/core';
-import { Router, type CanActivateFn } from '@angular/router';
+import { Router, CanActivateFn } from '@angular/router';
 import { SupabaseService } from '../services/supabase-service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, map, take } from 'rxjs/operators';
 
-export const AuthGuard: CanActivateFn = async (route, state) => {
+export const authGuard: CanActivateFn = (route, state) => {
   const supabase = inject(SupabaseService);
   const router = inject(Router);
 
-  // Get current session
-  const session = supabase.session();
+  // Wait for loading to finish, then check session
+  return toObservable(supabase.isLoading).pipe(
+    filter((isLoading) => !isLoading), // Wait until loading is done
+    take(1), // Take only the first emission
+    map(() => {
+      const session = supabase.session();
 
-  if (session) {
-    return true;
-  }
+      if (session) {
+        console.log('✅ Auth guard: User authenticated:', session.user.email);
+        return true;
+      }
 
-  // Redirect to login with return URL
-  router.navigate(['/login'], {
-    queryParams: { returnUrl: state.url },
-  });
-  return false;
+      console.log('❌ Auth guard: No session, redirecting to login');
+      router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      return false;
+    })
+  );
 };
