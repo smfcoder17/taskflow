@@ -8,7 +8,7 @@ import {
   User,
 } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { Profile } from '../models/models';
+import { Habit, Profile } from '../models/models';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -125,5 +125,77 @@ export class SupabaseService {
 
   getSupabaseClient(): SupabaseClient {
     return this.supabase;
+  }
+
+  /**
+   * Create a new habit
+   */
+  createHabit(habit: Habit) {
+    const user = this.session()?.user;
+
+    if (!user) {
+      throw new Error('User must be authenticated to create a habit');
+    }
+
+    const habitData = {
+      user_id: user.id,
+      title: habit.title,
+      description: habit.description,
+      frequency: habit.frequency,
+      start_date: habit.startDate,
+      end_date: habit.endDate,
+      streak_enabled: habit.streakEnabled,
+    };
+
+    return this.supabase.from('habits').insert(habitData).select().single();
+  }
+
+  /**
+   * Get all habits for the current user
+   */
+  getHabits() {
+    const user = this.session()?.user;
+
+    if (!user) {
+      throw new Error('User must be authenticated');
+    }
+
+    return this.supabase
+      .from('habits')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+  }
+
+  /**
+   * Get a single habit by ID
+   */
+  getHabit(id: string) {
+    return this.supabase.from('habits').select('*').eq('id', id).single();
+  }
+
+  /**
+   * Update an existing habit
+   */
+  updateHabit(id: string, habit: Partial<Habit>) {
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (habit.title) updateData.title = habit.title;
+    if (habit.description !== undefined) updateData.description = habit.description;
+    if (habit.frequency) updateData.frequency = habit.frequency;
+    if (habit.startDate) updateData.start_date = habit.startDate;
+    if (habit.endDate !== undefined) updateData.end_date = habit.endDate;
+    if (habit.streakEnabled !== undefined) updateData.streak_enabled = habit.streakEnabled;
+
+    return this.supabase.from('habits').update(updateData).eq('id', id).select().single();
+  }
+
+  /**
+   * Delete a habit
+   */
+  deleteHabit(id: string) {
+    return this.supabase.from('habits').delete().eq('id', id);
   }
 }

@@ -18,6 +18,6 @@ export class App implements OnInit {
   ngOnInit() {}
 
   isLoginPage(): boolean {
-    return this.router.url === '/login';
+    return this.router.url?.includes('/login');
   }
 }

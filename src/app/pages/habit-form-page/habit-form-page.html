@@ -1,1 +1,205 @@
-<p>habit-form works!</p>
+<section
+  class="min-h-screen bg-background-dark text-text-dark-primary font-[family:var(--font-family-display)] px-4 md:px-12 py-12 flex flex-col items-center"
+>
+  <header class="mb-7">
+    <h1 class="text-3xl md:text-4xl font-extrabold">Create a New Habit</h1>
+  </header>
+
+  <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 w-8/12">
+    <!-- Basics -->
+    <div
+      class="bg-card-dark border border-border-dark-strong/50 rounded-xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+    >
+      <div class="font-bold mb-3">The Basics</div>
+      <div class="grid gap-4 md:grid-cols-[2fr_1fr]">
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-2">
+            <label for="name" class="text-sm text-text-dark-secondary">Habit Name</label>
+            <input
+              id="name"
+              formControlName="title"
+              type="text"
+              placeholder="e.g., Drink 8 glasses of water"
+              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="description" class="text-sm text-text-dark-secondary"
+              >Description (Optional)</label
+            >
+            <textarea
+              id="description"
+              formControlName="description"
+              placeholder="Add some notes or details..."
+              rows="3"
+              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30 resize-y min-h-[96px]"
+            ></textarea>
+          </div>
+        </div>
+
+        <div
+          class="bg-background-dark border border-dashed border-border-dark-strong/65 rounded-xl p-4 flex flex-col gap-3"
+        >
+          <p class="text-sm text-text-dark-secondary">Icon</p>
+          <button
+            type="button"
+            class="bg-card-dark border border-border-dark-strong text-text-dark-primary rounded-xl p-3 flex items-center gap-3 hover:border-primary hover:-translate-y-px transition"
+          >
+            <span
+              class="w-11 h-11 rounded-full inline-flex items-center justify-center bg-primary/20"
+              >🏆</span
+            >
+            <span>Choose an icon</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scheduling -->
+    <div
+      class="bg-card-dark border border-border-dark-strong/50 rounded-xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+    >
+      <div class="font-bold mb-3">Scheduling &amp; Frequency</div>
+      <div class="flex flex-col gap-3">
+        <span class="text-sm text-text-dark-secondary">How often?</span>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button
+            type="button"
+            class="rounded-lg px-3 py-3 font-semibold border transition"
+            [ngClass]="
+              habitForm.value.frequency === 'daily'
+                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
+                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+            "
+            (click)="habitForm.get('frequency')?.setValue('daily')"
+          >
+            Daily
+          </button>
+          <button
+            type="button"
+            class="rounded-lg px-3 py-3 font-semibold border transition"
+            [ngClass]="
+              habitForm.value.frequency === 'weekly'
+                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
+                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+            "
+            (click)="habitForm.get('frequency')?.setValue('weekly')"
+          >
+            Weekly
+          </button>
+          <button
+            type="button"
+            class="rounded-lg px-3 py-3 font-semibold border transition"
+            [ngClass]="
+              habitForm.value.frequency === 'monthly'
+                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
+                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+            "
+            (click)="habitForm.get('frequency')?.setValue('monthly')"
+          >
+            Monthly
+          </button>
+          <button
+            type="button"
+            class="rounded-lg px-3 py-3 font-semibold border transition"
+            [ngClass]="
+              habitForm.value.frequency === 'custom'
+                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
+                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+            "
+            (click)="habitForm.get('frequency')?.setValue('custom')"
+          >
+            Custom
+          </button>
+        </div>
+
+        @if (habitForm.value.frequency === 'custom') {
+        <input
+          type="text"
+          formControlName="customFrequency"
+          class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+          placeholder="Describe your custom cadence"
+        />
+        }
+
+        <div class="grid gap-3 md:grid-cols-2">
+          <div class="flex flex-col gap-2">
+            <label for="startDate" class="text-sm text-text-dark-secondary">Start Date</label>
+            <input
+              id="startDate"
+              type="date"
+              formControlName="startDate"
+              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+            />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="endDate" class="text-sm text-text-dark-secondary"
+              >End Date (Optional)</label
+            >
+            <input
+              id="endDate"
+              type="date"
+              formControlName="endDate"
+              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracking -->
+    <div
+      class="bg-card-dark border border-border-dark-strong/50 rounded-xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+    >
+      <div class="font-bold mb-3">Tracking &amp; Motivation</div>
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between gap-4 py-3">
+          <div>
+            <p class="font-semibold text-text-dark-primary">Enable Streak Tracking</p>
+            <p class="text-sm text-text-dark-secondary">Keep momentum by tracking streaks</p>
+          </div>
+          <label class="relative inline-flex h-7 w-14 items-center">
+            <input type="checkbox" formControlName="streakEnabled" class="peer sr-only" />
+            <span
+              class="absolute inset-0 rounded-full bg-border-dark-strong/40 transition peer-checked:bg-gradient-to-r peer-checked:from-primary peer-checked:to-primary/85"
+            ></span>
+            <span
+              class="absolute left-1 h-5 w-5 rounded-full bg-white transition peer-checked:translate-x-7"
+            ></span>
+          </label>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="resetCondition" class="text-sm text-text-dark-secondary"
+            >Streak Reset Condition</label
+          >
+          <select
+            id="resetCondition"
+            formControlName="resetCondition"
+            class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+          >
+            <option value="reset-after-1">Reset after 1 missed day</option>
+            <option value="reset-after-2">Reset after 2 missed days</option>
+            <option value="never">Never reset</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-2">
+      <button
+        type="button"
+        class="h-12 px-4 rounded-xl font-bold text-base border border-border-dark-strong text-text-dark-secondary hover:-translate-y-px transition"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="h-12 px-5 rounded-xl font-bold text-base bg-primary text-[#052213] min-w-[140px] hover:-translate-y-px transition"
+      >
+        Create Habit
+      </button>
+    </div>
+  </form>
+</section>
