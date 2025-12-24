@@ -16,7 +16,7 @@ export const authGuard: CanActivateFn = (route, state) => {
       const session = supabase.session();
 
       if (session) {
-        console.log('✅ Auth guard: User authenticated:', session.user.email);
+        console.log('✅ Auth guard: User authenticated:');
         return true;
       }
 

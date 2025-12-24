@@ -53,7 +53,7 @@ export class SupabaseService {
       }
 
       if (data?.session) {
-        console.log('✅ Session found:', data.session.user.email);
+        console.log('✅ Session found:');
         this.session.set(data.session);
       } else {
         console.log('ℹ️ No session found');
@@ -61,12 +61,13 @@ export class SupabaseService {
 
       // Listen for auth state changes
       this.supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔐 Auth event:', event, session?.user?.email || 'null');
+        console.log('🔐 Auth event:', event);
+        const previousSession = this.session();
         this.session.set(session);
 
-        if (event === 'SIGNED_IN' && session) {
+        if (event === 'SIGNED_IN' && !previousSession && session) {
           this.router.navigate(['/dashboard']);
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event === 'SIGNED_OUT' && previousSession && !session) {
           this.router.navigate(['/login']);
         }
       });
