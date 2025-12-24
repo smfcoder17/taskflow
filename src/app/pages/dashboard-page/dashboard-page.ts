@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HabitWithStats, DailyProgress, WeeklyProgress, StreakInfo } from '../../models/models';
 import { SupabaseService } from '../../services/supabase-service';
 import { isSameDay } from '../../models/utilities';
@@ -23,7 +23,7 @@ interface TopStreak {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [RouterLink, CommonModule],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.css',
 })
