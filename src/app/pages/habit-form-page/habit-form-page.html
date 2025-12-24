@@ -114,7 +114,29 @@
           </button>
         </div>
 
-        @if (habitForm.value.frequency === 'custom') {
+        @if (habitForm.value.frequency === 'weekly') {
+        <div class="flex flex-wrap gap-2">
+          @for (day of weekDays; track day.index) {
+          <label
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer select-none transition"
+            [ngClass]="
+              habitForm.value.customDays.includes(day.value)
+                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
+                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+            "
+          >
+            <input
+              type="checkbox"
+              [value]="day.value"
+              (change)="onCustomDayChange($event)"
+              [checked]="habitForm.value.customDays.includes(day.value)"
+              class="sr-only"
+            />
+            {{ day.label }}
+          </label>
+          }
+        </div>
+        } @if (habitForm.value.frequency === 'custom') {
         <input
           type="text"
           formControlName="customFrequency"

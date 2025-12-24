@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: 'calendar', component: CalendarPage, canActivate: [authGuard] },
   { path: 'reports', component: ReportsPage, canActivate: [authGuard] },
   { path: 'settings', component: SettingsPage, canActivate: [authGuard] },
-  { path: 'add-habit', component: HabitFormPage, canActivate: [authGuard] },
+  { path: 'habit/new', component: HabitFormPage, canActivate: [authGuard] },
   { path: 'profile', component: ProfilePage, canActivate: [authGuard] },
 
   { path: 'login', component: LoginPage },

@@ -1,63 +1,311 @@
-<div class="space-y-8">
-  <!-- PageHeading -->
-  <div class="flex flex-wrap justify-between gap-3">
-    <div class="flex min-w-72 flex-col gap-2">
-      <p
-        class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]"
-      >
-        Good Morning, Alex!
-      </p>
-      <p class="text-slate-500 dark:text-text-dark-secondary text-base font-normal leading-normal">
-        Here's your progress for today. Keep it up!
-      </p>
-    </div>
-  </div>
+<div class="bg-background-dark min-h-screen flex pt-4">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-text-dark-primary">
+      <!-- Left Column - Main Content -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Page Title & Date Navigation -->
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-bold text-text-dark-secondary">My Habits</h2>
+        </div>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+        <!-- Daily Progress Card -->
+        <div class="bg-card-dark rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="text-sm text-text-dark-secondary mb-1">Daily Goal</div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-4xl font-bold">{{ dailyProgress().percentage }}%</span>
+                <span class="text-text-dark-secondary">Completed</span>
+              </div>
+            </div>
+            <div class="text-6xl opacity-10">🎯</div>
+          </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Today's Habits List -->
-    <div class="lg:col-span-2 space-y-4">
-      <h2
-        class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]"
-      >
-        Today's Habits
-      </h2>
-      <div class="flex flex-col gap-3"></div>
-    </div>
+          <!-- Progress Bar -->
+          <div class="relative w-full h-3 bg-background-dark rounded-full overflow-hidden">
+            <div
+              class="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-primary/85 rounded-full transition-all duration-500"
+              [style.width.%]="dailyProgress().percentage"
+            ></div>
+          </div>
 
-    <!-- Activity Heatmap -->
-    <div class="space-y-4">
-      <h2
-        class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]"
-      >
-        Activity
-      </h2>
-      <div
-        class="p-4 rounded-xl border border-slate-200 dark:border-border-dark-strong bg-white dark:bg-card-dark"
-      >
-        <div class="flex justify-between items-center mb-4">
-          <p class="font-semibold text-slate-800 dark:text-white"></p>
-          <div class="flex gap-2">
-            <button class="text-slate-500 dark:text-slate-400">
-              <span class="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button class="text-slate-500 dark:text-slate-400">
-              <span class="material-symbols-outlined">chevron_right</span>
-            </button>
+          <div class="mt-3 text-sm text-text-dark-secondary">
+            {{ dailyProgress().completedHabits }} of {{ dailyProgress().totalHabits }} habits
+            completed today
           </div>
         </div>
-        <div class="grid grid-cols-7 gap-1 text-center text-xs text-slate-500 dark:text-slate-400">
-          <div class="pb-2">Su</div>
-          <div>Mo</div>
-          <div>Tu</div>
-          <div>We</div>
-          <div>Th</div>
-          <div>Fr</div>
-          <div>Sa</div>
+
+        <!-- Active Habits List -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-semibold">Active Habits</h3>
+          <!-- Date Navigation -->
+          <div class="flex items-center justify-between bg-card-dark rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <button
+                (click)="changeDate(-1)"
+                class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <div>
+                <div class="text-sm text-text-dark-secondary">
+                  @if (isToday()) { TODAY } @else if (isYesterday()) { YESTERDAY } @else if
+                  (isTomorrow()) { TOMORROW }
+                </div>
+                <div class="font-semibold">{{ formatDate(currentDate()) }}</div>
+              </div>
+              <button
+                (click)="changeDate(1)"
+                class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+                Filter
+              </button>
+              <button
+                class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                Sort
+              </button>
+            </div>
+          </div>
+
+          @if (isLoading()) {
+          <div class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+          } @else if (habits().length === 0) {
+          <div class="bg-card-dark rounded-xl p-8 text-center">
+            <div class="text-4xl mb-4">🎯</div>
+            <p class="text-text-dark-secondary mb-4">No habits yet. Start building your routine!</p>
+            <button
+              routerLink="/habit/new"
+              class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+            >
+              Create Your First Habit
+            </button>
+          </div>
+          } @else { @for (habit of habits(); track habit.id) {
+          <div
+            class="bg-card-dark rounded-xl p-4 flex items-center justify-between hover:bg-card-dark/80 transition-colors group"
+          >
+            <!-- Checkbox & Content -->
+            <div class="flex items-center gap-4 flex-1">
+              <button
+                (click)="toggleHabit(habit.id!)"
+                class="w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all"
+                [ngClass]="{
+                  'border-primary bg-primary': habit.completedToday,
+                  'border-border-dark-strong hover:border-primary': !habit.completedToday
+                }"
+              >
+                @if (habit.completedToday) {
+                <svg
+                  class="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="3"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                }
+              </button>
+
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                  <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
+                  <h4
+                    class="font-semibold text-lg"
+                    [ngClass]="{ 'line-through text-text-dark-secondary/60': habit.completedToday }"
+                  >
+                    {{ habit.title }}
+                  </h4>
+                </div>
+                @if (habit.description) {
+                <p
+                  class="text-sm text-text-dark-secondary"
+                  [ngClass]="{ 'line-through': habit.completedToday }"
+                >
+                  {{ habit.description }}
+                </p>
+                }
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="flex items-center gap-6">
+              @if (habit.streakEnabled) {
+              <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
+                <span>🔥</span>
+                <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
+              </div>
+              } @if (habit.category) {
+              <span
+                class="px-3 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-blue-500/20 text-blue-400': habit.category === 'health',
+                  'bg-purple-500/20 text-purple-400': habit.category === 'personal',
+                  'bg-orange-500/20 text-orange-400': habit.category === 'work',
+                  'bg-green-500/20 text-green-400': habit.category === 'fitness',
+                  'bg-yellow-500/20 text-yellow-400': habit.category === 'learning',
+                  'bg-gray-500/20 text-gray-400': habit.category === 'other'
+                }"
+              >
+                {{ habit.category }}
+              </span>
+              }
+            </div>
+          </div>
+          } }
+
+          <!-- Add New Habit Button -->
+          <button
+            routerLink="/habit/new"
+            class="w-full border-2 border-dashed border-border-dark-strong hover:border-primary rounded-xl p-6 flex items-center justify-center gap-2 text-text-dark-secondary hover:text-primary transition-all group"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span class="font-medium">Add new habit</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column - Sidebar -->
+      <div class="space-y-6">
+        <!-- This Week Progress -->
+        <div class="bg-card-dark rounded-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold">This Week</h3>
+            <a routerLink="/calendar" class="text-sm text-primary hover:text-primary/80"
+              >View All</a
+            >
+          </div>
+
+          <div class="grid grid-cols-7 gap-2">
+            @for (day of weeklyProgress().days; track day.date) {
+            <div class="text-center">
+              <div class="text-xs text-text-dark-secondary mb-2">{{ day.dayName.charAt(0) }}</div>
+              <button
+                class="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                [ngClass]="{
+                  'bg-primary text-background-dark': getWeekDayStatus(day) === 'complete',
+                  'bg-primary/50': getWeekDayStatus(day) === 'partial',
+                  'bg-background-dark': getWeekDayStatus(day) === 'incomplete',
+                  'border-2 border-primary': day.date === currentDate().toISOString().split('T')[0]
+                }"
+              >
+                @if (getWeekDayStatus(day) === 'complete') {
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                } @else if (getWeekDayStatus(day) === 'partial') {
+                <span class="text-xs font-bold">+{{ day.completed }}</span>
+                }
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Top Streaks -->
+        <div class="bg-card-dark rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-6">
+            <span class="text-2xl">🏆</span>
+            <h3 class="text-lg font-semibold">Top Streaks</h3>
+          </div>
+
+          <div class="space-y-4">
+            @for (streak of topStreaks(); track streak.habitId) {
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                <span class="text-xl">{{ streak.icon }}</span>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium">{{ streak.habitTitle }}</div>
+                <div class="text-sm text-text-dark-secondary">{{ streak.currentStreak }} days</div>
+              </div>
+              <div
+                class="text-2xl font-bold"
+                [ngClass]="{
+                  'text-yellow-500': streak.rank === 1,
+                  'text-gray-300': streak.rank === 2,
+                  'text-orange-600': streak.rank === 3
+                }"
+              >
+                #{{ streak.rank }}
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Productivity Card -->
+        <div
+          class="bg-gradient-to-br from-card-dark to-background-dark border border-primary/30 rounded-xl p-6"
+        >
+          <h3 class="text-lg font-semibold mb-3">Feeling productive?</h3>
+          <p class="text-sm text-text-dark-secondary mb-4">
+            You have cleared all high priority tasks for today.
+          </p>
+          <button
+            class="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+          >
+            Discover New Habits
+          </button>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </div>

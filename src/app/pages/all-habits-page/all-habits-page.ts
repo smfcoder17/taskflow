@@ -7,6 +7,4 @@ import { Component } from '@angular/core';
   templateUrl: './all-habits-page.html',
   styleUrl: './all-habits-page.css',
 })
-export class AllHabitsPage {
-
-}
+export class AllHabitsPage {}
