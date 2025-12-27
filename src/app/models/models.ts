@@ -5,7 +5,19 @@ export interface Profile {
   avatar_url: string;
 }
 
-export type HabitCategory = 'health' | 'personal' | 'work' | 'fitness' | 'learning' | 'other';
+export type HabitCategory =
+  | 'health'
+  | 'fitness'
+  | 'nutrition'
+  | 'mindfulness'
+  | 'learning'
+  | 'productivity'
+  | 'creative'
+  | 'social'
+  | 'finance'
+  | 'sleep'
+  | 'hydration'
+  | 'personal';
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 

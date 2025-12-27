@@ -5,55 +5,65 @@
     <h1 class="text-3xl md:text-4xl font-extrabold">Create a New Habit</h1>
   </header>
 
-  <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 w-8/12">
+  <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 w-9/12">
     <!-- Basics -->
     <div
       class="bg-card-dark border border-border-dark-strong/50 rounded-xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
     >
       <div class="font-bold mb-3">The Basics</div>
-      <div class="grid gap-4 md:grid-cols-[2fr_1fr]">
-        <div class="flex flex-col gap-3">
-          <div class="flex flex-col gap-2">
-            <label for="name" class="text-sm text-text-dark-secondary">Habit Name</label>
-            <input
-              id="name"
-              formControlName="title"
-              type="text"
-              placeholder="e.g., Drink 8 glasses of water"
-              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
-            />
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label for="description" class="text-sm text-text-dark-secondary"
-              >Description (Optional)</label
-            >
-            <textarea
-              id="description"
-              formControlName="description"
-              placeholder="Add some notes or details..."
-              rows="3"
-              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30 resize-y min-h-[96px]"
-            ></textarea>
-          </div>
+      <div class="flex flex-col gap-3">
+        <!-- Habit Name -->
+        <div class="flex flex-col gap-2">
+          <label for="name" class="text-sm text-text-dark-secondary">Habit Name</label>
+          <input
+            id="name"
+            formControlName="title"
+            type="text"
+            placeholder="e.g., Drink 8 glasses of water"
+            class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+          />
         </div>
 
+        <!-- Description -->
+        <div class="flex flex-col gap-2">
+          <label for="description" class="text-sm text-text-dark-secondary"
+            >Description (Optional)</label
+          >
+          <textarea
+            id="description"
+            formControlName="description"
+            placeholder="Add some notes or details..."
+            rows="3"
+            class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30 resize-y min-h-[96px]"
+          ></textarea>
+        </div>
+
+        <!-- Category Selection -->
         <div
           class="bg-background-dark border border-dashed border-border-dark-strong/65 rounded-xl p-4 flex flex-col gap-3"
         >
-          <p class="text-sm text-text-dark-secondary">Icon</p>
-          <button
-            type="button"
-            class="bg-card-dark border border-border-dark-strong text-text-dark-primary rounded-xl p-3 flex items-center gap-3 hover:border-primary hover:-translate-y-px transition"
-          >
-            <span
-              class="w-11 h-11 rounded-full inline-flex items-center justify-center bg-primary/20"
-              >🏆</span
+          <p class="text-sm text-text-dark-secondary">Category</p>
+          <div class="grid grid-cols-4 lg:grid-cols-12 gap-2">
+            @for (cat of categories(); track cat.value) {
+            <button
+              type="button"
+              (click)="selectCategory(cat.value, cat.icon)"
+              class="w-full aspect-square rounded-lg border transition flex flex-col items-center justify-center gap-1 hover:-translate-y-px"
+              [ngClass]="
+                habitForm.value.category === cat.value
+                  ? 'bg-primary/20 border-primary'
+                  : 'bg-card-dark border-border-dark-strong hover:border-primary/50'
+              "
             >
-            <span>Choose an icon</span>
-          </button>
+              <span class="text-2xl">{{ cat.icon }}</span>
+              <span class="text-xs font-medium">{{ cat.label }}</span>
+            </button>
+            }
+          </div>
         </div>
       </div>
+
+      <!-- Icons -->
     </div>
 
     <!-- Scheduling -->

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
@@ -26,14 +26,20 @@ export class HabitFormPage {
   isSubmitting: boolean = false;
 
   // Options pour les selects
-  categories = [
+  categories = signal([
     { value: 'health', label: 'Health', icon: '💪' },
-    { value: 'personal', label: 'Personal', icon: '🎯' },
-    { value: 'work', label: 'Work', icon: '💼' },
     { value: 'fitness', label: 'Fitness', icon: '🏃' },
+    { value: 'nutrition', label: 'Nutrition', icon: '🥗' },
+    { value: 'mindfulness', label: 'Mindful', icon: '🧘' },
     { value: 'learning', label: 'Learning', icon: '📚' },
-    { value: 'other', label: 'Other', icon: '✨' },
-  ];
+    { value: 'productivity', label: 'Work', icon: '💼' },
+    { value: 'creative', label: 'Creative', icon: '🎨' },
+    { value: 'social', label: 'Social', icon: '👥' },
+    { value: 'finance', label: 'Finance', icon: '💰' },
+    { value: 'sleep', label: 'Sleep', icon: '💤' },
+    { value: 'hydration', label: 'Hydration', icon: '💧' },
+    { value: 'personal', label: 'Personal', icon: '🎯' },
+  ]);
 
   frequencies = [
     { value: 'daily', label: 'Daily' },
@@ -69,6 +75,13 @@ export class HabitFormPage {
 
     target.checked ? selectedDays.push(day) : selectedDays.splice(selectedDays.indexOf(day), 1);
     this.habitForm.get('customDays')?.setValue(selectedDays);
+  }
+
+  selectCategory(category: string, icon: string): void {
+    this.habitForm.patchValue({
+      category: category,
+      icon: icon,
+    });
   }
 
   async onSubmit(): Promise<void> {
