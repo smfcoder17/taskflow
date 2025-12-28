@@ -60,6 +60,10 @@ Supabase uses snake_case, TypeScript uses camelCase. The service handles convers
 - Theme colors: `--color-primary`, `--color-background-dark`, `--color-card-dark`
 - DaisyUI available but currently commented out
 
+### Icons
+
+- Use google-material-icons via `<span class="material-symbols-outlined">icon_name</span>`
+
 ## Development Commands
 
 ```bash

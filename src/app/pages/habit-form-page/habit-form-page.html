@@ -71,91 +71,179 @@
       class="bg-card-dark border border-border-dark-strong/50 rounded-xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
     >
       <div class="font-bold mb-3">Scheduling &amp; Frequency</div>
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-4">
         <span class="text-sm text-text-dark-secondary">How often?</span>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+        <!-- Frequency Options - Radio Style -->
+        <div class="flex flex-col gap-1">
+          <!-- Daily -->
           <button
             type="button"
-            class="rounded-lg px-3 py-3 font-semibold border transition"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg transition text-left"
             [ngClass]="
               habitForm.value.frequency === 'daily'
-                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
-                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+                ? 'bg-primary/10'
+                : 'hover:bg-border-dark-strong/25'
             "
-            (click)="habitForm.get('frequency')?.setValue('daily')"
+            (click)="onFrequencyChange('daily')"
           >
-            Daily
+            <span
+              class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition"
+              [ngClass]="
+                habitForm.value.frequency === 'daily'
+                  ? 'border-primary'
+                  : 'border-border-dark-strong'
+              "
+            >
+              @if (habitForm.value.frequency === 'daily') {
+              <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+              }
+            </span>
+            <span class="text-text-dark-primary font-medium">Daily</span>
           </button>
+
+          <!-- Weekly (Specific days of the week) -->
           <button
             type="button"
-            class="rounded-lg px-3 py-3 font-semibold border transition"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg transition text-left"
             [ngClass]="
               habitForm.value.frequency === 'weekly'
-                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
-                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+                ? 'bg-primary/10'
+                : 'hover:bg-border-dark-strong/25'
             "
-            (click)="habitForm.get('frequency')?.setValue('weekly')"
+            (click)="onFrequencyChange('weekly')"
           >
-            Weekly
+            <span
+              class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition"
+              [ngClass]="
+                habitForm.value.frequency === 'weekly'
+                  ? 'border-primary'
+                  : 'border-border-dark-strong'
+              "
+            >
+              @if (habitForm.value.frequency === 'weekly') {
+              <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+              }
+            </span>
+            <span class="text-text-dark-primary font-medium">Specific days of the week</span>
           </button>
+
+          <!-- Weekly Days Selection -->
+          @if (habitForm.value.frequency === 'weekly') {
+          <div class="ml-8 mt-2 mb-2">
+            <div class="flex flex-wrap gap-2">
+              @for (day of weekDays; track day.index) {
+              <button
+                type="button"
+                class="w-auto h-12 px-4 rounded-lg border font-semibold transition"
+                [ngClass]="
+                  isWeekDaySelected(day.value)
+                    ? 'bg-primary text-[#052213] border-primary'
+                    : 'bg-border-dark-strong/25 text-text-dark-primary border-border-dark-strong hover:border-primary/50'
+                "
+                (click)="onWeekDayToggle(day.value)"
+              >
+                {{ day.label }}
+              </button>
+              }
+            </div>
+            @if (habitForm.value.customDays?.length === 0) {
+            <p class="text-xs text-text-dark-secondary mt-2">Select at least one day</p>
+            }
+          </div>
+          }
+
+          <!-- Monthly (Specific days of the month) -->
           <button
             type="button"
-            class="rounded-lg px-3 py-3 font-semibold border transition"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg transition text-left"
             [ngClass]="
               habitForm.value.frequency === 'monthly'
-                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
-                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+                ? 'bg-primary/10'
+                : 'hover:bg-border-dark-strong/25'
             "
-            (click)="habitForm.get('frequency')?.setValue('monthly')"
+            (click)="onFrequencyChange('monthly')"
           >
-            Monthly
+            <span
+              class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition"
+              [ngClass]="
+                habitForm.value.frequency === 'monthly'
+                  ? 'border-primary'
+                  : 'border-border-dark-strong'
+              "
+            >
+              @if (habitForm.value.frequency === 'monthly') {
+              <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+              }
+            </span>
+            <span class="text-text-dark-primary font-medium">Specific days of the month</span>
           </button>
+
+          <!-- Monthly Days Selection -->
+          @if (habitForm.value.frequency === 'monthly') {
+          <div class="ml-8 mt-2 mb-2">
+            <div class="grid grid-cols-7 gap-1.5">
+              @for (day of monthDays; track day) {
+              <button
+                type="button"
+                class="h-10 rounded-lg border text-sm font-medium transition"
+                [ngClass]="
+                  isMonthDaySelected(day)
+                    ? 'bg-primary text-[#052213] border-primary'
+                    : 'bg-border-dark-strong/25 text-text-dark-primary border-border-dark-strong hover:border-primary/50'
+                "
+                (click)="onMonthDayToggle(day)"
+              >
+                {{ day === 'last' ? 'Last' : day }}
+              </button>
+              }
+            </div>
+            @if (habitForm.value.customDays?.length === 0) {
+            <p class="text-xs text-text-dark-secondary mt-2">Select at least one day</p>
+            }
+          </div>
+          }
+
+          <!-- Custom -->
           <button
             type="button"
-            class="rounded-lg px-3 py-3 font-semibold border transition"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg transition text-left"
             [ngClass]="
               habitForm.value.frequency === 'custom'
-                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
-                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
+                ? 'bg-primary/10'
+                : 'hover:bg-border-dark-strong/25'
             "
-            (click)="habitForm.get('frequency')?.setValue('custom')"
+            (click)="onFrequencyChange('custom')"
           >
-            Custom
+            <span
+              class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition"
+              [ngClass]="
+                habitForm.value.frequency === 'custom'
+                  ? 'border-primary'
+                  : 'border-border-dark-strong'
+              "
+            >
+              @if (habitForm.value.frequency === 'custom') {
+              <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+              }
+            </span>
+            <span class="text-text-dark-primary font-medium">Custom schedule</span>
           </button>
-        </div>
 
-        @if (habitForm.value.frequency === 'weekly') {
-        <div class="flex flex-wrap gap-2">
-          @for (day of weekDays; track day.index) {
-          <label
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer select-none transition"
-            [ngClass]="
-              habitForm.value.customDays.includes(day.value)
-                ? 'bg-gradient-to-r from-primary to-primary/85 text-[#052213] border-transparent'
-                : 'bg-border-dark-strong/25 text-[#d7f5e1] border border-border-dark-strong'
-            "
-          >
+          @if (habitForm.value.frequency === 'custom') {
+          <div class="ml-8 mt-2 mb-2">
             <input
-              type="checkbox"
-              [value]="day.value"
-              (change)="onCustomDayChange($event)"
-              [checked]="habitForm.value.customDays.includes(day.value)"
-              class="sr-only"
+              type="text"
+              formControlName="customDays"
+              class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+              placeholder="Describe your custom schedule (e.g., every 3 days)"
             />
-            {{ day.label }}
-          </label>
+          </div>
           }
         </div>
-        } @if (habitForm.value.frequency === 'custom') {
-        <input
-          type="text"
-          formControlName="customFrequency"
-          class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-3 text-base outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
-          placeholder="Describe your custom cadence"
-        />
-        }
 
-        <div class="grid gap-3 md:grid-cols-2">
+        <!-- Date Range -->
+        <div class="grid gap-3 md:grid-cols-2 mt-2">
           <div class="flex flex-col gap-2">
             <label for="startDate" class="text-sm text-text-dark-secondary">Start Date</label>
             <input

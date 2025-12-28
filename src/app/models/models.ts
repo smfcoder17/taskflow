@@ -43,6 +43,7 @@ export const DefaultHabitIcons: HabitIconPair[] = [
 ];
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+export type MonthDay = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 'last';
 
 export interface Habit {
   id?: string;
@@ -59,7 +60,7 @@ export interface Habit {
 
   // Fréquence
   frequency: HabitFrequency;
-  customDays?: DayOfWeek[]; // ["mon", "tue", "wed"]
+  customDays?: (DayOfWeek | MonthDay)[]; // ["mon", "tue"] for weekly, [1, 15, "last"] for monthly
   timeOfDay?: string; // format "HH:mm:ss"
 
   // Dates

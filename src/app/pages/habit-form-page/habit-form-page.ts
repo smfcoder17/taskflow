@@ -6,11 +6,11 @@ import {
   ReactiveFormsModule,
   FormControl,
 } from '@angular/forms';
-import { DayOfWeek, DefaultHabitIcons, Habit, HabitIconPair } from '../../models/models';
+import { DayOfWeek, DefaultHabitIcons, Habit, HabitIconPair, MonthDay } from '../../models/models';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase-service';
-import { DateUtils, getDayOfWeek, weekDays } from '../../models/utilities';
+import { DateUtils } from '../../models/utilities';
 
 @Component({
   selector: 'app-habit-form',
@@ -35,7 +35,8 @@ export class HabitFormPage implements OnInit {
     { value: 'custom', label: 'Custom' },
   ];
 
-  weekDays = weekDays;
+  weekDays = DateUtils.weekDays;
+  monthDays: (number | 'last')[] = [...Array.from({ length: 31 }, (_, i) => i + 1), 'last'];
 
   constructor() {
     this.habitForm = new FormGroup({
@@ -58,14 +59,42 @@ export class HabitFormPage implements OnInit {
     console.log('Categories:', this.availableHabitIcons);
   }
 
-  onCustomDayChange(event: Event): void {
-    event.preventDefault();
-    const target = event.target as HTMLInputElement;
-    const selectedDays = this.habitForm.value.customDays as DayOfWeek[];
-    const day = target.value as DayOfWeek;
+  onWeekDayToggle(day: DayOfWeek): void {
+    const selectedDays = [...(this.habitForm.value.customDays as DayOfWeek[])];
+    const index = selectedDays.indexOf(day);
 
-    target.checked ? selectedDays.push(day) : selectedDays.splice(selectedDays.indexOf(day), 1);
+    if (index > -1) {
+      selectedDays.splice(index, 1);
+    } else {
+      selectedDays.push(day);
+    }
     this.habitForm.get('customDays')?.setValue(selectedDays);
+  }
+
+  onMonthDayToggle(day: number | 'last'): void {
+    const selectedDays = [...(this.habitForm.value.customDays as MonthDay[])];
+    const index = selectedDays.indexOf(day as MonthDay);
+
+    if (index > -1) {
+      selectedDays.splice(index, 1);
+    } else {
+      selectedDays.push(day as MonthDay);
+    }
+    this.habitForm.get('customDays')?.setValue(selectedDays);
+  }
+
+  isWeekDaySelected(day: DayOfWeek): boolean {
+    return (this.habitForm.value.customDays || []).includes(day);
+  }
+
+  isMonthDaySelected(day: number | 'last'): boolean {
+    return (this.habitForm.value.customDays || []).includes(day);
+  }
+
+  onFrequencyChange(frequency: string): void {
+    this.habitForm.get('frequency')?.setValue(frequency);
+    // Reset customDays when frequency changes
+    this.habitForm.get('customDays')?.setValue([]);
   }
 
   selectCategory(category: string, icon: string): void {
