@@ -1,4 +1,4 @@
-<div class="bg-background-dark min-h-screen flex pt-4">
+<div class="bg-background-dark min-h-screen flex pt-4" (click)="closeMenus()">
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-text-dark-primary">
       <!-- Left Column - Main Content -->
@@ -62,23 +62,167 @@
               </button>
             </div>
 
-            <div class="flex gap-3">
-              <button
-                class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
-              >
-                <span class="material-symbols-outlined text-base">filter_list</span>
-                Filter
-              </button>
-              <button
-                class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
-              >
-                <span class="material-symbols-outlined text-base">swap_vert</span>
-                Sort
-              </button>
+            <div class="flex gap-3 relative">
+              <!-- Filter Button & Dropdown -->
+              <div class="relative" (click)="$event.stopPropagation()">
+                <button
+                  (click)="toggleFilterMenu()"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                  [ngClass]="
+                    hasActiveFilters()
+                      ? 'bg-primary/20 text-primary'
+                      : 'bg-border-dark hover:bg-border-dark-strong/40'
+                  "
+                >
+                  <span class="material-symbols-outlined text-base">filter_list</span>
+                  Filter @if (activeFilterCount() > 0) {
+                  <span
+                    class="bg-primary text-background-dark text-xs font-bold px-1.5 py-0.5 rounded-full"
+                  >
+                    {{ activeFilterCount() }}
+                  </span>
+                  }
+                </button>
+
+                <!-- Filter Dropdown Menu -->
+                @if (showFilterMenu()) {
+                <div
+                  class="absolute top-full right-0 mt-2 w-72 bg-card-dark border border-border-dark-strong rounded-xl shadow-xl z-50 overflow-hidden"
+                >
+                  <!-- Status Filter -->
+                  <div class="p-3 border-b border-border-dark-strong">
+                    <p
+                      class="text-xs text-text-dark-secondary font-medium mb-2 uppercase tracking-wide"
+                    >
+                      Status
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                      @for (filter of statusFilters; track filter.value) {
+                      <button
+                        (click)="setStatusFilter(filter.value)"
+                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors"
+                        [ngClass]="
+                          activeStatusFilter() === filter.value
+                            ? 'bg-primary text-background-dark font-medium'
+                            : 'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary'
+                        "
+                      >
+                        <span class="material-symbols-outlined text-base">{{ filter.icon }}</span>
+                        {{ filter.label }}
+                      </button>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Category Filter -->
+                  <div class="p-3">
+                    <p
+                      class="text-xs text-text-dark-secondary font-medium mb-2 uppercase tracking-wide"
+                    >
+                      Category
+                    </p>
+                    <div class="relative">
+                      <select
+                        [value]="activeCategoryFilter()"
+                        (change)="setCategoryFilter($any($event.target).value)"
+                        class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
+                      >
+                        @for (cat of categoryFilters; track cat.value) { @if (cat.value === 'all') {
+                        <option [value]="cat.value">
+                          {{ cat.label }}
+                        </option>
+                        } @else {
+                        <option [value]="cat.value">{{ cat.icon }} {{ cat.label }}</option>
+                        } }
+                      </select>
+                      <span
+                        class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-dark-secondary pointer-events-none text-lg"
+                      >
+                        expand_more
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Clear Filters -->
+                  @if (hasActiveFilters()) {
+                  <div class="p-3 border-t border-border-dark-strong">
+                    <button
+                      (click)="clearFilters()"
+                      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-text-dark-secondary hover:text-primary transition-colors"
+                    >
+                      <span class="material-symbols-outlined text-base">clear_all</span>
+                      Clear all filters
+                    </button>
+                  </div>
+                  }
+                </div>
+                }
+              </div>
+
+              <!-- Sort Button & Dropdown -->
+              <div class="relative" (click)="$event.stopPropagation()">
+                <button
+                  (click)="toggleSortMenu()"
+                  class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
+                >
+                  <span class="material-symbols-outlined text-base">swap_vert</span>
+                  <span class="hidden sm:inline">{{ getActiveSortLabel() }}</span>
+                  <span class="sm:hidden">Sort</span>
+                </button>
+
+                <!-- Sort Dropdown Menu -->
+                @if (showSortMenu()) {
+                <div
+                  class="absolute top-full right-0 mt-2 w-48 bg-card-dark border border-border-dark-strong rounded-xl shadow-xl z-50 overflow-hidden py-2"
+                >
+                  @for (option of sortOptions; track option.value) {
+                  <button
+                    (click)="setSort(option.value)"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
+                    [ngClass]="
+                      activeSort() === option.value
+                        ? 'bg-primary/10 text-primary'
+                        : 'hover:bg-background-dark text-text-dark-primary'
+                    "
+                  >
+                    <span class="material-symbols-outlined text-base">{{ option.icon }}</span>
+                    {{ option.label }}
+                    @if (activeSort() === option.value) {
+                    <span class="material-symbols-outlined text-base ml-auto">check</span>
+                    }
+                  </button>
+                  }
+                </div>
+                }
+              </div>
             </div>
           </div>
 
-          @if (isLoading()) {
+          <!-- Active Filters Display -->
+          @if (hasActiveFilters()) {
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm text-text-dark-secondary">Showing:</span>
+            @if (activeStatusFilter() !== 'all') {
+            <span
+              class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
+            >
+              {{ activeStatusFilter() === 'completed' ? 'Completed' : 'Pending' }}
+              <button (click)="setStatusFilter('all')" class="hover:text-primary/70">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </span>
+            } @if (activeCategoryFilter() !== 'all') {
+            <span
+              class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
+            >
+              {{ activeCategoryFilter() }}
+              <button (click)="setCategoryFilter('all')" class="hover:text-primary/70">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </span>
+            }
+          </div>
+          } @if (isLoading()) {
           <div class="flex items-center justify-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -93,7 +237,24 @@
               Create Your First Habit
             </button>
           </div>
-          } @else { @for (habit of habits(); track habit.id) {
+          } @else if (habitsForCurrentDate().length === 0) {
+          <div class="bg-card-dark rounded-xl p-8 text-center">
+            <div class="text-4xl mb-4">📅</div>
+            <p class="text-text-dark-secondary mb-4">No habits scheduled for this day.</p>
+            <p class="text-sm text-text-dark-secondary">You have {{ habits().length }} habit(s) on other days.</p>
+          </div>
+          } @else if (filteredHabits().length === 0) {
+          <div class="bg-card-dark rounded-xl p-8 text-center">
+            <div class="text-4xl mb-4">🔍</div>
+            <p class="text-text-dark-secondary mb-4">No habits match your filters.</p>
+            <button
+              (click)="clearFilters()"
+              class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+          } @else { @for (habit of filteredHabits(); track habit.id) {
           <div
             class="bg-card-dark rounded-xl p-4 flex items-center justify-between hover:bg-card-dark/80 transition-colors group"
           >
@@ -144,18 +305,18 @@
               <span
                 class="px-3 py-1 rounded-full text-xs font-medium"
                 [ngClass]="{
-                  'bg-blue-500/20 text-blue-400': habit.category === 'health',
-                  'bg-green-500/20 text-green-400': habit.category === 'fitness',
-                  'bg-lime-500/20 text-lime-400': habit.category === 'nutrition',
-                  'bg-teal-500/20 text-teal-400': habit.category === 'mindfulness',
-                  'bg-yellow-500/20 text-yellow-400': habit.category === 'learning',
-                  'bg-orange-500/20 text-orange-400': habit.category === 'productivity',
-                  'bg-pink-500/20 text-pink-400': habit.category === 'creative',
-                  'bg-sky-500/20 text-sky-400': habit.category === 'social',
-                  'bg-emerald-500/20 text-emerald-400': habit.category === 'finance',
-                  'bg-indigo-500/20 text-indigo-400': habit.category === 'sleep',
-                  'bg-cyan-500/20 text-cyan-400': habit.category === 'hydration',
-                  'bg-purple-500/20 text-purple-400': habit.category === 'personal'
+                  'bg-category-health/20 text-category-health': habit.category === 'health',
+                  'bg-category-fitness/20 text-category-fitness': habit.category === 'fitness',
+                  'bg-category-nutrition/20 text-category-nutrition': habit.category === 'nutrition',
+                  'bg-category-mindfulness/20 text-category-mindfulness': habit.category === 'mindfulness',
+                  'bg-category-learning/20 text-category-learning': habit.category === 'learning',
+                  'bg-category-productivity/20 text-category-productivity': habit.category === 'productivity',
+                  'bg-category-creative/20 text-category-creative': habit.category === 'creative',
+                  'bg-category-social/20 text-category-social': habit.category === 'social',
+                  'bg-category-finance/20 text-category-finance': habit.category === 'finance',
+                  'bg-category-sleep/20 text-category-sleep': habit.category === 'sleep',
+                  'bg-category-hydration/20 text-category-hydration': habit.category === 'hydration',
+                  'bg-category-personal/20 text-category-personal': habit.category === 'personal'
                 }"
               >
                 {{ habit.category }}

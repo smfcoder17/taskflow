@@ -13,6 +13,20 @@
   --color-text-dark-primary: #ffffff;
   --color-text-dark-secondary: #92c9a4;
 
+  /* Category Colors */
+  --color-category-health: #3b82f6;
+  --color-category-fitness: #22c55e;
+  --color-category-nutrition: #84cc16;
+  --color-category-mindfulness: #14b8a6;
+  --color-category-learning: #eab308;
+  --color-category-productivity: #f97316;
+  --color-category-creative: #ec4899;
+  --color-category-social: #0ea5e9;
+  --color-category-finance: #10b981;
+  --color-category-sleep: #6366f1;
+  --color-category-hydration: #06b6d4;
+  --color-category-personal: #a855f7;
+
   /* Fonts */
   --font-family-display: Inter, sans-serif;
 
