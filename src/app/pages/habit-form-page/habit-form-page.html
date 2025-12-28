@@ -44,13 +44,13 @@
         >
           <p class="text-sm text-text-dark-secondary">Category</p>
           <div class="grid grid-cols-4 lg:grid-cols-12 gap-2">
-            @for (cat of categories(); track cat.value) {
+            @for (cat of availableHabitIcons; track cat.category) {
             <button
               type="button"
-              (click)="selectCategory(cat.value, cat.icon)"
+              (click)="selectCategory(cat.category, cat.icon)"
               class="w-full aspect-square rounded-lg border transition flex flex-col items-center justify-center gap-1 hover:-translate-y-px"
               [ngClass]="
-                habitForm.value.category === cat.value
+                habitForm.value.category === cat.category
                   ? 'bg-primary/20 border-primary'
                   : 'bg-card-dark border-border-dark-strong hover:border-primary/50'
               "

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, signal } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
   FormControl,
 } from '@angular/forms';
-import { DayOfWeek, Habit } from '../../models/models';
+import { DayOfWeek, DefaultHabitIcons, Habit, HabitIconPair } from '../../models/models';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase-service';
@@ -19,27 +19,14 @@ import { DateUtils, getDayOfWeek, weekDays } from '../../models/utilities';
   templateUrl: './habit-form-page.html',
   styleUrl: './habit-form-page.css',
 })
-export class HabitFormPage {
+export class HabitFormPage implements OnInit {
   habitForm: FormGroup;
   router = inject(Router);
   supabaseService = inject(SupabaseService);
   isSubmitting: boolean = false;
 
   // Options pour les selects
-  categories = signal([
-    { value: 'health', label: 'Health', icon: '💪' },
-    { value: 'fitness', label: 'Fitness', icon: '🏃' },
-    { value: 'nutrition', label: 'Nutrition', icon: '🥗' },
-    { value: 'mindfulness', label: 'Mindful', icon: '🧘' },
-    { value: 'learning', label: 'Learning', icon: '📚' },
-    { value: 'productivity', label: 'Work', icon: '💼' },
-    { value: 'creative', label: 'Creative', icon: '🎨' },
-    { value: 'social', label: 'Social', icon: '👥' },
-    { value: 'finance', label: 'Finance', icon: '💰' },
-    { value: 'sleep', label: 'Sleep', icon: '💤' },
-    { value: 'hydration', label: 'Hydration', icon: '💧' },
-    { value: 'personal', label: 'Personal', icon: '🎯' },
-  ]);
+  availableHabitIcons: HabitIconPair[] = DefaultHabitIcons;
 
   frequencies = [
     { value: 'daily', label: 'Daily' },
@@ -54,9 +41,9 @@ export class HabitFormPage {
     this.habitForm = new FormGroup({
       title: new FormControl('', Validators.required),
       description: new FormControl(''),
-      icon: new FormControl('🎯'),
+      icon: new FormControl(this.availableHabitIcons[0].icon),
       color: new FormControl('#10b981'),
-      category: new FormControl('personal'),
+      category: new FormControl(this.availableHabitIcons[0].category),
       frequency: new FormControl('daily', Validators.required),
       customDays: new FormControl([]),
       timeOfDay: new FormControl(''),
@@ -65,6 +52,10 @@ export class HabitFormPage {
       streakEnabled: new FormControl(true),
       streakResetAfterMissingDays: new FormControl(1),
     });
+  }
+
+  ngOnInit(): void {
+    console.log('Categories:', this.availableHabitIcons);
   }
 
   onCustomDayChange(event: Event): void {

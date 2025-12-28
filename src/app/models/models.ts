@@ -18,6 +18,29 @@ export type HabitCategory =
   | 'sleep'
   | 'hydration'
   | 'personal';
+
+/**
+ * Represents a habit icon pair containing category, icon, and label information.
+ * @typedef {Object} HabitIconPair
+ * @property {HabitCategory} category - The category of the habit
+ * @property {string} icon - The icon representation of the habit
+ * @property {string} label - The display label for the habit
+ */
+export type HabitIconPair = { category: HabitCategory; icon: string; label: string };
+export const DefaultHabitIcons: HabitIconPair[] = [
+  { category: 'personal', label: 'Personal', icon: '🎯' },
+  { category: 'health', label: 'Health', icon: '💪' },
+  { category: 'fitness', label: 'Fitness', icon: '🏃' },
+  { category: 'nutrition', label: 'Nutrition', icon: '🥗' },
+  { category: 'mindfulness', label: 'Mindful', icon: '🧘' },
+  { category: 'learning', label: 'Learning', icon: '📚' },
+  { category: 'productivity', label: 'Work', icon: '💼' },
+  { category: 'creative', label: 'Creative', icon: '🎨' },
+  { category: 'social', label: 'Social', icon: '👥' },
+  { category: 'finance', label: 'Finance', icon: '💰' },
+  { category: 'sleep', label: 'Sleep', icon: '💤' },
+  { category: 'hydration', label: 'Hydration', icon: '💧' },
+];
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
