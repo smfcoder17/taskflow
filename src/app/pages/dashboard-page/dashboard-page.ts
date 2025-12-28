@@ -9,6 +9,7 @@ import {
   HabitCategory,
   DefaultHabitIcons,
   DayOfWeek,
+  HabitLog,
 } from '../../models/models';
 import { SupabaseService } from '../../services/supabase-service';
 import { isSameDay, getDayOfWeek } from '../../models/utilities';
@@ -71,13 +72,7 @@ export class DashboardPage {
 
   // Signals for reactive data
   habits = signal<HabitWithStats[]>([]);
-  dailyProgress = signal<DailyProgress>({
-    date: '',
-    totalHabits: 0,
-    completedHabits: 0,
-    percentage: 0,
-  });
-  weeklyProgress = signal<WeeklyProgress>({ days: [] });
+  weeklyLogs = signal<HabitLog[]>([]);
   topStreaks = signal<StreakInfo[]>([]);
 
   currentDate = signal<Date>(new Date());
@@ -172,6 +167,78 @@ export class DashboardPage {
     });
   });
 
+  // Computed daily progress based on habits scheduled for current date
+  dailyProgress = computed(() => {
+    const scheduledHabits = this.habitsForCurrentDate();
+    const totalHabits = scheduledHabits.length;
+    const completedHabits = scheduledHabits.filter((h) => h.completedToday).length;
+    const percentage = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
+
+    return {
+      date: this.formatDateForAPI(this.currentDate()),
+      totalHabits,
+      completedHabits,
+      percentage,
+    };
+  });
+
+  // Computed weekly progress based on habits and logs
+  weeklyProgress = computed(() => {
+    const allHabits = this.habits();
+    const logs = this.weeklyLogs();
+    const today = new Date();
+    const days = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = this.formatDateForAPI(date);
+      const dayOfWeek = getDayOfWeek(date);
+      const dayOfMonth = date.getDate();
+      const isLastDayOfMonth =
+        new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate() === dayOfMonth;
+
+      // Filter habits scheduled for this specific day
+      const scheduledHabits = allHabits.filter((habit) => {
+        // Check date range
+        if (habit.startDate && date < new Date(habit.startDate)) return false;
+        if (habit.endDate && date > new Date(habit.endDate)) return false;
+
+        switch (habit.frequency) {
+          case 'daily':
+            return true;
+          case 'weekly':
+            if (!habit.customDays || habit.customDays.length === 0) return true;
+            return habit.customDays.includes(dayOfWeek);
+          case 'monthly':
+            if (!habit.customDays || habit.customDays.length === 0) return true;
+            return (
+              habit.customDays.includes(dayOfMonth as any) ||
+              (isLastDayOfMonth && habit.customDays.includes('last' as any))
+            );
+          case 'custom':
+            return true;
+          default:
+            return true;
+        }
+      });
+
+      // Count completed habits for this day
+      const completedCount = scheduledHabits.filter((habit) =>
+        logs.some((log) => log.habitId === habit.id && log.logDate === dateStr)
+      ).length;
+
+      days.push({
+        date: dateStr,
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        completed: completedCount,
+        total: scheduledHabits.length,
+      });
+    }
+
+    return { days };
+  });
+
   // Computed filtered & sorted habits (now uses habitsForCurrentDate)
   filteredHabits = computed(() => {
     let result = [...this.habitsForCurrentDate()];
@@ -243,12 +310,7 @@ export class DashboardPage {
   async loadDashboardData() {
     this.isLoading.set(true);
     try {
-      await Promise.all([
-        this.loadHabits(),
-        this.loadDailyProgress(),
-        this.loadWeeklyProgress(),
-        this.loadTopStreaks(),
-      ]);
+      await Promise.all([this.loadHabits(), this.loadWeeklyLogs(), this.loadTopStreaks()]);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -258,7 +320,7 @@ export class DashboardPage {
 
   async loadHabits() {
     const dateString = this.formatDateForAPI(this.currentDate());
-    const { data, error } = await this.supabaseService.getHabitsWithTodayStatus(dateString);
+    const { data, error } = await this.supabaseService.getHabitsForDate(dateString);
     if (error) {
       console.error('Error loading habits:', error);
       return;
@@ -266,15 +328,34 @@ export class DashboardPage {
     this.habits.set(data || []);
   }
 
-  async loadDailyProgress() {
-    const dateString = this.formatDateForAPI(this.currentDate());
-    const progress = await this.supabaseService.getDailyProgress(dateString);
-    this.dailyProgress.set(progress);
-  }
+  async loadWeeklyLogs() {
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 6);
 
-  async loadWeeklyProgress() {
-    const progress = await this.supabaseService.getWeeklyProgress();
-    this.weeklyProgress.set(progress);
+    const startDate = this.formatDateForAPI(weekAgo);
+    const endDate = this.formatDateForAPI(today);
+
+    const { data, error } = await this.supabaseService.getHabitLogsForDateRange(startDate, endDate);
+    if (error) {
+      console.error('Error loading weekly logs:', error);
+      return;
+    }
+
+    // Map the logs from DB format to our model format
+    const mappedLogs: HabitLog[] = (data || []).map((log: any) => ({
+      id: log.id,
+      habitId: log.habit_id,
+      userId: log.user_id,
+      logDate: log.log_date,
+      completed: log.completed,
+      notes: log.notes,
+      completedAt: log.completed_at,
+      createdAt: log.created_at,
+      updatedAt: log.updated_at,
+    }));
+
+    this.weeklyLogs.set(mappedLogs);
   }
 
   async loadTopStreaks() {
@@ -286,8 +367,7 @@ export class DashboardPage {
     try {
       const dateString = this.formatDateForAPI(this.currentDate());
       await this.supabaseService.toggleHabitCompletion(habitId, dateString);
-      await this.loadHabits();
-      await this.loadDailyProgress();
+      await Promise.all([this.loadHabits(), this.loadWeeklyLogs()]);
     } catch (error) {
       console.error('Error toggling habit:', error);
     }
@@ -299,7 +379,6 @@ export class DashboardPage {
     this.currentDate.set(newDate);
     // Reload habits for the new date
     this.loadHabits();
-    this.loadDailyProgress();
   }
 
   formatDate(date: Date): string {

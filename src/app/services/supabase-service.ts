@@ -189,7 +189,7 @@ export class SupabaseService {
   /**
    * Get habits with their stats for today
    */
-  async getHabitsWithTodayStatus(date?: string) {
+  async getHabitsForDate(date?: string) {
     const user = this.session()?.user;
 
     if (!user) {
@@ -273,68 +273,54 @@ export class SupabaseService {
   }
 
   /**
-   * Get daily progress for a specific date
+   * Get habit logs for a date range
    */
-  async getDailyProgress(date?: string): Promise<DailyProgress> {
+  async getHabitLogsForDateRange(startDate: string, endDate: string) {
     const user = this.session()?.user;
 
     if (!user) {
       throw new Error('User must be authenticated');
     }
 
-    const targetDate = date || new Date().toISOString().split('T')[0];
-
-    const { data: habits } = await this.getActiveHabits();
-    const totalHabits = habits?.length || 0;
-
-    const { data: logs } = await this.supabase
+    return this.supabase
       .from('habit_logs')
       .select('*')
       .eq('user_id', user.id)
-      .eq('log_date', targetDate)
+      .gte('log_date', startDate)
+      .lte('log_date', endDate)
       .eq('completed', true);
-
-    const completedHabits = logs?.length || 0;
-    const percentage = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
-
-    return {
-      date: targetDate,
-      totalHabits,
-      completedHabits,
-      percentage,
-    };
   }
 
   /**
    * Get weekly progress (last 7 days)
    */
-  async getWeeklyProgress(): Promise<WeeklyProgress> {
-    const user = this.session()?.user;
+  // async getWeeklyProgress(): Promise<WeeklyProgress> {
+  //   const user = this.session()?.user;
 
-    if (!user) {
-      throw new Error('User must be authenticated');
-    }
+  //   if (!user) {
+  //     throw new Error('User must be authenticated');
+  //   }
 
-    const days = [];
-    const today = new Date();
+  //   const days = [];
+  //   const today = new Date();
 
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+  //   for (let i = 6; i >= 0; i--) {
+  //     const date = new Date(today);
+  //     date.setDate(date.getDate() - i);
+  //     const dateStr = date.toISOString().split('T')[0];
 
-      const progress = await this.getDailyProgress(dateStr);
+  //     const progress = await this.getHabitsForDate(dateStr);
 
-      days.push({
-        date: dateStr,
-        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        completed: progress.completedHabits,
-        total: progress.totalHabits,
-      });
-    }
+  //     days.push({
+  //       date: dateStr,
+  //       dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+  //       completed: progress.completedHabits,
+  //       total: progress.totalHabits,
+  //     });
+  //   }
 
-    return { days };
-  }
+  //   return { days };
+  // }
 
   /**
    * Get top streaks
