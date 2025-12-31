@@ -1,0 +1,148 @@
+@reference "../../../styles.css";
+
+/* Settings Card */
+.settings-card {
+  @apply bg-card-dark rounded-xl overflow-hidden;
+}
+
+.settings-header {
+  @apply flex items-center gap-3 px-6 py-4 border-b border-border-dark;
+}
+
+.settings-content {
+  @apply divide-y divide-border-dark;
+}
+
+/* Settings Row */
+.settings-row {
+  @apply flex items-center justify-between px-6 py-4 gap-4;
+}
+
+.settings-row-clickable {
+  @apply hover:bg-border-dark/30 transition-colors cursor-pointer;
+}
+
+.settings-label {
+  @apply flex items-center gap-3;
+}
+
+/* Theme Selector */
+.theme-selector {
+  @apply flex bg-background-dark rounded-lg p-1;
+}
+
+.theme-option {
+  @apply flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-text-dark-secondary transition-all;
+}
+
+.theme-option:hover {
+  @apply text-text-dark-primary;
+}
+
+.theme-option-active {
+  @apply bg-primary text-background-dark font-medium;
+}
+
+/* Color Picker */
+.color-picker {
+  @apply flex gap-2;
+}
+
+.color-option {
+  @apply w-8 h-8 rounded-full flex items-center justify-center transition-transform hover:scale-110;
+  box-shadow: 0 0 0 2px transparent;
+}
+
+.color-option-active {
+  box-shadow: 0 0 0 2px var(--color-primary);
+  transform: scale(1.1);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  @apply relative w-12 h-7 bg-border-dark rounded-full transition-colors cursor-pointer;
+}
+
+.toggle-switch-active {
+  @apply bg-primary;
+}
+
+.toggle-slider {
+  @apply absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform;
+}
+
+.toggle-switch-active .toggle-slider {
+  @apply translate-x-5;
+}
+
+/* Input Styles */
+.time-input {
+  @apply bg-background-dark border border-border-dark-strong rounded-lg px-3 py-2 text-text-dark-primary text-sm outline-none;
+  @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
+}
+
+.select-input {
+  @apply bg-background-dark border border-border-dark-strong rounded-lg px-3 py-2 text-text-dark-primary text-sm outline-none appearance-none cursor-pointer min-w-32;
+  @apply focus:border-primary focus:ring-2 focus:ring-primary/30;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2392c9a4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+}
+
+/* Modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  @apply bg-card-dark rounded-xl p-6 max-w-md w-full;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toast */
+.toast {
+  @apply fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-3 bg-card-dark border border-border-dark-strong rounded-lg shadow-lg;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .settings-row {
+    @apply flex-col items-start gap-3;
+  }
+
+  .theme-selector,
+  .color-picker {
+    @apply w-full justify-start;
+  }
+
+  .select-input,
+  .time-input {
+    @apply w-full;
+  }
+}

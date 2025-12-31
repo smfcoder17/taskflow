@@ -1,0 +1,402 @@
+<div class="bg-background-dark min-h-screen">
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-text-dark-primary">Settings</h1>
+      <p class="text-text-dark-secondary mt-1">Manage your account and preferences</p>
+    </div>
+
+    @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+    } @else {
+    <div class="space-y-6">
+      <!-- Account Section -->
+      <section class="settings-card">
+        <div class="settings-header">
+          <span class="material-symbols-outlined text-2xl text-primary">account_circle</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Account</h2>
+        </div>
+
+        <div class="settings-content">
+          <!-- Email -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">mail</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Email</p>
+                <p class="text-sm text-text-dark-secondary">{{ userEmail() }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Link -->
+          <a routerLink="/profile" class="settings-row settings-row-clickable">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">person</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Edit Profile</p>
+                <p class="text-sm text-text-dark-secondary">Update your profile information</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-text-dark-secondary">chevron_right</span>
+          </a>
+
+          <!-- Sign Out -->
+          <button (click)="signOut()" class="settings-row settings-row-clickable w-full text-left">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-red-400">logout</span>
+              <p class="text-red-400 font-medium">Sign Out</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Appearance Section -->
+      <section class="settings-card">
+        <div class="settings-header">
+          <span class="material-symbols-outlined text-2xl text-primary">palette</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Appearance</h2>
+        </div>
+
+        <div class="settings-content">
+          <!-- Theme Selector -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">dark_mode</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Theme</p>
+                <p class="text-sm text-text-dark-secondary">Choose your preferred theme</p>
+              </div>
+            </div>
+            <div class="theme-selector">
+              <button
+                (click)="updateTheme('dark')"
+                class="theme-option"
+                [class.theme-option-active]="settings().theme === 'dark'"
+              >
+                <span class="material-symbols-outlined text-sm">dark_mode</span>
+                Dark
+              </button>
+              <button
+                (click)="updateTheme('light')"
+                class="theme-option"
+                [class.theme-option-active]="settings().theme === 'light'"
+              >
+                <span class="material-symbols-outlined text-sm">light_mode</span>
+                Light
+              </button>
+              <button
+                (click)="updateTheme('system')"
+                class="theme-option"
+                [class.theme-option-active]="settings().theme === 'system'"
+              >
+                <span class="material-symbols-outlined text-sm">devices</span>
+                System
+              </button>
+            </div>
+          </div>
+
+          <!-- Accent Color -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">colorize</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Accent Color</p>
+                <p class="text-sm text-text-dark-secondary">Customize your app color</p>
+              </div>
+            </div>
+            <div class="color-picker">
+              @for (color of accentColors; track color.value) {
+              <button
+                (click)="updateAccentColor(color.value)"
+                class="color-option"
+                [style.background-color]="color.value"
+                [class.color-option-active]="settings().accentColor === color.value"
+                [title]="color.name"
+              >
+                @if (settings().accentColor === color.value) {
+                <span class="material-symbols-outlined text-white text-sm">check</span>
+                }
+              </button>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications Section -->
+      <section class="settings-card">
+        <div class="settings-header">
+          <span class="material-symbols-outlined text-2xl text-primary">notifications</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Notifications</h2>
+        </div>
+
+        <div class="settings-content">
+          <!-- Push Notifications -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">notifications_active</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Push Notifications</p>
+                <p class="text-sm text-text-dark-secondary">Get reminders for your habits</p>
+              </div>
+            </div>
+            <button
+              (click)="toggleNotifications()"
+              class="toggle-switch"
+              [class.toggle-switch-active]="settings().notificationsEnabled"
+            >
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
+
+          <!-- Reminder Time -->
+          @if (settings().notificationsEnabled) {
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">schedule</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Daily Reminder</p>
+                <p class="text-sm text-text-dark-secondary">When to remind you about habits</p>
+              </div>
+            </div>
+            <input
+              type="time"
+              [value]="settings().reminderTime"
+              (change)="updateReminderTime($event)"
+              class="time-input"
+            />
+          </div>
+          }
+
+          <!-- Email Notifications -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">mark_email_read</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Email Notifications</p>
+                <p class="text-sm text-text-dark-secondary">Weekly progress summaries via email</p>
+              </div>
+            </div>
+            <button
+              (click)="toggleEmailNotifications()"
+              class="toggle-switch"
+              [class.toggle-switch-active]="settings().emailNotifications"
+            >
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Privacy & Data Section -->
+      <section class="settings-card">
+        <div class="settings-header">
+          <span class="material-symbols-outlined text-2xl text-primary">shield</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Privacy & Data</h2>
+        </div>
+
+        <div class="settings-content">
+          <!-- Show Streak -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">local_fire_department</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Show Streak Publicly</p>
+                <p class="text-sm text-text-dark-secondary">Let others see your streak count</p>
+              </div>
+            </div>
+            <button
+              (click)="toggleShowStreak()"
+              class="toggle-switch"
+              [class.toggle-switch-active]="settings().showStreak"
+            >
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
+
+          <!-- Profile Visibility -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">visibility</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Profile Visibility</p>
+                <p class="text-sm text-text-dark-secondary">Control who can see your profile</p>
+              </div>
+            </div>
+            <select
+              [value]="settings().profileVisibility"
+              (change)="updateProfileVisibility($any($event.target).value)"
+              class="select-input"
+            >
+              <option value="private">Private</option>
+              <option value="public">Public</option>
+            </select>
+          </div>
+
+          <!-- Export Data -->
+          <button (click)="exportData()" class="settings-row settings-row-clickable w-full text-left">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">download</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Export Data</p>
+                <p class="text-sm text-text-dark-secondary">Download all your data as JSON</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-text-dark-secondary">chevron_right</span>
+          </button>
+
+          <!-- Delete Account -->
+          <button (click)="openDeleteModal()" class="settings-row settings-row-clickable w-full text-left">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-red-400">delete_forever</span>
+              <div>
+                <p class="text-red-400 font-medium">Delete Account</p>
+                <p class="text-sm text-text-dark-secondary">Permanently delete your account and data</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Preferences Section -->
+      <section class="settings-card">
+        <div class="settings-header">
+          <span class="material-symbols-outlined text-2xl text-primary">tune</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Preferences</h2>
+        </div>
+
+        <div class="settings-content">
+          <!-- Week Starts On -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">calendar_today</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Week Starts On</p>
+                <p class="text-sm text-text-dark-secondary">First day of the week</p>
+              </div>
+            </div>
+            <select
+              [value]="settings().weekStartsOn"
+              (change)="updateWeekStartsOn($any($event.target).value)"
+              class="select-input"
+            >
+              <option value="sunday">Sunday</option>
+              <option value="monday">Monday</option>
+            </select>
+          </div>
+
+          <!-- Date Format -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">event</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Date Format</p>
+                <p class="text-sm text-text-dark-secondary">How dates are displayed</p>
+              </div>
+            </div>
+            <select
+              [value]="settings().dateFormat"
+              (change)="updateDateFormat($any($event.target).value)"
+              class="select-input"
+            >
+              <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+              <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+              <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section class="settings-card">
+        <div class="settings-header">
+          <span class="material-symbols-outlined text-2xl text-primary">info</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">About</h2>
+        </div>
+
+        <div class="settings-content">
+          <!-- Version -->
+          <div class="settings-row">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">verified</span>
+              <div>
+                <p class="text-text-dark-primary font-medium">Version</p>
+                <p class="text-sm text-text-dark-secondary">1.0.0</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Help & Support -->
+          <a href="mailto:support@habitflow.app" class="settings-row settings-row-clickable">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">help</span>
+              <p class="text-text-dark-primary font-medium">Help & Support</p>
+            </div>
+            <span class="material-symbols-outlined text-text-dark-secondary">open_in_new</span>
+          </a>
+
+          <!-- Privacy Policy -->
+          <a href="#" class="settings-row settings-row-clickable">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">policy</span>
+              <p class="text-text-dark-primary font-medium">Privacy Policy</p>
+            </div>
+            <span class="material-symbols-outlined text-text-dark-secondary">open_in_new</span>
+          </a>
+
+          <!-- Terms of Service -->
+          <a href="#" class="settings-row settings-row-clickable">
+            <div class="settings-label">
+              <span class="material-symbols-outlined text-text-dark-secondary">description</span>
+              <p class="text-text-dark-primary font-medium">Terms of Service</p>
+            </div>
+            <span class="material-symbols-outlined text-text-dark-secondary">open_in_new</span>
+          </a>
+        </div>
+      </section>
+    </div>
+    }
+
+    <!-- Delete Account Modal -->
+    @if (showDeleteModal()) {
+    <div class="modal-overlay" (click)="closeDeleteModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="text-center">
+          <div class="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl text-red-400">warning</span>
+          </div>
+          <h3 class="text-xl font-bold text-text-dark-primary mb-2">Delete Account?</h3>
+          <p class="text-text-dark-secondary mb-6">
+            This action cannot be undone. All your data, habits, and progress will be permanently deleted.
+          </p>
+          <div class="flex gap-3">
+            <button
+              (click)="closeDeleteModal()"
+              class="flex-1 px-4 py-3 bg-border-dark hover:bg-border-dark-strong rounded-lg text-text-dark-primary font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="confirmDeleteAccount()"
+              class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 rounded-lg text-white font-medium transition-colors"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Toast Notification -->
+    @if (showToast()) {
+    <div class="toast">
+      <span class="material-symbols-outlined text-primary">check_circle</span>
+      <span>{{ toastMessage() }}</span>
+    </div>
+    }
+  </main>
+</div>
