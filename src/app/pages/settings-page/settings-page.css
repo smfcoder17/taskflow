@@ -1,0 +1,73 @@
+/* Settings Page Styles */
+
+/* Toast slide-in animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Toggle switch transitions */
+button[class*="rounded-full"] {
+  transition: background-color 0.2s ease;
+}
+
+button[class*="rounded-full"] span {
+  transition: transform 0.2s ease;
+}
+
+/* Modal backdrop */
+.fixed.inset-0 {
+  backdrop-filter: blur(4px);
+}
+
+/* Section hover effect */
+section {
+  transition: box-shadow 0.2s ease;
+}
+
+section:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Accent color buttons */
+button[style*="background-color"] {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button[style*="background-color"]:hover {
+  transform: scale(1.1);
+}
+
+/* Time input styling for dark mode */
+input[type="time"] {
+  color-scheme: dark;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Select dropdown styling */
+select {
+  background-image: none;
+}
+
+/* Sticky save button shadow */
+.sticky {
+  z-index: 10;
+}
+
+.sticky button {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}

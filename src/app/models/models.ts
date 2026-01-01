@@ -1,9 +1,71 @@
 export interface Profile {
   id?: string;
   username: string;
+  email?: string;
   website: string;
   avatar_url: string;
 }
+
+// ==================== Settings Types ====================
+
+/** Theme mode options for the app appearance */
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+/** Preset accent colors available for customization */
+export type AccentColor = 'green' | 'blue' | 'purple' | 'pink' | 'orange' | 'cyan';
+
+/** Start of week preference for calendar/streak calculations */
+export type StartOfWeek = 'monday' | 'sunday';
+
+/** User settings for preferences, notifications, and defaults */
+export interface UserSettings {
+  id?: string;
+  userId: string;
+
+  // Preferences
+  timezone: string;
+  theme: ThemeMode;
+  accentColor: AccentColor;
+  startOfWeek: StartOfWeek;
+
+  // Streak behavior
+  streakGracePeriodEnabled: boolean;
+  streakGracePeriodDays: number;
+
+  // Default habit settings
+  defaultFrequency: HabitFrequency;
+  defaultStartDateToday: boolean;
+
+  // Notifications
+  notificationsEnabled: boolean;
+  dailyReminderEnabled: boolean;
+  dailyReminderTime: string; // HH:mm format
+  missedHabitReminderEnabled: boolean;
+  missedHabitReminderTime: string; // HH:mm format
+
+  // Timestamps
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Accent color configuration with display properties */
+export interface AccentColorOption {
+  value: AccentColor;
+  label: string;
+  colorClass: string;
+}
+
+/** Available accent color presets */
+export const AccentColorOptions: AccentColorOption[] = [
+  { value: 'green', label: 'Green', colorClass: 'bg-primary' },
+  { value: 'blue', label: 'Blue', colorClass: 'bg-blue-500' },
+  { value: 'purple', label: 'Purple', colorClass: 'bg-purple-500' },
+  { value: 'pink', label: 'Pink', colorClass: 'bg-pink-500' },
+  { value: 'orange', label: 'Orange', colorClass: 'bg-orange-500' },
+  { value: 'cyan', label: 'Cyan', colorClass: 'bg-cyan-500' },
+];
+
+// ==================== Habit Types ====================
 
 export type HabitCategory =
   | 'health'
