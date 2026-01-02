@@ -195,6 +195,19 @@ export class SettingsPage implements OnInit {
     this.updateSettings({ missedHabitReminderTime: time });
   }
 
+  // Notification Channels
+  togglePushEnabled() {
+    this.updateSettings({ pushEnabled: !this.userSettings().pushEnabled });
+  }
+
+  toggleEmailEnabled() {
+    this.updateSettings({ emailEnabled: !this.userSettings().emailEnabled });
+  }
+
+  togglePersistentNotifications() {
+    this.updateSettings({ persistentNotifications: !this.userSettings().persistentNotifications });
+  }
+
   // Actions
   openEditProfile() {
     this.router.navigate(['/profile']);
