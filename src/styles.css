@@ -2,16 +2,101 @@
 
 @import 'tailwindcss';
 
-@theme {
-  /* Colors */
+:root {
+  /* Default Green Theme */
+  --theme-primary: #13ec5b;
+  --theme-background-light: #f6f8f6;
+  --theme-background-dark: #102216;
+  --theme-card-dark: #1c2d21;
+  --theme-border-dark: #23482f;
+  --theme-border-dark-strong: #326744;
+  --theme-text-dark-secondary: #92c9a4;
+
+  /* Current Dynamic Variables */
+  --color-primary: var(--theme-primary);
+  --color-background-light: var(--theme-background-light);
+  --color-background-dark: var(--theme-background-dark);
+  --color-card-dark: var(--theme-card-dark);
+  --color-border-dark: var(--theme-border-dark);
+  --color-border-dark-strong: var(--theme-border-dark-strong);
+  --color-text-dark-primary: #ffffff;
+  --color-text-dark-secondary: var(--theme-text-dark-secondary);
+}
+
+/* Accent Color Themes */
+
+body.accent-green {
   --color-primary: #13ec5b;
   --color-background-light: #f6f8f6;
   --color-background-dark: #102216;
   --color-card-dark: #1c2d21;
   --color-border-dark: #23482f;
   --color-border-dark-strong: #326744;
-  --color-text-dark-primary: #ffffff;
   --color-text-dark-secondary: #92c9a4;
+}
+
+body.accent-blue {
+  --color-primary: #3b82f6;
+  --color-background-light: #f6f9fe;
+  --color-background-dark: #0a1120;
+  --color-card-dark: #151e2e;
+  --color-border-dark: #1f2e45;
+  --color-border-dark-strong: #2a3f5e;
+  --color-text-dark-secondary: #89a9c9;
+}
+
+body.accent-purple {
+  --color-primary: #a855f7;
+  --color-background-light: #faf6fe;
+  --color-background-dark: #161022;
+  --color-card-dark: #211c2d;
+  --color-border-dark: #2f2348;
+  --color-border-dark-strong: #443267;
+  --color-text-dark-secondary: #ae92c9;
+}
+
+body.accent-pink {
+  --color-primary: #ec4899;
+  --color-background-light: #fef6f9;
+  --color-background-dark: #221019;
+  --color-card-dark: #2d1c23;
+  --color-border-dark: #482334;
+  --color-border-dark-strong: #67324b;
+  --color-text-dark-secondary: #c992ab;
+}
+
+body.accent-orange {
+  --color-primary: #f97316;
+  --color-background-light: #fef8f6;
+  --color-background-dark: #221510;
+  --color-card-dark: #2d1f1c;
+  --color-border-dark: #482f23;
+  --color-border-dark-strong: #674432;
+  --color-text-dark-secondary: #c9a492;
+}
+
+body.accent-cyan {
+  --color-primary: #06b6d4;
+  --color-background-light: #f6fdf9;
+  --color-background-dark: #102122;
+  --color-card-dark: #1c2c2d;
+  --color-border-dark: #234548;
+  --color-border-dark-strong: #326267;
+  --color-text-dark-secondary: #92c4c9;
+}
+
+@theme {
+  /* Dynamic Primary */
+  --color-primary: var(--color-primary);
+
+  /* Static Theme Colors (mapped from root for Tailwind access) */
+  --color-background-light: var(--color-background-light);
+  --color-background-dark: var(--color-background-dark);
+  --color-card-dark: var(--color-card-dark);
+  --color-border-dark: var(--color-border-dark);
+  --color-border-dark-strong: var(--color-border-dark-strong);
+  --color-text-dark-primary: var(--color-text-dark-primary);
+  --color-text-dark-secondary: var(--color-text-dark-secondary);
 
   /* Category Colors */
   --color-category-health: #3b82f6;

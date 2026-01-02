@@ -10,10 +10,12 @@ import {
 import { environment } from '../../environments/environment';
 import {
   DailyProgress,
+  DEFAULT_SETTINGS,
   Habit,
   HabitWithStats,
   Profile,
   StreakInfo,
+  UserSettings,
   WeeklyProgress,
 } from '../models/models';
 import { Router } from '@angular/router';
@@ -26,6 +28,7 @@ export class SupabaseService {
   private supabase: SupabaseClient;
   isLoading = signal(true);
   session = signal<Session | null>(null);
+  userSettings = signal<UserSettings>({ ...DEFAULT_SETTINGS });
 
   constructor(private router: Router) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
@@ -134,6 +137,45 @@ export class SupabaseService {
 
   getSupabaseClient(): SupabaseClient {
     return this.supabase;
+  }
+
+  // ==================== User Settings (Placeholders) ====================
+
+  /**
+   * Get user settings from the database.
+   * TODO: Implement when user_settings table is created.
+   * @returns {Promise<{data: any, error: any}>}
+   */
+  async getUserSettings() {
+    return { data: null, error: null };
+  }
+
+  /**
+   * Update or create user settings in the database.
+   * TODO: Implement mapping to snake_case and upsert logic.
+   * @param {Partial<UserSettings>} settings The settings to update.
+   * @returns {Promise<{error: any}>}
+   */
+  async updateUserSettings(settings: Partial<UserSettings>) {
+    return { error: null };
+  }
+
+  /**
+   * Export all user-related data (habits, logs, settings, profile).
+   * TODO: Implement aggregation logic.
+   * @returns {Promise<any>}
+   */
+  async exportUserData() {
+    return {};
+  }
+
+  /**
+   * Delete user account and associated data.
+   * TODO: Implement secure deletion (cascade or RPC).
+   * @returns {Promise<{error: any}>}
+   */
+  async deleteAccount() {
+    return { error: null };
   }
 
   /**

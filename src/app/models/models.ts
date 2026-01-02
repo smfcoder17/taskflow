@@ -48,6 +48,24 @@ export interface UserSettings {
   updatedAt?: string;
 }
 
+/** Default settings for new users */
+export const DEFAULT_SETTINGS: UserSettings = {
+  userId: '',
+  timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC',
+  theme: 'system',
+  accentColor: 'green',
+  startOfWeek: 'monday',
+  streakGracePeriodEnabled: false,
+  streakGracePeriodDays: 1,
+  defaultFrequency: 'daily',
+  defaultStartDateToday: true,
+  notificationsEnabled: true,
+  dailyReminderEnabled: false,
+  dailyReminderTime: '09:00',
+  missedHabitReminderEnabled: false,
+  missedHabitReminderTime: '20:00',
+};
+
 /** Accent color configuration with display properties */
 export interface AccentColorOption {
   value: AccentColor;
@@ -132,6 +150,9 @@ export interface Habit {
   // Streak
   streakEnabled: boolean;
   streakResetAfterMissingDays?: number;
+
+  // Reminders
+  // reminderEnabled: boolean;
 
   // UI
   sortOrder?: number;

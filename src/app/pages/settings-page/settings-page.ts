@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import {
   AccentColor,
   AccentColorOption,
   AccentColorOptions,
+  DEFAULT_SETTINGS,
   HabitFrequency,
   StartOfWeek,
   ThemeMode,
@@ -28,24 +29,6 @@ interface ToastMessage {
   type: 'success' | 'error';
   text: string;
 }
-
-/** Default settings for new users */
-const DEFAULT_SETTINGS: UserSettings = {
-  userId: '',
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-  theme: 'system',
-  accentColor: 'green',
-  startOfWeek: 'monday',
-  streakGracePeriodEnabled: false,
-  streakGracePeriodDays: 1,
-  defaultFrequency: 'daily',
-  defaultStartDateToday: true,
-  notificationsEnabled: true,
-  dailyReminderEnabled: false,
-  dailyReminderTime: '09:00',
-  missedHabitReminderEnabled: false,
-  missedHabitReminderTime: '20:00',
-};
 
 @Component({
   selector: 'app-settings-page',
@@ -69,46 +52,11 @@ export class SettingsPage implements OnInit {
   userName = signal<string>('');
   userEmail = signal<string>('');
 
-  // Single settings signal
-  userSettings = signal<UserSettings>({ ...DEFAULT_SETTINGS });
-
-  // Original settings for change detection
+  // Settings state (derived from SupabaseService)
   private originalSettings: UserSettings = { ...DEFAULT_SETTINGS };
 
-  // Computed properties for template bindings
-  selectedTimezone = computed(() => this.userSettings().timezone);
-  selectedTheme = computed(() => this.userSettings().theme);
-  selectedAccentColor = computed(() => this.userSettings().accentColor);
-  selectedStartOfWeek = computed(() => this.userSettings().startOfWeek);
-  gracePeriodEnabled = computed(() => this.userSettings().streakGracePeriodEnabled);
-  gracePeriodDays = computed(() => this.userSettings().streakGracePeriodDays);
-  defaultFrequency = computed(() => this.userSettings().defaultFrequency);
-  defaultStartDateToday = computed(() => this.userSettings().defaultStartDateToday);
-  notificationsEnabled = computed(() => this.userSettings().notificationsEnabled);
-  dailyReminderEnabled = computed(() => this.userSettings().dailyReminderEnabled);
-  dailyReminderTime = computed(() => this.userSettings().dailyReminderTime);
-  missedHabitReminderEnabled = computed(() => this.userSettings().missedHabitReminderEnabled);
-  missedHabitReminderTime = computed(() => this.userSettings().missedHabitReminderTime);
-
-  // Change detection
-  hasUnsavedChanges = computed(() => {
-    const current = this.userSettings();
-    return (
-      current.timezone !== this.originalSettings.timezone ||
-      current.theme !== this.originalSettings.theme ||
-      current.accentColor !== this.originalSettings.accentColor ||
-      current.startOfWeek !== this.originalSettings.startOfWeek ||
-      current.streakGracePeriodEnabled !== this.originalSettings.streakGracePeriodEnabled ||
-      current.streakGracePeriodDays !== this.originalSettings.streakGracePeriodDays ||
-      current.defaultFrequency !== this.originalSettings.defaultFrequency ||
-      current.defaultStartDateToday !== this.originalSettings.defaultStartDateToday ||
-      current.notificationsEnabled !== this.originalSettings.notificationsEnabled ||
-      current.dailyReminderEnabled !== this.originalSettings.dailyReminderEnabled ||
-      current.dailyReminderTime !== this.originalSettings.dailyReminderTime ||
-      current.missedHabitReminderEnabled !== this.originalSettings.missedHabitReminderEnabled ||
-      current.missedHabitReminderTime !== this.originalSettings.missedHabitReminderTime
-    );
-  });
+  // Reactive settings signal shared with App component
+  userSettings = this.supabaseService.userSettings;
 
   // UI state
   showDeleteModal = signal<boolean>(false);
@@ -131,27 +79,52 @@ export class SettingsPage implements OnInit {
     { value: 'sunday', label: 'Sunday' },
   ];
 
+  constructor() {
+    // Note: The theme/accent application effect is handled globally in App component (app.ts)
+  }
+
   async ngOnInit() {
     await this.loadSettings();
   }
 
+  // Change detection
+  hasUnsavedChanges = computed(() => {
+    const current = this.userSettings();
+    const original = this.originalSettings;
+
+    // Direct comparison of relevant fields
+    return (
+      current.timezone !== original.timezone ||
+      current.theme !== original.theme ||
+      current.accentColor !== original.accentColor ||
+      current.startOfWeek !== original.startOfWeek ||
+      current.streakGracePeriodEnabled !== original.streakGracePeriodEnabled ||
+      current.streakGracePeriodDays !== original.streakGracePeriodDays ||
+      current.defaultFrequency !== original.defaultFrequency ||
+      current.defaultStartDateToday !== original.defaultStartDateToday ||
+      current.notificationsEnabled !== original.notificationsEnabled ||
+      current.dailyReminderEnabled !== original.dailyReminderEnabled ||
+      current.dailyReminderTime !== original.dailyReminderTime ||
+      current.missedHabitReminderEnabled !== original.missedHabitReminderEnabled ||
+      current.missedHabitReminderTime !== original.missedHabitReminderTime
+    );
+  });
+
   async loadSettings() {
     this.isLoading.set(true);
     try {
-      // Get user email from session
+      // Get user info from session
       const session = this.supabaseService.session();
       if (session?.user) {
         this.userEmail.set(session.user.email || '');
         this.userName.set(
           session.user.user_metadata?.['full_name'] || session.user.email?.split('@')[0] || ''
         );
-
-        // Set userId in settings
-        this.updateSettings({ userId: session.user.id });
       }
 
-      // TODO: Load user settings from Supabase when backend is implemented
-      // For now, use defaults and store as original
+      // Placeholder: In the future, load from Supabase here
+      // For now, we use the value already in the service signal
+
       this.originalSettings = { ...this.userSettings() };
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -161,7 +134,7 @@ export class SettingsPage implements OnInit {
     }
   }
 
-  /** Helper to update specific fields in userSettings */
+  /** Helper to update specific fields in the shared userSettings signal */
   private updateSettings(updates: Partial<UserSettings>) {
     this.userSettings.update((current) => ({ ...current, ...updates }));
   }
@@ -173,12 +146,10 @@ export class SettingsPage implements OnInit {
 
   setTheme(theme: ThemeMode) {
     this.updateSettings({ theme });
-    // TODO: Apply theme preview
   }
 
   setAccentColor(color: AccentColor) {
     this.updateSettings({ accentColor: color });
-    // TODO: Apply accent color preview
   }
 
   setStartOfWeek(day: StartOfWeek) {
@@ -187,7 +158,7 @@ export class SettingsPage implements OnInit {
 
   // Streak behavior
   toggleGracePeriod() {
-    this.updateSettings({ streakGracePeriodEnabled: !this.gracePeriodEnabled() });
+    this.updateSettings({ streakGracePeriodEnabled: !this.userSettings().streakGracePeriodEnabled });
   }
 
   setGracePeriodDays(days: string) {
@@ -200,16 +171,16 @@ export class SettingsPage implements OnInit {
   }
 
   toggleDefaultStartDateToday() {
-    this.updateSettings({ defaultStartDateToday: !this.defaultStartDateToday() });
+    this.updateSettings({ defaultStartDateToday: !this.userSettings().defaultStartDateToday });
   }
 
   // Notifications
   toggleNotifications() {
-    this.updateSettings({ notificationsEnabled: !this.notificationsEnabled() });
+    this.updateSettings({ notificationsEnabled: !this.userSettings().notificationsEnabled });
   }
 
   toggleDailyReminder() {
-    this.updateSettings({ dailyReminderEnabled: !this.dailyReminderEnabled() });
+    this.updateSettings({ dailyReminderEnabled: !this.userSettings().dailyReminderEnabled });
   }
 
   setDailyReminderTime(time: string) {
@@ -217,7 +188,7 @@ export class SettingsPage implements OnInit {
   }
 
   toggleMissedHabitReminder() {
-    this.updateSettings({ missedHabitReminderEnabled: !this.missedHabitReminderEnabled() });
+    this.updateSettings({ missedHabitReminderEnabled: !this.userSettings().missedHabitReminderEnabled });
   }
 
   setMissedHabitReminderTime(time: string) {
@@ -242,7 +213,7 @@ export class SettingsPage implements OnInit {
   async saveChanges() {
     this.isSaving.set(true);
     try {
-      // TODO: Save settings to Supabase when backend is implemented
+      // TODO: Call updateUserSettings(this.userSettings()) when implemented in SupabaseService
       await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
 
       this.originalSettings = { ...this.userSettings() };
@@ -261,8 +232,8 @@ export class SettingsPage implements OnInit {
 
   async exportData(format: 'json' | 'csv') {
     try {
-      // TODO: Implement export via SupabaseService
-      this.showToast('success', `Exporting data as ${format.toUpperCase()}...`);
+      // TODO: Call this.supabaseService.exportUserData() when implemented
+      this.showToast('success', `Exporting data as ${format.toUpperCase()} (Simulated)...`);
     } catch (error) {
       console.error('Error exporting data:', error);
       this.showToast('error', 'Failed to export data');
@@ -294,8 +265,8 @@ export class SettingsPage implements OnInit {
     if (this.deleteConfirmInput !== 'DELETE') return;
 
     try {
-      // TODO: Implement account deletion via SupabaseService
-      this.showToast('success', 'Account deleted');
+      // TODO: Call this.supabaseService.deleteAccount() when implemented
+      this.showToast('success', 'Account deleted (Simulated)');
       await this.supabaseService.signOut();
       this.router.navigate(['/login']);
     } catch (error) {
