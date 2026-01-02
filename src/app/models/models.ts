@@ -43,6 +43,20 @@ export interface UserSettings {
   missedHabitReminderEnabled: boolean;
   missedHabitReminderTime: string; // HH:mm format
 
+  // Notification Channels
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  persistentNotifications: boolean; // Keep notification until user opens app
+
+  // Layout Preferences
+  dashboardLayout: 'grid' | 'list' | 'compact';
+  habitOrdering: 'alphabetical' | 'category' | 'streak' | 'recent';
+
+  // Integrations
+  googleCalendarLinked: boolean;
+  appleHealthLinked: boolean;
+  autoCloudBackup: boolean;
+
   // Timestamps
   createdAt?: string;
   updatedAt?: string;
@@ -64,6 +78,17 @@ export const DEFAULT_SETTINGS: UserSettings = {
   dailyReminderTime: '09:00',
   missedHabitReminderEnabled: false,
   missedHabitReminderTime: '20:00',
+  // Notification channels
+  pushEnabled: true,
+  emailEnabled: false,
+  persistentNotifications: false,
+  // Layout
+  dashboardLayout: 'grid',
+  habitOrdering: 'recent',
+  // Integrations
+  googleCalendarLinked: false,
+  appleHealthLinked: false,
+  autoCloudBackup: false,
 };
 
 /** Accent color configuration with display properties */
