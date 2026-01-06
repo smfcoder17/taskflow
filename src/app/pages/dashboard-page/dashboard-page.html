@@ -198,9 +198,12 @@
             </div>
           </div>
 
+          <!-- Habits Container -->
+          <div class="flex flex-col gap-4">
+
           <!-- Active Filters Display -->
           @if (hasActiveFilters()) {
-          <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap mb-4">
             <span class="text-sm text-text-dark-secondary">Showing:</span>
             @if (activeStatusFilter() !== 'all') {
             <span
@@ -222,7 +225,9 @@
             </span>
             }
           </div>
-          } @if (isLoading()) {
+          }
+
+          @if (isLoading()) {
           <div class="flex items-center justify-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -256,13 +261,13 @@
           </div>
           } @else { @for (habit of filteredHabits(); track habit.id) {
           <div
-            class="bg-card-dark rounded-xl p-4 flex items-center justify-between hover:bg-card-dark/80 transition-colors group"
+            class="bg-card-dark rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4"
           >
             <!-- Checkbox & Content -->
             <div class="flex items-center gap-4 flex-1">
               <button
                 (click)="toggleHabit(habit.id!)"
-                class="w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all"
+                class="rounded-xl border-2 flex items-center justify-center transition-all w-12 h-12"
                 [ngClass]="{
                   'border-primary bg-primary': habit.completedToday,
                   'border-border-dark-strong hover:border-primary': !habit.completedToday
@@ -278,7 +283,9 @@
                   <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
                   <h4
                     class="font-semibold text-lg"
-                    [ngClass]="{ 'line-through text-text-dark-secondary/60': habit.completedToday }"
+                    [ngClass]="{
+                      'line-through text-text-dark-secondary/60': habit.completedToday
+                    }"
                   >
                     {{ habit.title }}
                   </h4>
@@ -325,6 +332,7 @@
             </div>
           </div>
           } }
+          </div>
 
           <!-- Add New Habit Button -->
           <button

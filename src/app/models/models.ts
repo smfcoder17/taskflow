@@ -17,47 +17,25 @@ export type AccentColor = 'green' | 'blue' | 'purple' | 'pink' | 'orange' | 'cya
 /** Start of week preference for calendar/streak calculations */
 export type StartOfWeek = 'monday' | 'sunday';
 
+/** Notification mode settings */
+export type NotificationMode = 'Zen' | 'Balanced' | 'Persistent';
+
 /** User settings for preferences, notifications, and defaults */
 export interface UserSettings {
   id?: string;
   userId: string;
-
-  // Preferences
   timezone: string;
   theme: ThemeMode;
-  accentColor: AccentColor;
+  accentColor: string; // Adjusted to string to match any color name
   startOfWeek: StartOfWeek;
-
-  // Streak behavior
-  streakGracePeriodEnabled: boolean;
-  streakGracePeriodDays: number;
-
-  // Default habit settings
   defaultFrequency: HabitFrequency;
   defaultStartDateToday: boolean;
-
-  // Notifications
   notificationsEnabled: boolean;
+  notificationMode: NotificationMode;
   dailyReminderEnabled: boolean;
   dailyReminderTime: string; // HH:mm format
   missedHabitReminderEnabled: boolean;
   missedHabitReminderTime: string; // HH:mm format
-
-  // Notification Channels
-  pushEnabled: boolean;
-  emailEnabled: boolean;
-  persistentNotifications: boolean; // Keep notification until user opens app
-
-  // Layout Preferences
-  dashboardLayout: 'grid' | 'list' | 'compact';
-  habitOrdering: 'alphabetical' | 'category' | 'streak' | 'recent';
-
-  // Integrations
-  googleCalendarLinked: boolean;
-  appleHealthLinked: boolean;
-  autoCloudBackup: boolean;
-
-  // Timestamps
   createdAt?: string;
   updatedAt?: string;
 }
@@ -69,26 +47,14 @@ export const DEFAULT_SETTINGS: UserSettings = {
   theme: 'system',
   accentColor: 'green',
   startOfWeek: 'monday',
-  streakGracePeriodEnabled: false,
-  streakGracePeriodDays: 1,
   defaultFrequency: 'daily',
   defaultStartDateToday: true,
   notificationsEnabled: true,
+  notificationMode: 'Balanced',
   dailyReminderEnabled: false,
   dailyReminderTime: '09:00',
   missedHabitReminderEnabled: false,
   missedHabitReminderTime: '20:00',
-  // Notification channels
-  pushEnabled: true,
-  emailEnabled: false,
-  persistentNotifications: false,
-  // Layout
-  dashboardLayout: 'grid',
-  habitOrdering: 'recent',
-  // Integrations
-  googleCalendarLinked: false,
-  appleHealthLinked: false,
-  autoCloudBackup: false,
 };
 
 /** Accent color configuration with display properties */

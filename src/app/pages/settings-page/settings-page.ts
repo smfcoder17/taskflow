@@ -156,14 +156,7 @@ export class SettingsPage implements OnInit {
     this.updateSettings({ startOfWeek: day });
   }
 
-  // Streak behavior
-  toggleGracePeriod() {
-    this.updateSettings({ streakGracePeriodEnabled: !this.userSettings().streakGracePeriodEnabled });
-  }
 
-  setGracePeriodDays(days: string) {
-    this.updateSettings({ streakGracePeriodDays: parseInt(days, 10) });
-  }
 
   // Default habit settings
   setDefaultFrequency(freq: HabitFrequency) {
@@ -206,6 +199,13 @@ export class SettingsPage implements OnInit {
 
   togglePersistentNotifications() {
     this.updateSettings({ persistentNotifications: !this.userSettings().persistentNotifications });
+  }
+
+  // Interface Customization
+
+
+  setHabitOrdering(ordering: 'alphabetical' | 'category' | 'streak' | 'recent') {
+    this.updateSettings({ habitOrdering: ordering });
   }
 
   // Actions

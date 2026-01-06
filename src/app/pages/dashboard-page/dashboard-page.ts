@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -85,6 +85,27 @@ export class DashboardPage {
   activeStatusFilter = signal<FilterStatus>('all');
   activeCategoryFilter = signal<FilterCategory>('all');
   activeSort = signal<SortOption>('name-asc');
+
+  constructor() {
+    // Sync local sort with global settings
+    effect(() => {
+      const setting = this.supabaseService.userSettings().habitOrdering;
+      switch (setting) {
+        case 'alphabetical':
+          this.activeSort.set('name-asc');
+          break;
+        case 'category':
+          this.activeSort.set('category');
+          break;
+        case 'streak':
+          this.activeSort.set('streak-desc');
+          break;
+        case 'recent':
+          this.activeSort.set('created-newest');
+          break;
+      }
+    });
+  }
 
   // Filter options
   statusFilters: FilterOption[] = [

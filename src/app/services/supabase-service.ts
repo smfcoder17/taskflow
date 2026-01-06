@@ -139,25 +139,104 @@ export class SupabaseService {
     return this.supabase;
   }
 
-  // ==================== User Settings (Placeholders) ====================
+  // ==================== User Settings ====================
 
   /**
    * Get user settings from the database.
-   * TODO: Implement when user_settings table is created.
-   * @returns {Promise<{data: any, error: any}>}
    */
   async getUserSettings() {
-    return { data: null, error: null };
+    const user = this.session()?.user;
+    if (!user) return { data: null, error: 'Not authenticated' };
+
+    const { data, error } = await this.supabase
+      .from('user_settings')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (data) {
+      const mapped = this.mapUserSettingsFromDB(data);
+      this.userSettings.set(mapped);
+      return { data: mapped, error: null };
+    }
+
+    return { data: null, error };
   }
 
   /**
    * Update or create user settings in the database.
-   * TODO: Implement mapping to snake_case and upsert logic.
    * @param {Partial<UserSettings>} settings The settings to update.
-   * @returns {Promise<{error: any}>}
    */
   async updateUserSettings(settings: Partial<UserSettings>) {
-    return { error: null };
+    const user = this.session()?.user;
+    if (!user) return { error: 'Not authenticated' };
+
+    const dbSettings = this.mapUserSettingsToDB(settings);
+    dbSettings.user_id = user.id;
+    dbSettings.updated_at = new Date().toISOString();
+
+    const { data, error } = await this.supabase
+      .from('user_settings')
+      .upsert(dbSettings)
+      .select()
+      .single();
+
+    if (data) {
+      const mapped = this.mapUserSettingsFromDB(data);
+      this.userSettings.set(mapped);
+    }
+
+    return { error };
+  }
+
+  /**
+   * Helper to map database user settings to our model
+   */
+  private mapUserSettingsFromDB(dbSettings: any): UserSettings {
+    return {
+      id: dbSettings.id,
+      userId: dbSettings.user_id,
+      timezone: dbSettings.timezone,
+      theme: dbSettings.theme,
+      accentColor: dbSettings.accent_color,
+      startOfWeek: dbSettings.start_of_week,
+      defaultFrequency: dbSettings.default_frequency,
+      defaultStartDateToday: dbSettings.default_start_date_today,
+      notificationsEnabled: dbSettings.notifications_enabled,
+      notificationMode: dbSettings.notification_mode,
+      dailyReminderEnabled: dbSettings.daily_reminder_enabled,
+      dailyReminderTime: dbSettings.daily_reminder_time,
+      missedHabitReminderEnabled: dbSettings.missed_habit_reminder_enabled,
+      missedHabitReminderTime: dbSettings.missed_habit_reminder_time,
+      createdAt: dbSettings.created_at,
+      updatedAt: dbSettings.updated_at,
+    };
+  }
+
+  /**
+   * Helper to map user settings model to database
+   */
+  private mapUserSettingsToDB(settings: Partial<UserSettings>): any {
+    const dbSettings: any = {};
+    if (settings.id) dbSettings.id = settings.id;
+    if (settings.timezone) dbSettings.timezone = settings.timezone;
+    if (settings.theme) dbSettings.theme = settings.theme;
+    if (settings.accentColor) dbSettings.accent_color = settings.accentColor;
+    if (settings.startOfWeek) dbSettings.start_of_week = settings.startOfWeek;
+    if (settings.defaultFrequency) dbSettings.default_frequency = settings.defaultFrequency;
+    if (settings.defaultStartDateToday !== undefined)
+      dbSettings.default_start_date_today = settings.defaultStartDateToday;
+    if (settings.notificationsEnabled !== undefined)
+      dbSettings.notifications_enabled = settings.notificationsEnabled;
+    if (settings.notificationMode) dbSettings.notification_mode = settings.notificationMode;
+    if (settings.dailyReminderEnabled !== undefined)
+      dbSettings.daily_reminder_enabled = settings.dailyReminderEnabled;
+    if (settings.dailyReminderTime) dbSettings.daily_reminder_time = settings.dailyReminderTime;
+    if (settings.missedHabitReminderEnabled !== undefined)
+      dbSettings.missed_habit_reminder_enabled = settings.missedHabitReminderEnabled;
+    if (settings.missedHabitReminderTime)
+      dbSettings.missed_habit_reminder_time = settings.missedHabitReminderTime;
+    return dbSettings;
   }
 
   /**

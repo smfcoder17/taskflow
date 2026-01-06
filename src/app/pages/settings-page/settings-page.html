@@ -153,55 +153,7 @@
         </div>
       </section>
 
-      <!-- ==================== Streak Behavior Section ==================== -->
-      <section class="bg-card-dark rounded-xl p-6">
-        <div class="flex items-center gap-3 mb-6">
-          <span class="material-symbols-outlined text-2xl text-primary">local_fire_department</span>
-          <h2 class="text-xl font-semibold text-text-dark-primary">Streak Behavior</h2>
-        </div>
 
-        <div class="space-y-4">
-          <!-- Grace Period Toggle -->
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-text-dark-primary font-medium">Grace Period</p>
-              <p class="text-sm text-text-dark-secondary">Allow a buffer before resetting streaks</p>
-            </div>
-            <button
-              (click)="toggleGracePeriod()"
-              class="relative w-12 h-6 rounded-full transition-colors"
-              [ngClass]="{
-                'bg-primary': userSettings().streakGracePeriodEnabled,
-                'bg-border-dark-strong': !userSettings().streakGracePeriodEnabled
-              }"
-            >
-              <span
-                class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
-                [ngClass]="{ 'translate-x-6': userSettings().streakGracePeriodEnabled }"
-              ></span>
-            </button>
-          </div>
-
-          <!-- Grace Period Days (shown when enabled) -->
-          @if (userSettings().streakGracePeriodEnabled) {
-          <div class="flex items-center justify-between pl-4 border-l-2 border-primary/30">
-            <div>
-              <p class="text-text-dark-primary font-medium">Grace Period Days</p>
-              <p class="text-sm text-text-dark-secondary">Days allowed before streak resets</p>
-            </div>
-            <select
-              [value]="userSettings().streakGracePeriodDays"
-              (change)="setGracePeriodDays($any($event.target).value)"
-              class="bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2 text-sm outline-none focus:border-primary"
-            >
-              <option value="1">1 day</option>
-              <option value="2">2 days</option>
-              <option value="3">3 days</option>
-            </select>
-          </div>
-          }
-        </div>
-      </section>
 
       <!-- ==================== Default Habit Settings Section ==================== -->
       <section class="bg-card-dark rounded-xl p-6">
@@ -424,7 +376,41 @@
         </div>
       </section>
 
-      <!-- ==================== Data & Privacy Section ==================== -->
+      <!-- ==================== Interface Customization Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">view_quilt</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Interface Customization</h2>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Habit Ordering -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-text-dark-primary font-medium">Default Habit Sort</p>
+              <p class="text-sm text-text-dark-secondary">Syncs with dashboard sort options</p>
+            </div>
+            <div class="relative w-full sm:w-64">
+              <select
+                [value]="userSettings().habitOrdering"
+                (change)="setHabitOrdering($any($event.target).value)"
+                class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
+              >
+                <option value="recent">Recently Updated</option>
+                <option value="alphabetical">Alphabetical</option>
+                <option value="category">Category</option>
+                <option value="streak">Streak Length</option>
+              </select>
+              <span
+                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-dark-secondary pointer-events-none text-lg"
+              >
+                expand_more
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="bg-card-dark rounded-xl p-6">
         <div class="flex items-center gap-3 mb-6">
           <span class="material-symbols-outlined text-2xl text-primary">shield</span>
