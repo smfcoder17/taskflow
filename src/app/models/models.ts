@@ -43,7 +43,7 @@ export interface UserSettings {
 /** Default settings for new users */
 export const DEFAULT_SETTINGS: UserSettings = {
   userId: '',
-  timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC',
+  timezone: 'UTC+00:00',
   theme: 'system',
   accentColor: 'green',
   startOfWeek: 'monday',
@@ -114,7 +114,39 @@ export const DefaultHabitIcons: HabitIconPair[] = [
 ];
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
-export type MonthDay = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 'last';
+export type MonthDay =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16
+  | 17
+  | 18
+  | 19
+  | 20
+  | 21
+  | 22
+  | 23
+  | 24
+  | 25
+  | 26
+  | 27
+  | 28
+  | 29
+  | 30
+  | 31
+  | 'last';
 
 export interface Habit {
   id?: string;

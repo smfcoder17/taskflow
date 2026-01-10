@@ -58,19 +58,25 @@ export class SupabaseService {
       if (data?.session) {
         console.log('✅ Session found:');
         this.session.set(data.session);
+        // Load user settings immediately after session is confirmed
+        await this.getUserSettings();
       } else {
         console.log('ℹ️ No session found');
       }
 
       // Listen for auth state changes
-      this.supabase.auth.onAuthStateChange((event, session) => {
+      this.supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔐 Auth event:', event);
         const previousSession = this.session();
         this.session.set(session);
 
         if (event === 'SIGNED_IN' && !previousSession && session) {
+          // Load settings on sign in
+          await this.getUserSettings();
           this.router.navigate(['/dashboard']);
         } else if (event === 'SIGNED_OUT' && previousSession && !session) {
+          // Reset to defaults on sign out
+          this.userSettings.set({ ...DEFAULT_SETTINGS });
           this.router.navigate(['/login']);
         }
       });
@@ -570,27 +576,38 @@ export class SupabaseService {
   }
 
   /**
-   * Get all habits for the current user
+   * Get all habits for the current user with mapped fields
    */
-  getHabits() {
+  async getHabits() {
     const user = this.session()?.user;
 
     if (!user) {
       throw new Error('User must be authenticated');
     }
 
-    return this.supabase
+    const { data, error } = await this.supabase
       .from('habits')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
+
+    if (error) return { data: null, error };
+
+    return { 
+      data: (data || []).map(h => this.mapHabitFromDB(h)), 
+      error: null 
+    };
   }
 
   /**
-   * Get a single habit by ID
+   * Get a single habit by ID with mapped fields
    */
-  getHabit(id: string) {
-    return this.supabase.from('habits').select('*').eq('id', id).single();
+  async getHabitById(id: string) {
+    const { data, error } = await this.supabase.from('habits').select('*').eq('id', id).single();
+    
+    if (error) return { data: null, error };
+    
+    return { data: this.mapHabitFromDB(data), error: null };
   }
 
   /**
@@ -603,10 +620,18 @@ export class SupabaseService {
 
     if (habit.title) updateData.title = habit.title;
     if (habit.description !== undefined) updateData.description = habit.description;
+    if (habit.icon) updateData.icon = habit.icon;
+    if (habit.color) updateData.color = habit.color;
+    if (habit.category) updateData.category = habit.category;
     if (habit.frequency) updateData.frequency = habit.frequency;
+    if (habit.customDays !== undefined) updateData.custom_days = habit.customDays ? JSON.stringify(habit.customDays) : null;
+    if (habit.timeOfDay !== undefined) updateData.time_of_day = habit.timeOfDay;
     if (habit.startDate) updateData.start_date = habit.startDate;
     if (habit.endDate !== undefined) updateData.end_date = habit.endDate;
     if (habit.streakEnabled !== undefined) updateData.streak_enabled = habit.streakEnabled;
+    if (habit.streakResetAfterMissingDays !== undefined) updateData.streak_reset_after_missing_days = habit.streakResetAfterMissingDays;
+    if (habit.sortOrder !== undefined) updateData.sort_order = habit.sortOrder;
+    if (habit.archived !== undefined) updateData.archived = habit.archived;
 
     return this.supabase.from('habits').update(updateData).eq('id', id).select().single();
   }

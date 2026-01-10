@@ -87,24 +87,7 @@ export class DashboardPage {
   activeSort = signal<SortOption>('name-asc');
 
   constructor() {
-    // Sync local sort with global settings
-    effect(() => {
-      const setting = this.supabaseService.userSettings().habitOrdering;
-      switch (setting) {
-        case 'alphabetical':
-          this.activeSort.set('name-asc');
-          break;
-        case 'category':
-          this.activeSort.set('category');
-          break;
-        case 'streak':
-          this.activeSort.set('streak-desc');
-          break;
-        case 'recent':
-          this.activeSort.set('created-newest');
-          break;
-      }
-    });
+    // Note: Sort state managed locally in dashboard
   }
 
   // Filter options

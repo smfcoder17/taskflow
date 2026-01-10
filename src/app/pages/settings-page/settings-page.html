@@ -27,13 +27,6 @@
               <p class="text-sm text-text-dark-secondary">Name</p>
               <p class="text-text-dark-primary font-medium">{{ userName() || 'Not set' }}</p>
             </div>
-            <button
-              (click)="openEditProfile()"
-              class="flex items-center gap-2 px-3 py-1.5 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors"
-            >
-              <span class="material-symbols-outlined text-lg">edit</span>
-              Edit
-            </button>
           </div>
 
           <div class="flex items-center justify-between py-3 border-b border-border-dark">
@@ -72,8 +65,7 @@
             </div>
             <div class="relative w-full sm:w-64">
               <select
-                [value]="userSettings().timezone"
-                (change)="setTimezone($any($event.target).value)"
+                [(ngModel)]="timezoneModel"
                 class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
               >
                 @for (tz of timezones; track tz) {
@@ -295,122 +287,11 @@
               </button>
             </div>
           </div>
-
-          <!-- Notification Channels -->
-          <div class="mt-6 pt-4 border-t border-border-dark">
-            <p class="text-sm text-text-dark-secondary mb-4">Notification Channels</p>
-
-            <!-- Push Notifications -->
-            <div class="flex items-center justify-between py-3">
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-text-dark-secondary">smartphone</span>
-                <div>
-                  <p class="text-text-dark-primary font-medium">Push Notifications</p>
-                  <p class="text-sm text-text-dark-secondary">Receive alerts on your device</p>
-                </div>
-              </div>
-              <button
-                (click)="togglePushEnabled()"
-                class="relative w-12 h-6 rounded-full transition-colors"
-                [ngClass]="{
-                  'bg-primary': userSettings().pushEnabled,
-                  'bg-border-dark-strong': !userSettings().pushEnabled
-                }"
-              >
-                <span
-                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
-                  [ngClass]="{ 'translate-x-6': userSettings().pushEnabled }"
-                ></span>
-              </button>
-            </div>
-
-            <!-- Email Notifications -->
-            <div class="flex items-center justify-between py-3">
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-text-dark-secondary">mail</span>
-                <div>
-                  <p class="text-text-dark-primary font-medium">Email Notifications</p>
-                  <p class="text-sm text-text-dark-secondary">Receive digest and reminders via email</p>
-                </div>
-              </div>
-              <button
-                (click)="toggleEmailEnabled()"
-                class="relative w-12 h-6 rounded-full transition-colors"
-                [ngClass]="{
-                  'bg-primary': userSettings().emailEnabled,
-                  'bg-border-dark-strong': !userSettings().emailEnabled
-                }"
-              >
-                <span
-                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
-                  [ngClass]="{ 'translate-x-6': userSettings().emailEnabled }"
-                ></span>
-              </button>
-            </div>
-
-            <!-- Persistent Notifications -->
-            <div class="flex items-center justify-between py-3">
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-text-dark-secondary">keep</span>
-                <div>
-                  <p class="text-text-dark-primary font-medium">Persistent Notifications</p>
-                  <p class="text-sm text-text-dark-secondary">Keep visible until you open the app</p>
-                </div>
-              </div>
-              <button
-                (click)="togglePersistentNotifications()"
-                class="relative w-12 h-6 rounded-full transition-colors"
-                [ngClass]="{
-                  'bg-primary': userSettings().persistentNotifications,
-                  'bg-border-dark-strong': !userSettings().persistentNotifications
-                }"
-              >
-                <span
-                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
-                  [ngClass]="{ 'translate-x-6': userSettings().persistentNotifications }"
-                ></span>
-              </button>
-            </div>
-          </div>
           }
         </div>
       </section>
 
-      <!-- ==================== Interface Customization Section ==================== -->
-      <section class="bg-card-dark rounded-xl p-6">
-        <div class="flex items-center gap-3 mb-6">
-          <span class="material-symbols-outlined text-2xl text-primary">view_quilt</span>
-          <h2 class="text-xl font-semibold text-text-dark-primary">Interface Customization</h2>
-        </div>
-
-        <div class="space-y-6">
-          <!-- Habit Ordering -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <p class="text-text-dark-primary font-medium">Default Habit Sort</p>
-              <p class="text-sm text-text-dark-secondary">Syncs with dashboard sort options</p>
-            </div>
-            <div class="relative w-full sm:w-64">
-              <select
-                [value]="userSettings().habitOrdering"
-                (change)="setHabitOrdering($any($event.target).value)"
-                class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
-              >
-                <option value="recent">Recently Updated</option>
-                <option value="alphabetical">Alphabetical</option>
-                <option value="category">Category</option>
-                <option value="streak">Streak Length</option>
-              </select>
-              <span
-                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-dark-secondary pointer-events-none text-lg"
-              >
-                expand_more
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <!-- ==================== Data & Privacy Section ==================== -->
       <section class="bg-card-dark rounded-xl p-6">
         <div class="flex items-center gap-3 mb-6">
           <span class="material-symbols-outlined text-2xl text-primary">shield</span>
@@ -460,7 +341,7 @@
           <!-- Delete Account -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3">
             <div>
-              <p class="text-text-dark-primary font-medium text-red-400">Delete Account</p>
+              <p class="font-medium text-red-400">Delete Account</p>
               <p class="text-sm text-text-dark-secondary">Permanently delete your account and all data</p>
             </div>
             <button

@@ -1,8 +1,9 @@
-import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, model, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase-service';
+import { CanComponentDeactivate } from '../../guards/can-deactivate.guard';
 import {
   AccentColor,
   AccentColorOption,
@@ -37,7 +38,7 @@ interface ToastMessage {
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.css',
 })
-export class SettingsPage implements OnInit {
+export class SettingsPage implements OnInit, CanComponentDeactivate {
   private supabaseService = inject(SupabaseService);
   private router = inject(Router);
 
@@ -58,13 +59,46 @@ export class SettingsPage implements OnInit {
   // Reactive settings signal shared with App component
   userSettings = this.supabaseService.userSettings;
 
+  // Two-way binding model for timezone select
+  timezoneModel = model(this.userSettings().timezone);
+
   // UI state
   showDeleteModal = signal<boolean>(false);
   toastMessage = signal<ToastMessage | null>(null);
   deleteConfirmInput = '';
 
-  // Options
-  timezones: string[] = Intl.supportedValuesOf('timeZone');
+  // Options - Simplified UTC offset timezones
+  timezones: string[] = [
+    'UTC-12:00',
+    'UTC-11:00',
+    'UTC-10:00',
+    'UTC-09:00',
+    'UTC-08:00',
+    'UTC-07:00',
+    'UTC-06:00',
+    'UTC-05:00',
+    'UTC-04:00',
+    'UTC-03:00',
+    'UTC-02:00',
+    'UTC-01:00',
+    'UTC+00:00',
+    'UTC+01:00',
+    'UTC+02:00',
+    'UTC+03:00',
+    'UTC+04:00',
+    'UTC+05:00',
+    'UTC+05:30',
+    'UTC+06:00',
+    'UTC+07:00',
+    'UTC+08:00',
+    'UTC+09:00',
+    'UTC+09:30',
+    'UTC+10:00',
+    'UTC+11:00',
+    'UTC+12:00',
+    'UTC+13:00',
+    'UTC+14:00'
+  ];
 
   themeOptions: ThemeOption[] = [
     { value: 'light', label: 'Light', icon: 'light_mode' },
@@ -83,8 +117,24 @@ export class SettingsPage implements OnInit {
     // Note: The theme/accent application effect is handled globally in App component (app.ts)
   }
 
+  canDeactivate(): boolean {
+    if (this.hasUnsavedChanges()) {
+      return confirm(
+        'You have unsaved changes. Do you want to leave this page?\n\nClick OK to discard changes or Cancel to stay.'
+      );
+    }
+    return true;
+  }
+
   async ngOnInit() {
     await this.loadSettings();
+    
+    // Intercept navigation events to warn about unsaved changes
+    this.router.events.subscribe(() => {
+      if (this.hasUnsavedChanges()) {
+        // This will be caught by the canDeactivate guard
+      }
+    });
   }
 
   // Change detection
@@ -98,8 +148,6 @@ export class SettingsPage implements OnInit {
       current.theme !== original.theme ||
       current.accentColor !== original.accentColor ||
       current.startOfWeek !== original.startOfWeek ||
-      current.streakGracePeriodEnabled !== original.streakGracePeriodEnabled ||
-      current.streakGracePeriodDays !== original.streakGracePeriodDays ||
       current.defaultFrequency !== original.defaultFrequency ||
       current.defaultStartDateToday !== original.defaultStartDateToday ||
       current.notificationsEnabled !== original.notificationsEnabled ||
@@ -122,10 +170,13 @@ export class SettingsPage implements OnInit {
         );
       }
 
-      // Placeholder: In the future, load from Supabase here
-      // For now, we use the value already in the service signal
+      // Load settings from Supabase
+      await this.supabaseService.getUserSettings();
 
       this.originalSettings = { ...this.userSettings() };
+      
+      // Sync timezone model with loaded settings
+      this.timezoneModel.set(this.userSettings().timezone);
     } catch (error) {
       console.error('Error loading settings:', error);
       this.showToast('error', 'Failed to load settings');
@@ -142,6 +193,7 @@ export class SettingsPage implements OnInit {
   // Preference setters
   setTimezone(tz: string) {
     this.updateSettings({ timezone: tz });
+    this.timezoneModel.set(tz);
   }
 
   setTheme(theme: ThemeMode) {
@@ -155,8 +207,6 @@ export class SettingsPage implements OnInit {
   setStartOfWeek(day: StartOfWeek) {
     this.updateSettings({ startOfWeek: day });
   }
-
-
 
   // Default habit settings
   setDefaultFrequency(freq: HabitFrequency) {
@@ -181,38 +231,16 @@ export class SettingsPage implements OnInit {
   }
 
   toggleMissedHabitReminder() {
-    this.updateSettings({ missedHabitReminderEnabled: !this.userSettings().missedHabitReminderEnabled });
+    this.updateSettings({
+      missedHabitReminderEnabled: !this.userSettings().missedHabitReminderEnabled,
+    });
   }
 
   setMissedHabitReminderTime(time: string) {
     this.updateSettings({ missedHabitReminderTime: time });
   }
 
-  // Notification Channels
-  togglePushEnabled() {
-    this.updateSettings({ pushEnabled: !this.userSettings().pushEnabled });
-  }
-
-  toggleEmailEnabled() {
-    this.updateSettings({ emailEnabled: !this.userSettings().emailEnabled });
-  }
-
-  togglePersistentNotifications() {
-    this.updateSettings({ persistentNotifications: !this.userSettings().persistentNotifications });
-  }
-
-  // Interface Customization
-
-
-  setHabitOrdering(ordering: 'alphabetical' | 'category' | 'streak' | 'recent') {
-    this.updateSettings({ habitOrdering: ordering });
-  }
-
   // Actions
-  openEditProfile() {
-    this.router.navigate(['/profile']);
-  }
-
   async logout() {
     try {
       await this.supabaseService.signOut();
@@ -226,8 +254,11 @@ export class SettingsPage implements OnInit {
   async saveChanges() {
     this.isSaving.set(true);
     try {
-      // TODO: Call updateUserSettings(this.userSettings()) when implemented in SupabaseService
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API call
+      const { error } = await this.supabaseService.updateUserSettings(this.userSettings());
+
+      if (error) {
+        throw error;
+      }
 
       this.originalSettings = { ...this.userSettings() };
       this.showToast('success', 'Settings saved successfully');
@@ -240,7 +271,9 @@ export class SettingsPage implements OnInit {
   }
 
   discardChanges() {
-    this.userSettings.set({ ...this.originalSettings });
+    // Reset to original settings loaded from DB
+    this.userSettings.update(() => ({ ...this.originalSettings }));
+    this.showToast('success', 'Changes discarded');
   }
 
   async exportData(format: 'json' | 'csv') {
