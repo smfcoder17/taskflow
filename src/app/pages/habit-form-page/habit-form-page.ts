@@ -8,7 +8,14 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { DayOfWeek, DefaultHabitIcons, Habit, HabitIconPair, HabitWithStats, MonthDay } from '../../models/models';
+import {
+  DayOfWeek,
+  DefaultHabitIcons,
+  Habit,
+  HabitIconPair,
+  HabitWithStats,
+  MonthDay,
+} from '../../models/models';
 import { SupabaseService } from '../../services/supabase-service';
 import { DateUtils } from '../../models/utilities';
 
@@ -87,11 +94,11 @@ export class HabitFormPage implements OnInit {
       if (error) throw error;
       if (data) {
         this.editingHabitTitle.set(data.title);
-        
-        // Map snake_case from DB to camelCase for form if needed, 
+
+        // Map snake_case from DB to camelCase for form if needed,
         // but getHabitById already returns mapped data if the service does it.
         // Let's check getHabitById in SupabaseService.
-        
+
         this.habitForm.patchValue({
           title: data.title,
           description: data.description || '',

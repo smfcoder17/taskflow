@@ -1,0 +1,119 @@
+<div class="bg-card-dark rounded-xl p-6 border border-border-dark-strong/30 shadow-lg h-full">
+  <div class="flex items-center gap-4 mb-8">
+    <div class="p-3 rounded-xl bg-purple-500/10 text-purple-500">
+      <span class="material-symbols-outlined">psychology</span>
+    </div>
+    <div>
+      <h3 class="text-lg font-bold text-text-dark-primary">Insights & Trends</h3>
+      <p class="text-xs text-text-dark-secondary tracking-wide">Behavioral patterns</p>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- Week Comparison -->
+    @if (weekComparison(); as comparison) {
+    <div class="p-5 rounded-xl bg-background-dark/30 border border-border-dark-strong/10">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-xs font-bold text-text-dark-secondary uppercase tracking-widest"
+          >Weekly Growth</span
+        >
+        <div
+          class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
+          [ngClass]="getChangeClass(comparison.change)"
+          [style.background-color]="
+            comparison.change > 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 44, 44, 0.1)'
+          "
+        >
+          <span class="material-symbols-outlined text-sm">{{
+            getChangeIcon(comparison.change)
+          }}</span>
+          <span>{{ comparison.change > 0 ? '+' : '' }}{{ Math.abs(comparison.change) }}%</span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="flex justify-between items-end">
+          <span class="text-xs text-text-dark-secondary">This Week</span>
+          <span class="text-lg font-bold text-text-dark-primary"
+            >{{ comparison.currentWeek.completions }}
+            <span class="text-[10px] font-medium text-text-dark-secondary">done</span></span
+          >
+        </div>
+        <div class="w-full h-1.5 bg-card-dark rounded-full overflow-hidden">
+          <div
+            class="bg-primary h-full rounded-full opacity-80"
+            [style.width.%]="comparison.currentWeek.rate"
+          ></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] text-text-dark-tertiary">
+          <span>Last Week</span>
+          <span>{{ comparison.lastWeek.completions }} completions</span>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Behavioral Insights -->
+    @if (insights(); as i) {
+    <div class="space-y-4">
+      <!-- Best Day -->
+      <div
+        class="flex items-center gap-5 p-4 rounded-xl bg-background-dark/20 border border-border-dark-strong/5 hover:bg-background-dark/40 transition-colors"
+      >
+        <div
+          class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-sm"
+        >
+          <span class="material-symbols-outlined">event_available</span>
+        </div>
+        <div>
+          <div
+            class="text-[10px] text-text-dark-secondary uppercase tracking-widest font-extrabold mb-0.5"
+          >
+            Best Day
+          </div>
+          <div class="text-text-dark-primary font-bold capitalize">{{ i.bestDayOfWeek.day }}</div>
+        </div>
+      </div>
+
+      <!-- Best Time -->
+      <div
+        class="flex items-center gap-5 p-4 rounded-xl bg-background-dark/20 border border-border-dark-strong/5 hover:bg-background-dark/40 transition-colors"
+      >
+        <div
+          class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shadow-sm"
+        >
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <div>
+          <div
+            class="text-[10px] text-text-dark-secondary uppercase tracking-widest font-extrabold mb-0.5"
+          >
+            Peak Time
+          </div>
+          <div class="text-text-dark-primary font-bold capitalize">
+            {{ i.bestTimeOfDay.period }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Consistency -->
+      <div
+        class="flex items-center gap-5 p-4 rounded-xl bg-background-dark/20 border border-border-dark-strong/5 hover:bg-background-dark/40 transition-colors"
+      >
+        <div
+          class="w-10 h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center shadow-sm"
+        >
+          <span class="material-symbols-outlined">verified</span>
+        </div>
+        <div>
+          <div
+            class="text-[10px] text-text-dark-secondary uppercase tracking-widest font-extrabold mb-0.5"
+          >
+            Consistency
+          </div>
+          <div class="text-text-dark-primary font-bold">{{ i.averageConsistencyScore }}%</div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+</div>

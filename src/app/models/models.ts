@@ -241,3 +241,34 @@ export interface AnalyticsSnapshot {
   streak: number;
   totalCompleted: number;
 }
+
+export interface HabitAnalytics {
+  habitId: string;
+  habitTitle: string;
+  icon: string;
+  completionRate: number; // percentage
+  consistencyScore: number; // percentage with gap penalty
+  totalCompletions: number;
+  bestDayOfWeek: DayOfWeek;
+  bestTimeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
+}
+
+export interface WeekComparison {
+  currentWeek: { completions: number; rate: number; startDate: string; endDate: string };
+  lastWeek: { completions: number; rate: number; startDate: string; endDate: string };
+  change: number; // percentage change
+}
+
+export interface BehavioralInsights {
+  bestDayOfWeek: { day: DayOfWeek; completionRate: number };
+  bestTimeOfDay: { period: string; completionRate: number };
+  averageConsistencyScore: number;
+  totalActiveHabits: number;
+}
+
+export interface HeatmapDay {
+  date: string;
+  completionRate: number; // 0-100
+  completedCount: number;
+  totalScheduled: number;
+}

@@ -200,138 +200,143 @@
 
           <!-- Habits Container -->
           <div class="flex flex-col gap-4">
-
-          <!-- Active Filters Display -->
-          @if (hasActiveFilters()) {
-          <div class="flex items-center gap-2 flex-wrap mb-4">
-            <span class="text-sm text-text-dark-secondary">Showing:</span>
-            @if (activeStatusFilter() !== 'all') {
-            <span
-              class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
-            >
-              {{ activeStatusFilter() === 'completed' ? 'Completed' : 'Pending' }}
-              <button (click)="setStatusFilter('all')" class="hover:text-primary/70">
-                <span class="material-symbols-outlined text-sm">close</span>
-              </button>
-            </span>
-            } @if (activeCategoryFilter() !== 'all') {
-            <span
-              class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
-            >
-              {{ activeCategoryFilter() }}
-              <button (click)="setCategoryFilter('all')" class="hover:text-primary/70">
-                <span class="material-symbols-outlined text-sm">close</span>
-              </button>
-            </span>
-            }
-          </div>
-          }
-
-          @if (isLoading()) {
-          <div class="flex items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-          } @else if (habits().length === 0) {
-          <div class="bg-card-dark rounded-xl p-8 text-center">
-            <div class="text-4xl mb-4">🎯</div>
-            <p class="text-text-dark-secondary mb-4">No habits yet. Start building your routine!</p>
-            <button
-              routerLink="/habit/new"
-              class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
-            >
-              Create Your First Habit
-            </button>
-          </div>
-          } @else if (habitsForCurrentDate().length === 0) {
-          <div class="bg-card-dark rounded-xl p-8 text-center">
-            <div class="text-4xl mb-4">📅</div>
-            <p class="text-text-dark-secondary mb-4">No habits scheduled for this day.</p>
-            <p class="text-sm text-text-dark-secondary">You have {{ habits().length }} habit(s) on other days.</p>
-          </div>
-          } @else if (filteredHabits().length === 0) {
-          <div class="bg-card-dark rounded-xl p-8 text-center">
-            <div class="text-4xl mb-4">🔍</div>
-            <p class="text-text-dark-secondary mb-4">No habits match your filters.</p>
-            <button
-              (click)="clearFilters()"
-              class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-          } @else { @for (habit of filteredHabits(); track habit.id) {
-          <div
-            class="bg-card-dark rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4"
-          >
-            <!-- Checkbox & Content -->
-            <div class="flex items-center gap-4 flex-1">
-              <button
-                (click)="toggleHabit(habit.id!)"
-                class="rounded-xl border-2 flex items-center justify-center transition-all w-12 h-12"
-                [ngClass]="{
-                  'border-primary bg-primary': habit.completedToday,
-                  'border-border-dark-strong hover:border-primary': !habit.completedToday
-                }"
-              >
-                @if (habit.completedToday) {
-                <span class="material-symbols-outlined text-white text-2xl">check</span>
-                }
-              </button>
-
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-1">
-                  <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
-                  <h4
-                    class="font-semibold text-lg"
-                    [ngClass]="{
-                      'line-through text-text-dark-secondary/60': habit.completedToday
-                    }"
-                  >
-                    {{ habit.title }}
-                  </h4>
-                </div>
-                @if (habit.description) {
-                <p
-                  class="text-sm text-text-dark-secondary"
-                  [ngClass]="{ 'line-through': habit.completedToday }"
-                >
-                  {{ habit.description }}
-                </p>
-                }
-              </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="flex items-center gap-6">
-              @if (habit.streakEnabled) {
-              <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
-                <span>🔥</span>
-                <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
-              </div>
-              } @if (habit.category) {
+            <!-- Active Filters Display -->
+            @if (hasActiveFilters()) {
+            <div class="flex items-center gap-2 flex-wrap mb-4">
+              <span class="text-sm text-text-dark-secondary">Showing:</span>
+              @if (activeStatusFilter() !== 'all') {
               <span
-                class="px-3 py-1 rounded-full text-xs font-medium"
-                [ngClass]="{
-                  'bg-category-health/20 text-category-health': habit.category === 'health',
-                  'bg-category-fitness/20 text-category-fitness': habit.category === 'fitness',
-                  'bg-category-nutrition/20 text-category-nutrition': habit.category === 'nutrition',
-                  'bg-category-mindfulness/20 text-category-mindfulness': habit.category === 'mindfulness',
-                  'bg-category-learning/20 text-category-learning': habit.category === 'learning',
-                  'bg-category-productivity/20 text-category-productivity': habit.category === 'productivity',
-                  'bg-category-creative/20 text-category-creative': habit.category === 'creative',
-                  'bg-category-social/20 text-category-social': habit.category === 'social',
-                  'bg-category-finance/20 text-category-finance': habit.category === 'finance',
-                  'bg-category-sleep/20 text-category-sleep': habit.category === 'sleep',
-                  'bg-category-hydration/20 text-category-hydration': habit.category === 'hydration',
-                  'bg-category-personal/20 text-category-personal': habit.category === 'personal'
-                }"
+                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
               >
-                {{ habit.category }}
+                {{ activeStatusFilter() === 'completed' ? 'Completed' : 'Pending' }}
+                <button (click)="setStatusFilter('all')" class="hover:text-primary/70">
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </span>
+              } @if (activeCategoryFilter() !== 'all') {
+              <span
+                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
+              >
+                {{ activeCategoryFilter() }}
+                <button (click)="setCategoryFilter('all')" class="hover:text-primary/70">
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
               </span>
               }
             </div>
-          </div>
-          } }
+            } @if (isLoading()) {
+            <div class="flex items-center justify-center py-12">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+            } @else if (habits().length === 0) {
+            <div class="bg-card-dark rounded-xl p-8 text-center">
+              <div class="text-4xl mb-4">🎯</div>
+              <p class="text-text-dark-secondary mb-4">
+                No habits yet. Start building your routine!
+              </p>
+              <button
+                routerLink="/habit/new"
+                class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+              >
+                Create Your First Habit
+              </button>
+            </div>
+            } @else if (habitsForCurrentDate().length === 0) {
+            <div class="bg-card-dark rounded-xl p-8 text-center">
+              <div class="text-4xl mb-4">📅</div>
+              <p class="text-text-dark-secondary mb-4">No habits scheduled for this day.</p>
+              <p class="text-sm text-text-dark-secondary">
+                You have {{ habits().length }} habit(s) on other days.
+              </p>
+            </div>
+            } @else if (filteredHabits().length === 0) {
+            <div class="bg-card-dark rounded-xl p-8 text-center">
+              <div class="text-4xl mb-4">🔍</div>
+              <p class="text-text-dark-secondary mb-4">No habits match your filters.</p>
+              <button
+                (click)="clearFilters()"
+                class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+            } @else { @for (habit of filteredHabits(); track habit.id) {
+            <div
+              class="bg-card-dark rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4"
+            >
+              <!-- Checkbox & Content -->
+              <div class="flex items-center gap-4 flex-1">
+                <button
+                  (click)="toggleHabit(habit.id!)"
+                  class="rounded-xl border-2 flex items-center justify-center transition-all w-12 h-12"
+                  [ngClass]="{
+                    'border-primary bg-primary': habit.completedToday,
+                    'border-border-dark-strong hover:border-primary': !habit.completedToday
+                  }"
+                >
+                  @if (habit.completedToday) {
+                  <span class="material-symbols-outlined text-white text-2xl">check</span>
+                  }
+                </button>
+
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-1">
+                    <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
+                    <h4
+                      class="font-semibold text-lg"
+                      [ngClass]="{
+                        'line-through text-text-dark-secondary/60': habit.completedToday
+                      }"
+                    >
+                      {{ habit.title }}
+                    </h4>
+                  </div>
+                  @if (habit.description) {
+                  <p
+                    class="text-sm text-text-dark-secondary"
+                    [ngClass]="{ 'line-through': habit.completedToday }"
+                  >
+                    {{ habit.description }}
+                  </p>
+                  }
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="flex items-center gap-6">
+                @if (habit.streakEnabled) {
+                <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
+                  <span>🔥</span>
+                  <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
+                </div>
+                } @if (habit.category) {
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-category-health/20 text-category-health': habit.category === 'health',
+                    'bg-category-fitness/20 text-category-fitness': habit.category === 'fitness',
+                    'bg-category-nutrition/20 text-category-nutrition':
+                      habit.category === 'nutrition',
+                    'bg-category-mindfulness/20 text-category-mindfulness':
+                      habit.category === 'mindfulness',
+                    'bg-category-learning/20 text-category-learning': habit.category === 'learning',
+                    'bg-category-productivity/20 text-category-productivity':
+                      habit.category === 'productivity',
+                    'bg-category-creative/20 text-category-creative': habit.category === 'creative',
+                    'bg-category-social/20 text-category-social': habit.category === 'social',
+                    'bg-category-finance/20 text-category-finance': habit.category === 'finance',
+                    'bg-category-sleep/20 text-category-sleep': habit.category === 'sleep',
+                    'bg-category-hydration/20 text-category-hydration':
+                      habit.category === 'hydration',
+                    'bg-category-personal/20 text-category-personal': habit.category === 'personal'
+                  }"
+                >
+                  {{ habit.category }}
+                </span>
+                }
+              </div>
+            </div>
+            } }
           </div>
 
           <!-- Add New Habit Button -->

@@ -162,4 +162,43 @@ describe('SupabaseService', () => {
       expect(result.data).toBeNull();
     });
   });
+
+  describe('Advanced Analytics', () => {
+    const mockUser = { id: 'user-123' };
+
+    beforeEach(() => {
+      service.session.set({ user: mockUser } as any);
+    });
+
+    it('should generate full reports data', async () => {
+      const mockHabits = [{ id: 'h1', title: 'Test Habit', icon: 'H' }];
+      vi.spyOn(service, 'getActiveHabits').mockResolvedValue({
+        data: mockHabits,
+        error: null,
+      } as any);
+
+      const mockLogs = [
+        { habit_id: 'h1', log_date: '2023-01-01', completed: true },
+        { habit_id: 'h1', log_date: '2023-01-02', completed: true },
+      ];
+
+      // Deep mock for Supabase query chain: from -> select -> eq -> gte -> order
+      const orderMock = vi.fn().mockResolvedValue({ data: mockLogs, error: null });
+      const gteMock = vi.fn().mockReturnValue({ order: orderMock });
+      const eqMock = vi.fn().mockReturnValue({ gte: gteMock });
+      const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
+      // Use any cast to spy on private property or if it was public getter
+      (service as any).supabase.from = vi.fn().mockReturnValue({ select: selectMock });
+
+      const result = await service.getFullReportsData('2023-01-01', '2023-01-02');
+
+      expect(result).toBeDefined();
+      expect(result.habitAnalytics.length).toBe(1);
+      expect(result.habitAnalytics[0].totalCompletions).toBe(2);
+      expect(result.habitAnalytics[0].completionRate).toBe(100);
+
+      expect(result.heatmapData.length).toBe(2);
+      expect(result.heatmapData[0].completedCount).toBe(1); // 1 habit done
+    });
+  });
 });

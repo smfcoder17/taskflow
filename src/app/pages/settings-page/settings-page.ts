@@ -97,7 +97,7 @@ export class SettingsPage implements OnInit, CanComponentDeactivate {
     'UTC+11:00',
     'UTC+12:00',
     'UTC+13:00',
-    'UTC+14:00'
+    'UTC+14:00',
   ];
 
   themeOptions: ThemeOption[] = [
@@ -128,7 +128,7 @@ export class SettingsPage implements OnInit, CanComponentDeactivate {
 
   async ngOnInit() {
     await this.loadSettings();
-    
+
     // Intercept navigation events to warn about unsaved changes
     this.router.events.subscribe(() => {
       if (this.hasUnsavedChanges()) {
@@ -174,7 +174,7 @@ export class SettingsPage implements OnInit, CanComponentDeactivate {
       await this.supabaseService.getUserSettings();
 
       this.originalSettings = { ...this.userSettings() };
-      
+
       // Sync timezone model with loaded settings
       this.timezoneModel.set(this.userSettings().timezone);
     } catch (error) {

@@ -36,7 +36,7 @@ export class CalendarPage implements OnInit {
   weekDayLabels = computed(() => {
     const startOfWeek = this.supabaseService.userSettings().startOfWeek;
     const allDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     if (startOfWeek === 'monday') {
       return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     }

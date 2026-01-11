@@ -1,1 +1,85 @@
-<p>reports-page works!</p>
+<div class="bg-background-dark min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-20">
+    <!-- Header & Filters -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-text-dark-primary">Reports & Analytics</h1>
+        <p class="text-text-dark-secondary">Your Habit Story</p>
+      </div>
+
+      <div class="flex p-1 bg-card-dark rounded-xl border border-border-dark-strong w-fit">
+        <button
+          (click)="setRange('7d')"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+          [class.bg-primary]="selectedRange() === '7d'"
+          [class.text-white]="selectedRange() === '7d'"
+          [class.text-text-dark-secondary]="selectedRange() !== '7d'"
+          [class.hover:bg-background-dark]="selectedRange() !== '7d'"
+        >
+          7 Days
+        </button>
+        <button
+          (click)="setRange('30d')"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+          [class.bg-primary]="selectedRange() === '30d'"
+          [class.text-white]="selectedRange() === '30d'"
+          [class.text-text-dark-secondary]="selectedRange() !== '30d'"
+          [class.hover:bg-background-dark]="selectedRange() !== '30d'"
+        >
+          30 Days
+        </button>
+        <button
+          (click)="setRange('90d')"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer"
+          [class.bg-primary]="selectedRange() === '90d'"
+          [class.text-white]="selectedRange() === '90d'"
+          [class.text-text-dark-secondary]="selectedRange() !== '90d'"
+          [class.hover:bg-background-dark]="selectedRange() !== '90d'"
+        >
+          90 Days
+        </button>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+    } @else {
+    <!-- Progress Snapshot (Hero) -->
+    <app-overview-stats
+      [totalHabits]="displayInsights()?.totalActiveHabits || 0"
+      [completionRate]="weekComparison()?.currentWeek?.rate || 0"
+      [topStreaks]="topStreaks()"
+      [weekComparison]="weekComparison()"
+      [dateLabel]="dateRangeLabel()"
+    />
+
+    <!-- Timeline & Heatmap Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Timeline View (New) -->
+      <div class="lg:col-span-2">
+          <app-timeline-view [data]="heatmapData()" />
+      </div>
+
+      <!-- Heatmap (Side) -->
+      <div class="lg:col-span-1">
+          <app-calendar-heatmap [heatmapData]="heatmapData()" />
+      </div>
+    </div>
+
+    <!-- Breakdown & Insights Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Habit Breakdown (2 cols) -->
+      <div class="lg:col-span-2">
+        <app-habit-breakdown [habitAnalytics]="habitAnalytics()" />
+      </div>
+
+      <!-- Insights Panel (1 col) -->
+      <div class="lg:col-span-1">
+        <app-insights-panel [insights]="displayInsights()" [weekComparison]="weekComparison()" />
+      </div>
+    </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="bg-card-dark rounded-xl p-8 border border-border-dark-strong/30 shadow-xl">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
+    
+    <!-- Title Section -->
+    <div class="md:col-span-1 border-b md:border-b-0 md:border-r border-border-dark-strong/30 pb-6 md:pb-0 md:pr-8">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="p-2.5 bg-primary/10 rounded-xl text-primary">
+               <span class="material-symbols-outlined text-2xl">insights</span>
+            </div>
+            <div class="text-sm font-bold text-text-dark-secondary tracking-widest uppercase">Overview</div>
+        </div>
+        <div class="text-xl font-semibold text-text-dark-primary pl-1">{{ dateLabel() }}</div>
+    </div>
+
+    <!-- Metrics Section -->
+    <div class="md:col-span-3 grid grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Metric 1: Habits -->
+        <div class="space-y-1">
+            <div class="text-xs text-text-dark-secondary font-semibold uppercase tracking-wider">Active Habits</div>
+            <div class="text-3xl font-bold text-text-dark-primary flex items-baseline gap-2">
+                {{ totalHabits() }}
+                <span class="text-sm font-normal text-text-dark-secondary">tracked</span>
+            </div>
+        </div>
+
+        <!-- Metric 2: Completion Rate -->
+        <div class="space-y-1">
+            <div class="text-xs text-text-dark-secondary font-semibold uppercase tracking-wider">Completion Rate</div>
+            <div class="flex items-center gap-3">
+                <div class="text-3xl font-bold text-text-dark-primary">{{ completionRate() }}%</div>
+                @if (weekComparison(); as wc) {
+                     <div class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold" 
+                        [class.bg-green-500/10]="wc.change > 0"
+                        [class.text-green-500]="wc.change > 0"
+                        [class.bg-red-500/10]="wc.change < 0"
+                        [class.text-red-500]="wc.change < 0"
+                        [class.text-text-dark-secondary]="wc.change === 0">
+                        <span class="material-symbols-outlined text-xs">{{ wc.change > 0 ? 'trending_up' : (wc.change < 0 ? 'trending_down' : 'remove') }}</span>
+                        {{ Math.abs(wc.change) }}%
+                     </div>
+                }
+            </div>
+        </div>
+
+        <!-- Metric 3: Best Streak -->
+        <div class="col-span-2 lg:col-span-1 space-y-1">
+             <div class="text-xs text-text-dark-secondary font-semibold uppercase tracking-wider">Top Current Streak</div>
+             @if (topStreaks().length > 0) {
+                 <div class="flex items-center gap-3">
+                    <div class="text-3xl font-bold text-text-dark-primary">{{ topStreaks()[0].currentStreak }}</div>
+                    <div class="p-1 px-2 bg-orange-500/10 text-orange-500 rounded-lg flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">local_fire_department</span>
+                        <span class="text-xs font-bold">days</span>
+                    </div>
+                 </div>
+                 <div class="text-xs text-text-dark-secondary font-medium truncate max-w-[180px]">{{ topStreaks()[0].habitTitle }}</div>
+             } @else {
+                 <div class="text-text-dark-secondary italic text-sm mt-1">No active streaks</div>
+             }
+        </div>
+    </div>
+  </div>
+</div>

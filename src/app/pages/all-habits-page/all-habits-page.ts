@@ -28,7 +28,7 @@ export class AllHabitsPage implements OnInit {
   isLoading = signal<boolean>(true);
   searchQuery = signal<string>('');
   viewMode = signal<ViewMode>('list'); // Default to list view
-  
+
   // Confirmation modal
   showDeleteModal = signal<boolean>(false);
   habitToDelete = signal<HabitWithStats | null>(null);
@@ -37,23 +37,24 @@ export class AllHabitsPage implements OnInit {
   filteredHabits = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     if (!query) return this.habits();
-    
-    return this.habits().filter(habit =>
-      habit.title.toLowerCase().includes(query) ||
-      (habit.category?.toLowerCase().includes(query) ?? false)
+
+    return this.habits().filter(
+      (habit) =>
+        habit.title.toLowerCase().includes(query) ||
+        (habit.category?.toLowerCase().includes(query) ?? false)
     );
   });
 
   // Stats
   totalHabits = computed(() => this.habits().length);
-  activeHabits = computed(() => this.habits().filter(h => !h.archived).length);
+  activeHabits = computed(() => this.habits().filter((h) => !h.archived).length);
 
   // Group habits by category
   groupedHabits = computed(() => {
     const filtered = this.filteredHabits();
     const groups = new Map<string, HabitWithStats[]>();
 
-    filtered.forEach(habit => {
+    filtered.forEach((habit) => {
       const category = habit.category || 'Uncategorized';
       if (!groups.has(category)) {
         groups.set(category, []);
@@ -69,11 +70,11 @@ export class AllHabitsPage implements OnInit {
       return a.localeCompare(b);
     });
 
-    sortedKeys.forEach(category => {
+    sortedKeys.forEach((category) => {
       result.push({
         category,
         habits: groups.get(category)!,
-        collapsed: false
+        collapsed: false,
       });
     });
 
@@ -118,7 +119,7 @@ export class AllHabitsPage implements OnInit {
     if (groups[groupIndex]) {
       groups[groupIndex].collapsed = !groups[groupIndex].collapsed;
       // Force recomputation by creating new array
-      this.habits.update(h => [...h]);
+      this.habits.update((h) => [...h]);
     }
   }
 
@@ -138,12 +139,12 @@ export class AllHabitsPage implements OnInit {
   getCategoryEmoji(category: string): string {
     const emojiMap: Record<string, string> = {
       'Health & Fitness': '💪',
-      'Productivity': '📚',
-      'Mindfulness': '🧘',
-      'Social': '👥',
-      'Learning': '🎓',
-      'Creative': '🎨',
-      'Uncategorized': '📋'
+      Productivity: '📚',
+      Mindfulness: '🧘',
+      Social: '👥',
+      Learning: '🎓',
+      Creative: '🎨',
+      Uncategorized: '📋',
     };
     return emojiMap[category] || '📌';
   }
@@ -152,11 +153,11 @@ export class AllHabitsPage implements OnInit {
     if (!category) return '📋';
     const iconMap: Record<string, string> = {
       'Health & Fitness': '💪',
-      'Productivity': '📚',
-      'Mindfulness': '🧘',
-      'Social': '👥',
-      'Learning': '🎓',
-      'Creative': '🎨'
+      Productivity: '📚',
+      Mindfulness: '🧘',
+      Social: '👥',
+      Learning: '🎓',
+      Creative: '🎨',
     };
     return iconMap[category] || '✨';
   }
@@ -199,7 +200,7 @@ export class AllHabitsPage implements OnInit {
 
   getCategoryIcon(category: HabitCategory | undefined): string {
     if (!category) return '⭐';
-    
+
     const icons: Record<HabitCategory, string> = {
       health: '🏥',
       fitness: '💪',

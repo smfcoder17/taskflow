@@ -61,7 +61,9 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p class="text-text-dark-primary font-medium">Timezone</p>
-              <p class="text-sm text-text-dark-secondary">Used for habit dates & streak calculations</p>
+              <p class="text-sm text-text-dark-secondary">
+                Used for habit dates & streak calculations
+              </p>
             </div>
             <div class="relative w-full sm:w-64">
               <select
@@ -72,7 +74,9 @@
                 <option [value]="tz">{{ tz }}</option>
                 }
               </select>
-              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-dark-secondary pointer-events-none text-lg">
+              <span
+                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-dark-secondary pointer-events-none text-lg"
+              >
                 expand_more
               </span>
             </div>
@@ -90,8 +94,10 @@
                 (click)="setTheme(theme.value)"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
                 [ngClass]="{
-                  'bg-primary text-background-dark font-medium': userSettings().theme === theme.value,
-                  'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary': userSettings().theme !== theme.value
+                  'bg-primary text-background-dark font-medium':
+                    userSettings().theme === theme.value,
+                  'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary':
+                    userSettings().theme !== theme.value
                 }"
               >
                 <span class="material-symbols-outlined text-lg">{{ theme.icon }}</span>
@@ -112,7 +118,9 @@
               <button
                 (click)="setAccentColor(color.value)"
                 [title]="color.label"
-                class="w-8 h-8 rounded-full transition-all ring-offset-2 ring-offset-card-dark {{color.colorClass}}"
+                class="w-8 h-8 rounded-full transition-all ring-offset-2 ring-offset-card-dark {{
+                  color.colorClass
+                }}"
                 [ngClass]="{
                   'ring-2 ring-white scale-110': userSettings().accentColor === color.value,
                 }"
@@ -133,8 +141,10 @@
                 (click)="setStartOfWeek(option.value)"
                 class="px-4 py-2 rounded-lg text-sm transition-colors"
                 [ngClass]="{
-                  'bg-primary text-background-dark font-medium': userSettings().startOfWeek === option.value,
-                  'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary': userSettings().startOfWeek !== option.value
+                  'bg-primary text-background-dark font-medium':
+                    userSettings().startOfWeek === option.value,
+                  'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary':
+                    userSettings().startOfWeek !== option.value
                 }"
               >
                 {{ option.label }}
@@ -144,8 +154,6 @@
           </div>
         </div>
       </section>
-
-
 
       <!-- ==================== Default Habit Settings Section ==================== -->
       <section class="bg-card-dark rounded-xl p-6">
@@ -300,7 +308,9 @@
 
         <div class="space-y-4">
           <!-- Export Data -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-dark">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-dark"
+          >
             <div>
               <p class="text-text-dark-primary font-medium">Export Your Data</p>
               <p class="text-sm text-text-dark-secondary">Download all habits and logs</p>
@@ -324,7 +334,9 @@
           </div>
 
           <!-- Clear Local Cache -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-dark">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-dark"
+          >
             <div>
               <p class="text-text-dark-primary font-medium">Clear Local Cache</p>
               <p class="text-sm text-text-dark-secondary">Remove locally stored data</p>
@@ -342,7 +354,9 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3">
             <div>
               <p class="font-medium text-red-400">Delete Account</p>
-              <p class="text-sm text-text-dark-secondary">Permanently delete your account and all data</p>
+              <p class="text-sm text-text-dark-secondary">
+                Permanently delete your account and all data
+              </p>
             </div>
             <button
               (click)="openDeleteAccountModal()"
@@ -412,11 +426,9 @@
         >
           @if (isSaving()) {
           <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-background-dark"></div>
-          Saving...
-          } @else {
+          Saving... } @else {
           <span class="material-symbols-outlined">save</span>
-          Save Changes
-          }
+          Save Changes }
         </button>
         }
       </div>
@@ -441,7 +453,10 @@
 
     <!-- ==================== Delete Account Modal ==================== -->
     @if (showDeleteModal()) {
-    <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" (click)="closeDeleteModal()">
+    <div
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+      (click)="closeDeleteModal()"
+    >
       <div
         class="bg-card-dark rounded-2xl p-6 max-w-md w-full shadow-2xl"
         (click)="$event.stopPropagation()"
@@ -457,7 +472,8 @@
         </div>
 
         <p class="text-text-dark-secondary mb-6">
-          Are you sure you want to delete your account? All your habits, logs, and settings will be permanently removed.
+          Are you sure you want to delete your account? All your habits, logs, and settings will be
+          permanently removed.
         </p>
 
         <div class="mb-6">

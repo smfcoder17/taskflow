@@ -1,0 +1,84 @@
+<div class="bg-card-dark rounded-xl p-6 border border-border-dark-strong/30 shadow-lg h-full">
+  <div class="flex items-center gap-4 mb-8">
+    <div class="p-3 rounded-xl bg-primary/10 text-primary">
+      <span class="material-symbols-outlined">analytics</span>
+    </div>
+    <div>
+        <h3 class="text-lg font-bold text-text-dark-primary">Habit Performance</h3>
+        <p class="text-xs text-text-dark-secondary tracking-wide">Detailed breakdown per habit</p>
+    </div>
+  </div>
+
+  <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+    @for (habit of habitAnalytics(); track habit.habitId) {
+    <div
+      class="p-5 rounded-xl bg-background-dark/30 border border-border-dark-strong/10 hover:border-primary/30 transition-all group"
+    >
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-card-dark flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">
+            {{ habit.icon }}
+          </div>
+          <div>
+            <div class="font-bold text-text-dark-primary group-hover:text-primary transition-colors">{{ habit.habitTitle }}</div>
+            <div class="text-[10px] text-text-dark-secondary uppercase tracking-widest font-semibold">{{ habit.totalCompletions }} total completions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Rate -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-xs font-semibold">
+            <span class="text-text-dark-secondary uppercase tracking-wider text-[10px]">Completion Rate</span>
+            <span class="text-text-dark-primary">{{ habit.completionRate }}%</span>
+          </div>
+          <div class="w-full h-2 bg-card-dark rounded-full overflow-hidden border border-border-dark-strong/10">
+            <div
+              class="bg-primary h-full rounded-full transition-all duration-700"
+              [style.width.%]="habit.completionRate"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Consistency -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-xs font-semibold">
+            <span class="text-text-dark-secondary uppercase tracking-wider text-[10px]">Consistency</span>
+            <span class="text-text-dark-primary">{{ habit.consistencyScore }}%</span>
+          </div>
+          <div class="w-full h-2 bg-card-dark rounded-full overflow-hidden border border-border-dark-strong/10">
+            <div
+              class="bg-blue-500 h-full rounded-full transition-all duration-700"
+              [style.width.%]="habit.consistencyScore"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Best Day -->
+        <div class="flex flex-col justify-center bg-card-dark/40 rounded-lg p-2 px-3 border border-border-dark-strong/5">
+             <div class="text-[9px] text-text-dark-secondary uppercase tracking-widest mb-1 font-extrabold">Best Day</div>
+             <div class="text-sm font-bold text-text-dark-primary capitalize flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm text-primary">calendar_month</span>
+                {{ habit.bestDayOfWeek }}
+             </div>
+        </div>
+
+        <!-- Peak Time -->
+        <div class="flex flex-col justify-center bg-card-dark/40 rounded-lg p-2 px-3 border border-border-dark-strong/5">
+             <div class="text-[9px] text-text-dark-secondary uppercase tracking-widest mb-1 font-extrabold">Peak Time</div>
+             <div class="text-sm font-bold text-text-dark-primary capitalize flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm text-primary">timer</span>
+                {{ habit.bestTimeOfDay }}
+             </div>
+        </div>
+      </div>
+    </div>
+    } @empty {
+      <div class="flex flex-col items-center justify-center py-20 text-text-dark-secondary space-y-4">
+          <span class="material-symbols-outlined text-6xl opacity-20">history_toggle_off</span>
+          <p class="font-medium">No habits to analyze yet.</p>
+      </div>
+    }
+  </div>
+</div>
