@@ -1,5 +1,5 @@
 /* ============================================
-   DASHBOARD - BEHAVIORAL UX REDESIGN
+   DASHBOARD - BEHAVIORAL PSYCHOLOGY LAYER
    ============================================ */
 
 /* ==========================================
@@ -66,6 +66,21 @@
 }
 
 /* ==========================================
+   IDENTITY BANNER (Long-term users)
+   ========================================== */
+.identity-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(90deg, var(--color-primary-muted), transparent, var(--color-primary-muted));
+  border-radius: var(--radius-full);
+  color: var(--color-text-dark-primary);
+  font-size: var(--text-sm);
+}
+
+/* ==========================================
    HERO ACTION CARD
    ========================================== */
 .hero-action-card {
@@ -77,7 +92,6 @@
   overflow: hidden;
 }
 
-/* Subtle glow effect */
 .hero-action-card::before {
   content: '';
   position: absolute;
@@ -88,6 +102,16 @@
   background: radial-gradient(ellipse at center, var(--color-primary-muted) 0%, transparent 60%);
   opacity: 0.15;
   pointer-events: none;
+}
+
+/* Hero complete state */
+.hero-stage-complete {
+  background: linear-gradient(135deg, var(--color-card-dark) 0%, rgba(34, 197, 94, 0.1) 100%);
+  border: 1px solid var(--color-primary-muted);
+}
+
+.hero-context {
+  min-height: 48px;
 }
 
 .hero-complete-button {
@@ -117,13 +141,32 @@
 }
 
 /* ==========================================
-   PROGRESS NARRATIVE BAR
+   PROGRESS BAR WITH EMOTIONAL STAGES
    ========================================== */
 .progress-narrative-bar {
   background: var(--color-card-dark);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+/* Stage-based border accents */
+.progress-narrative-bar[data-stage="zero"] {
+  border-left: 3px solid #64748b;
+}
+.progress-narrative-bar[data-stage="early"] {
+  border-left: 3px solid #22c55e;
+}
+.progress-narrative-bar[data-stage="mid"] {
+  border-left: 3px solid #f59e0b;
+}
+.progress-narrative-bar[data-stage="late"] {
+  border-left: 3px solid #ef4444;
+}
+.progress-narrative-bar[data-stage="complete"] {
+  border-left: 3px solid #22c55e;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent);
 }
 
 .progress-track-slim {
@@ -135,10 +178,31 @@
 
 .progress-fill-animated {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover, var(--color-primary)));
   border-radius: var(--radius-full);
   transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 0 10px var(--color-primary-muted);
+}
+
+/* Stage-based progress colors */
+.progress-early {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+.progress-mid {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+.progress-late {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  animation: progress-pulse 1.5s ease-in-out infinite;
+}
+.progress-complete {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+}
+
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 /* ==========================================
@@ -174,12 +238,19 @@
   transform: scale(0.99);
 }
 
+/* Next habit highlight */
+.habit-row-next {
+  background: linear-gradient(90deg, var(--color-card-dark), rgba(var(--color-primary-rgb, 34, 197, 94), 0.1));
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Completed habits - CELEBRATION, not punishment */
 .habit-row-completed {
-  opacity: 0.7;
+  background: linear-gradient(90deg, var(--color-card-dark), rgba(34, 197, 94, 0.08));
 }
 
 .habit-row-completed:hover {
-  opacity: 0.85;
+  background: linear-gradient(90deg, var(--color-surface-elevated), rgba(34, 197, 94, 0.12));
 }
 
 /* Checkbox Visual */
@@ -231,13 +302,13 @@
 }
 
 /* ==========================================
-   INSIGHT CARD
+   CELEBRATION CARD (PERFECT DAY)
    ========================================== */
-.insight-card {
-  background: linear-gradient(135deg, var(--color-card-dark) 0%, var(--color-surface-elevated) 100%);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-sm);
+.celebration-card {
+  background: linear-gradient(135deg, var(--color-card-dark) 0%, rgba(34, 197, 94, 0.15) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
   border: 1px solid var(--color-primary-muted);
 }
 
@@ -261,4 +332,8 @@ body.theme-light .habit-row:hover {
 
 body.theme-light .progress-fill-animated {
   box-shadow: none;
+}
+
+body.theme-light .identity-banner {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent, rgba(34, 197, 94, 0.1));
 }

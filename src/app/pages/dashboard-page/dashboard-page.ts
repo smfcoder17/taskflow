@@ -133,27 +133,73 @@ export class DashboardPage {
     return pending.sort((a, b) => a.title.localeCompare(b.title))[0];
   });
 
-  // Computed: Emotionally-reframed progress message
+  // Computed: Hero card context (urgency, consequence, time)
+  heroContext = computed(() => {
+    const habit = this.nextHabit();
+    if (!habit) return null;
+
+    const context: { urgency?: string; consequence?: string; actionLabel: string } = {
+      actionLabel: 'Mark as Done'
+    };
+
+    // Add streak consequence if applicable
+    if (habit.streakEnabled && (habit.currentStreak || 0) > 0) {
+      context.consequence = `Keeps your ${habit.currentStreak}-day streak alive`;
+    } else if (habit.streakEnabled) {
+      context.consequence = 'Start building your streak today';
+    }
+
+    // Urgency based on time of day
+    const hour = new Date().getHours();
+    if (hour >= 20) {
+      context.urgency = '⏰ Evening — finish before bed';
+    } else if (hour >= 17) {
+      context.urgency = '🌆 Winding down — a few hours left';
+    }
+
+    return context;
+  });
+
+  // Computed: Emotional progress with stages
   progressNarrative = computed(() => {
     const progress = this.dailyProgress();
-    const next = this.nextHabit();
-    
-    if (progress.totalHabits === 0) return { main: 'No habits today', sub: 'Enjoy your rest day!' };
-    if (progress.percentage === 100) return { main: '🎉 All done!', sub: 'You crushed it today.' };
-    
-    if (progress.completedHabits === 0) {
-      return { main: 'Start strong', sub: `${progress.totalHabits} habits waiting for you.` };
+    const percentage = progress.percentage;
+    const completed = progress.completedHabits;
+    const remaining = progress.remaining;
+    const total = progress.totalHabits;
+
+    // Stage-based emotional messaging
+    if (total === 0) {
+      return { stage: 'rest', emoji: '☀️', main: 'Rest day', sub: 'No habits scheduled. Enjoy!' };
     }
-    
-    if (progress.remaining === 1) {
-      return { main: 'One more to go!', sub: 'Finish strong to complete your day.' };
+    if (percentage === 100) {
+      return { stage: 'complete', emoji: '🏆', main: 'Perfect day!', sub: `All ${total} habits crushed. You're building something.` };
     }
-    
-    if (next?.streakEnabled && (next.currentStreak || 0) > 0) {
-      return { main: `${progress.completedHabits} down`, sub: `Complete ${next.title} to keep your ${next.currentStreak}-day streak.` };
+    if (percentage >= 75) {
+      return { stage: 'late', emoji: '🔥', main: 'Almost there!', sub: `Just ${remaining} more. Don't stop now.` };
     }
+    if (percentage >= 50) {
+      return { stage: 'mid', emoji: '💪', main: 'Halfway warrior', sub: `${completed} done, ${remaining} to go. You've got this.` };
+    }
+    if (percentage > 0) {
+      return { stage: 'early', emoji: '🌱', main: 'Off to a start', sub: `${completed} down. Every habit counts.` };
+    }
+    return { stage: 'zero', emoji: '🎯', main: 'Fresh start', sub: `${total} habits ready. Begin with one.` };
+  });
+
+  // Computed: Habits grouped by time of day (for later UI enhancement)
+  morningHabits = computed(() => this.habitsForCurrentDate().filter(h => h.category === 'health' || h.category === 'fitness'));
+  eveningHabits = computed(() => this.habitsForCurrentDate().filter(h => h.category === 'mindfulness' || h.category === 'personal'));
+
+  // Computed: Identity message for long-term users
+  identityMessage = computed(() => {
+    const streaks = this.topStreaks();
+    const longestStreak = streaks.length > 0 ? Math.max(...streaks.map(s => s.currentStreak)) : 0;
     
-    return { main: `${progress.completedHabits} down, ${progress.remaining} to go`, sub: 'Keep the momentum!' };
+    if (longestStreak >= 30) return `You're becoming someone who never misses.`;
+    if (longestStreak >= 14) return `Two weeks strong. This is who you are now.`;
+    if (longestStreak >= 7) return `One week in. The habit is taking root.`;
+    return null;
   });
 
   // Computed: habits scheduled for current date
