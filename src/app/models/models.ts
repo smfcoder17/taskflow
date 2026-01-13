@@ -206,6 +206,7 @@ export interface HabitWithStats extends Habit {
   completionsLast7Days?: number;
   completionsLast30Days?: number;
   lastCompletedDate?: string;
+  completedAt?: string; // ISO string time of completion for today
 }
 
 export interface DailyProgress {

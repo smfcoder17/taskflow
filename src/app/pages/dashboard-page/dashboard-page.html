@@ -4,20 +4,46 @@
     
     <!-- ==================== HEADER ==================== -->
     <header class="dashboard-header">
-      <div class="header-content">
+      <!-- Left: Title & Date Info -->
+      <div class="header-left">
         <h1 class="page-title">Dashboard</h1>
-        <span class="header-date">{{ formatDate(currentDate()) }}</span>
-      </div>
-      <!-- Progress Pill (Subtle global context) -->
-      @if (dailyProgress().totalHabits > 0) {
-        <div class="header-progress-pill" [class.complete]="dailyProgress().percentage === 100">
-          <span class="pill-value">{{ dailyProgress().percentage }}%</span>
-          <div class="pill-bar">
-            <div class="pill-fill" [style.width.%]="dailyProgress().percentage"></div>
-          </div>
+        <div class="header-date-row">
+          <span class="header-date">{{ formattedDateWithPrefix() }}</span>
+          @if (dailyProgress().totalHabits > 0) {
+            <div class="header-progress-pill" [class.complete]="dailyProgress().percentage === 100">
+              <span class="pill-value">{{ dailyProgress().percentage }}%</span>
+              <div class="pill-bar">
+                <div class="pill-fill" [style.width.%]="dailyProgress().percentage"></div>
+              </div>
+            </div>
+          }
         </div>
-      }
+      </div>
+      
+      <!-- Right: Date Strip -->
+      <div class="date-strip">
+        @for (day of dateStrip(); track day.date.toISOString()) {
+          <button 
+            class="date-chip" 
+            [class.is-today]="day.isToday"
+            [class.is-selected]="day.isSelected"
+            [class.is-future]="day.isFuture"
+            (click)="goToDate(day.date)"
+          >
+            <span class="chip-day">{{ day.dayName }}</span>
+            <span class="chip-num">{{ day.dayNum }}</span>
+          </button>
+        }
+      </div>
     </header>
+    
+    <!-- Future Date Warning -->
+    @if (isFutureDate()) {
+      <div class="future-warning">
+        <span class="material-symbols-outlined">info</span>
+        Viewing a future date — habits cannot be completed
+      </div>
+    }
 
     @if (isLoading()) {
       <div class="loading-state">
@@ -34,203 +60,273 @@
       </div>
       }
 
-      <!-- ==================== DAY COMPLETE STATE ==================== -->
-      @if (dailyProgress().percentage === 100 && dailyProgress().totalHabits > 0) {
-      <section class="day-complete-card">
-        <div class="complete-content">
-          <span class="complete-icon">🏆</span>
-          <h2 class="complete-title">Crushed it!</h2>
-          <p class="complete-subtitle">You've completed all {{ dailyProgress().totalHabits }} habits for today.</p>
-          
-          <div class="complete-stats-row">
-            <div class="mini-stat">
-              <span class="label">Streak</span>
-              <span class="value">{{ topStreaks().length > 0 ? topStreaks()[0].currentStreak : 1 }}d</span>
-            </div>
-            <div class="mini-stat">
-              <span class="label">Done</span>
-              <span class="value">{{ dailyProgress().totalHabits }}</span>
-            </div>
-          </div>
-        </div>
+      <!-- ==================== MASTER 2-COLUMN LAYOUT ==================== -->
+      <div class="dashboard-columns" [class.is-future]="isFutureDate()">
         
-        <!-- Collapsible Habit Summary -->
-        <div class="complete-summary">
-          <div class="summary-list">
-             @for (habit of completedHabits(); track habit.id) {
-            <div class="summary-item">
-              <span class="material-symbols-outlined check-icon">check_circle</span>
-              <span class="summary-name">{{ habit.title }}</span>
-            </div>
-            }
-          </div>
-        </div>
-      </section>
-      
-      <!-- PROGRESS HUB (Shown at bottom of complete state) -->
-       <section class="progress-hub">
-        <div class="hub-header">
-          <h3>Weekly Progress</h3>
-          <span class="hub-subtitle">Last 7 Days</span>
-        </div>
-        
-        <div class="hub-grid">
-           <!-- Chart -->
-          <div class="hub-chart">
-            <div class="chart-bars">
-              @for (day of weeklyProgress().days; track day.date) {
-              <div class="chart-col" [title]="day.dayName + ': ' + day.completed + '/' + day.total">
-                <div class="bar-track">
-                  <div 
-                    class="bar-fill" 
-                    [style.height.%]="day.total > 0 ? (day.completed / day.total * 100) : 0"
-                    [class.is-today]="isSameDate(day.date, currentDate())"
-                  ></div>
-                </div>
-                <span class="chart-label">{{ day.dayName.charAt(0) }}</span>
-              </div>
-              }
-            </div>
-          </div>
-
-          <!-- Key Metrics -->
-          <div class="hub-metrics">
-            <div class="metric-tile">
-              <span class="metric-val">{{ topStreaks().length > 0 ? topStreaks()[0].currentStreak : 0 }}</span>
-              <span class="metric-lbl">Best Streak</span>
-            </div>
-            <div class="metric-tile">
-              <span class="metric-val">{{ Math.round(weeklyProgress().completionRate) }}%</span>
-              <span class="metric-lbl"> Consistency</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      } @else {
-
-      <!-- ==================== FOCUS MODE ==================== -->
-      
-      <!-- Focus Strip -->
-      @if (nextHabit(); as habit) {
-      <section class="focus-strip">
-        <div class="focus-left">
-          <div class="focus-icon-wrapper">
-            <span class="focus-emoji">{{ habit.icon || '⚡' }}</span>
-          </div>
-          <div class="focus-details">
-            <span class="focus-overline">Up Next</span>
-            <h2 class="focus-name">{{ habit.title }}</h2>
-          </div>
-        </div>
-        
-        <div class="focus-right">
-           @if (habit.streakEnabled) {
-            <div class="focus-streak-badge" [class.has-streak]="(habit.currentStreak || 0) > 0">
-              <span class="material-symbols-outlined">local_fire_department</span>
-              <span>{{ (habit.currentStreak || 0) > 0 ? habit.currentStreak + ' day streak' : 'Start streak' }}</span>
-            </div>
-          }
-          <button (click)="toggleHabit(habit.id!)" class="focus-btn-primary">
-            <span class="material-symbols-outlined">check</span>
-            Complete
-          </button>
-        </div>
-      </section>
-      }
-
-      <!-- Main Columns -->
-      <div class="dashboard-columns">
-        
-        <!-- Left: Habit List -->
+        <!-- ========== LEFT COLUMN (Main) ========== -->
         <div class="list-column">
-          <!-- Pending -->
-           @if (pendingHabits().length > 0) {
-          <div class="habit-group">
-            <h3 class="group-title">Remaining ({{ pendingHabits().length }})</h3>
-            <div class="card-list">
-              @for (habit of pendingHabits(); track habit.id) {
-              <div class="habit-card" [class.is-next]="nextHabit()?.id === habit.id">
-                <button class="check-trigger" (click)="toggleHabit(habit.id!)">
-                  <div class="check-ring"></div>
-                </button>
-                <div class="card-content">
-                  <span class="card-title">{{ habit.title }}</span>
-                  <div class="card-meta">
-                    @if (habit.streakEnabled && (habit.currentStreak || 0) > 0) {
-                      <span class="meta-streak">🔥 {{ habit.currentStreak }}</span>
+
+          <!-- HERO SLOT: Success Banner OR Focus Strip -->
+          @if (dailyProgress().percentage === 100 && dailyProgress().totalHabits > 0) {
+            <!-- SUCCESS BANNER -->
+            <section class="day-complete-card" [class.collapsed]="isCelebrationCollapsed()">
+              <div class="complete-header">
+                <div class="complete-title-group">
+                  <span class="complete-icon">🎉</span>
+                  <div class="text-group">
+                    <h2 class="complete-title">Way to go, {{ userName() }}!</h2>
+                    <p class="complete-subtitle">All {{ dailyProgress().totalHabits }} habits crushed today.</p>
+                    @if (isCelebrationCollapsed()) {
+                      <div class="compact-stats">
+                        <span class="c-stat gold">🔥 {{ topStreaks().length > 0 ? topStreaks()[0].currentStreak : 1 }}d streak</span>
+                        <span class="c-sep">•</span>
+                        <span class="c-stat">✅ 100% done</span>
+                      </div>
                     }
                   </div>
                 </div>
-                <!-- Hover Actions -->
-                <div class="card-actions">
-                  <button class="icon-btn" title="Skip" (click)="$event.stopPropagation()">
-                     <span class="material-symbols-outlined">skip_next</span>
-                  </button>
-                </div>
-              </div>
-              }
-            </div>
-          </div>
-          }
-
-          <!-- Completed Today -->
-          @if (completedHabits().length > 0) {
-          <div class="habit-group completed-group">
-            <h3 class="group-title">Done Today ({{ completedHabits().length }})</h3>
-            <div class="card-list">
-              @for (habit of completedHabits(); track habit.id) {
-              <div class="habit-card completed">
-                <button class="check-trigger checked" (click)="toggleHabit(habit.id!)">
-                  <span class="material-symbols-outlined">check</span>
+                <button class="collapse-btn" (click)="toggleCelebrationCollapse()">
+                  <span class="material-symbols-outlined">{{ isCelebrationCollapsed() ? 'expand_more' : 'expand_less' }}</span>
                 </button>
-                <span class="card-title">{{ habit.title }}</span>
               </div>
-              }
-            </div>
-          </div>
-          }
-        </div>
-
-        <!-- Right: Progress Hub (Visible in Focus Mode too) -->
-        <div class="stats-column">
-          <section class="progress-hub compact">
-            <div class="hub-header">
-              <h3>Progress</h3>
-            </div>
-            <div class="hub-chart">
-               <div class="chart-bars">
-                @for (day of weeklyProgress().days; track day.date) {
-                <div class="chart-col" [title]="day.dayName + ': ' + day.completed + '/' + day.total">
-                  <div class="bar-track">
-                    <div 
-                      class="bar-fill" 
-                      [style.height.%]="day.total > 0 ? (day.completed / day.total * 100) : 0"
-                      [class.is-today]="isSameDate(day.date, currentDate())"
-                    ></div>
-                  </div>
-                  <span class="chart-label">{{ day.dayName.charAt(0) }}</span>
+              <div class="hero-metrics">
+                <div class="hero-metric highlight-gold">
+                  <span class="hero-val">{{ topStreaks().length > 0 ? topStreaks()[0].currentStreak : 1 }}d</span>
+                  <span class="hero-lbl">Current Streak</span>
                 </div>
+                <div class="hero-metric">
+                  <span class="hero-val">{{ dailyProgress().totalHabits }}</span>
+                  <span class="hero-lbl">Done Today</span>
+                </div>
+                <button class="share-btn">
+                  <span class="material-symbols-outlined">share</span>
+                  Share
+                </button>
+              </div>
+            </section>
+          } @else if (nextHabit(); as habit) {
+            <!-- FOCUS STRIP (Up Next) -->
+            <section class="focus-strip">
+              <div class="focus-left">
+                <div class="focus-icon-wrapper">
+                  <span class="focus-emoji">{{ habit.icon || '⚡' }}</span>
+                </div>
+                <div class="focus-details">
+                  <span class="focus-overline">Up Next</span>
+                  <h2 class="focus-name">{{ habit.title }}</h2>
+                </div>
+              </div>
+              <div class="focus-right">
+                @if (habit.streakEnabled && (habit.currentStreak || 0) >= 2) {
+                  <div class="focus-streak-stats">
+                    <span class="material-symbols-outlined">local_fire_department</span>
+                    <span>{{ habit.currentStreak }} day streak</span>
+                  </div>
+                }
+                <button (click)="toggleHabit(habit.id!)" class="focus-btn-primary">
+                  <span class="material-symbols-outlined">check</span>
+                  Complete
+                </button>
+              </div>
+            </section>
+          }
+
+          <!-- REMAINING HABITS (Excludes nextHabit to avoid duplication) -->
+          @if (pendingHabits().length > 0) {
+            <div class="habit-group">
+              <h3 class="group-title prominent">Remaining ({{ pendingHabits().length }})</h3>
+              <div class="card-list">
+                @for (habit of pendingHabits(); track habit.id) {
+                  <div class="habit-card">
+                    <button class="check-trigger" (click)="toggleHabit(habit.id!)">
+                      <div class="check-ring"></div>
+                    </button>
+                    <div class="card-content">
+                      <span class="card-title">{{ habit.title }}</span>
+                      <div class="card-meta">
+                        @if (habit.streakEnabled && (habit.currentStreak || 0) >= 2) {
+                          <span class="meta-streak">🔥 {{ habit.currentStreak }}</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="card-actions">
+                      <button class="icon-btn" title="Skip" (click)="$event.stopPropagation()">
+                        <span class="material-symbols-outlined">skip_next</span>
+                      </button>
+                    </div>
+                  </div>
                 }
               </div>
             </div>
-            
-            <div class="hub-metrics-row">
-              <div class="metric-simple">
-                <span class="val">{{ topStreaks().length > 0 ? topStreaks()[0].currentStreak : 0 }}</span>
-                <span class="lbl">Best Streak</span>
-              </div>
-               <div class="metric-simple">
-                <span class="val">{{ dailyProgress().completedHabits }}</span>
-                <span class="lbl">Done</span>
+          }
+
+          <!-- COMPLETED HABITS -->
+          @if (completedHabits().length > 0) {
+            <div class="habit-group completed-group">
+              <h3 class="group-title">Done Today ({{ completedHabits().length }})</h3>
+              <div class="card-list">
+                @for (habit of completedHabits(); track habit.id) {
+                  <div class="habit-card completed">
+                    <button class="check-trigger checked" (click)="toggleHabit(habit.id!)">
+                      <span class="material-symbols-outlined">check</span>
+                    </button>
+                    <span class="card-title">{{ habit.title }}</span>
+                    <span class="card-time">{{ habit.completedAt | date:'shortTime' }}</span>
+                  </div>
+                }
               </div>
             </div>
+          }
+
+          <!-- NEXT DAY FOCUS (Dynamic Label) -->
+          <section class="tomorrow-card">
+            <div class="tomorrow-header">
+              <div class="icon-box">
+                <span class="material-symbols-outlined">calendar_today</span>
+              </div>
+              <div class="text">
+                <h3>{{ nextDayLabel() }}</h3>
+                <p>{{ tomorrowHabits().length > 0 ? 'Upcoming habits for the next day.' : 'No habits scheduled.' }}</p>
+              </div>
+            </div>
+            @if (tomorrowHabits().length > 0) {
+              <ul class="next-day-list">
+                @for(habit of tomorrowHabits(); track habit.id) {
+                  <li class="next-day-item">
+                    <span class="nd-title">{{ habit.title }}</span>
+                    <div class="nd-meta">
+                      @if(habit.streakEnabled && (habit.currentStreak || 0) > 0) {
+                        <span class="nd-streak">🔥 {{ habit.currentStreak }}d</span>
+                      }
+                      @if(habit.timeOfDay) {
+                        <span class="nd-time">{{ formatTime(habit.timeOfDay) }}</span>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div class="tomorrow-empty-inline">Enjoy your rest day! 🌴</div>
+            }
           </section>
+
+        </div>
+
+        <!-- ========== RIGHT COLUMN (Widget Grid 2x2) ========== -->
+        <div class="widget-grid">
+          
+          <!-- Floating Customize Button -->
+          <div class="widget-customize-float">
+            <button 
+              class="widget-customize-btn" 
+              [class.is-active]="isWidgetEditMode()"
+              (click)="toggleWidgetEditMode()"
+            >
+              <span class="material-symbols-outlined">{{ isWidgetEditMode() ? 'check' : 'tune' }}</span>
+              <span class="customize-label">{{ isWidgetEditMode() ? 'Done' : 'Customize' }}</span>
+            </button>
+          </div>
+
+          <!-- WIDGET 1: Weekly Consistency (Fixed) -->
+          <div 
+            class="widget-card" 
+            [class.is-edit-mode]="isWidgetEditMode()"
+            [class.is-dragging]="draggedWidgetIndex() === -1"
+            [class.is-drag-over]="dragOverIndex() === -1"
+            [attr.draggable]="isWidgetEditMode() ? 'true' : null"
+            (dragstart)="onDragStart($event, -1)"
+            (dragover)="onDragOver($event, -1)"
+            (drop)="onDrop($event, -1)"
+            (dragend)="onDragEnd()"
+          >
+            <div class="widget-header">
+              <h3>Weekly Consistency</h3>
+              <span class="widget-badge">Last 7 Days</span>
+            </div>
+            <div class="hub-chart">
+              <div class="chart-bars">
+                @for (day of weeklyProgress().days; track day.date) {
+                  <div class="chart-col" [title]="day.dayName + ': ' + day.completed + '/' + day.total">
+                    <div class="bar-track">
+                      <div class="bar-ghost"></div>
+                      <div 
+                        class="bar-fill" 
+                        [style.height.%]="day.total > 0 ? (day.completed / day.total * 100) : 0"
+                        [class.is-today]="isSameDate(day.date, currentDate())"
+                      ></div>
+                    </div>
+                    <span class="chart-label" [class.highlight]="isSameDate(day.date, currentDate())">{{ day.dayName }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="hub-metrics-row">
+              <div class="metric-simple">
+                <span class="val">{{ topStreaks().length > 0 ? topStreaks()[0].currentStreak : 0 }}d</span>
+                <span class="lbl">Best Streak</span>
+              </div>
+              <div class="metric-simple">
+                <span class="val">{{ dailyProgress().completedHabits }}/{{ dailyProgress().totalHabits }}</span>
+                <span class="lbl">Done Today</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- WIDGET SLOTS (Always visible, Draggable in Edit Mode) -->
+          @for (widget of widgetSlots(); track $index) {
+              <div 
+                class="widget-card widget-slot" 
+                [class.has-widget]="widget !== null"
+                [class.is-empty]="widget === null"
+                [class.is-edit-mode]="isWidgetEditMode()"
+                [class.is-dragging]="draggedWidgetIndex() === $index"
+                [class.is-drag-over]="dragOverIndex() === $index"
+                [attr.draggable]="isWidgetEditMode() ? 'true' : null"
+                (click)="widget === null && isWidgetEditMode() ? openWidgetPicker($index) : null"
+                (dragstart)="onDragStart($event, $index)"
+                (dragover)="onDragOver($event, $index)"
+                (drop)="onDrop($event, $index)"
+                (dragend)="onDragEnd()"
+              >
+                @if (widget === null) {
+                  <div class="widget-add-trigger">
+                    <span class="material-symbols-outlined">add</span>
+                    <span class="add-label">Add widget</span>
+                  </div>
+                  
+                  @if (showWidgetPicker() === $index) {
+                    <div class="widget-picker" (click)="$event.stopPropagation()">
+                      <div class="picker-header">
+                        <span>Select Widget</span>
+                        <button class="picker-close" (click)="closeWidgetPicker()">
+                          <span class="material-symbols-outlined">close</span>
+                        </button>
+                      </div>
+                      <div class="picker-options">
+                        @for (w of availableWidgets; track w.id) {
+                          <button class="picker-option" (click)="addWidget($index, w.id)">
+                            <span class="material-symbols-outlined">{{ w.icon }}</span>
+                            <span>{{ w.name }}</span>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                } @else {
+                  <div class="widget-content">
+                    <span class="widget-name">{{ widget }}</span>
+                    @if (isWidgetEditMode()) {
+                      <button class="widget-remove" (click)="removeWidget($index); $event.stopPropagation()">
+                        <span class="material-symbols-outlined">close</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+          }
         </div>
 
       </div>
-
-      }
     }
   </div>
 </div>
