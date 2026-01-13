@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, effect } from '@angular/core';
+import { Component, computed, inject, signal, effect, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../../models/models';
 import { SupabaseService } from '../../services/supabase-service';
 import { isSameDay, getDayOfWeek } from '../../models/utilities';
+import { gsap } from 'gsap';
 
 interface TodayHabit {
   id: number;
@@ -516,10 +517,18 @@ export class DashboardPage {
         this.habits.set(updatedHabits);
       }
 
-      // Trigger confetti celebration on completion
+      // Trigger celebration on completion
       if (isCompleting) {
-        this.showConfetti.set(true);
-        setTimeout(() => this.showConfetti.set(false), 2500);
+        // Check if this completes the day
+        const remainingAfter = this.habitsForCurrentDate().filter(h => h.id !== habitId && !h.completedToday).length;
+        
+        if (remainingAfter === 0) {
+          // DAY COMPLETE: Big celebration
+          this.triggerDayCompleteAnimation();
+        } else {
+          // SINGLE HABIT: Quick celebratory pulse
+          this.triggerHabitCompleteAnimation();
+        }
       }
 
       const dateString = this.formatDateForAPI(this.currentDate());
@@ -622,5 +631,52 @@ export class DashboardPage {
   getActiveSortLabel(): string {
     return this.sortOptions.find((s) => s.value === this.activeSort())?.label || 'Sort';
   }
-  // Force Rebuild V5
+
+  // Expose Math for template
+  Math = Math;
+
+  // GSAP Animation: Single Habit Complete (subtle pulse)
+  triggerHabitCompleteAnimation(): void {
+    this.showConfetti.set(true);
+    
+    // Quick confetti burst
+    setTimeout(() => this.showConfetti.set(false), 1500);
+    
+    // Animate the focus strip if present
+    const focusStrip = document.querySelector('.focus-strip');
+    if (focusStrip) {
+      gsap.fromTo(focusStrip, 
+        { scale: 1 },
+        { scale: 1.02, duration: 0.15, yoyo: true, repeat: 1, ease: 'power2.out' }
+      );
+    }
+  }
+
+  // GSAP Animation: Day Complete (big celebration)
+  triggerDayCompleteAnimation(): void {
+    this.showConfetti.set(true);
+    
+    // Longer confetti for day complete
+    setTimeout(() => this.showConfetti.set(false), 3000);
+    
+    // Animate celebration banner entrance
+    setTimeout(() => {
+      const banner = document.querySelector('.celebration-banner');
+      if (banner) {
+        gsap.fromTo(banner,
+          { opacity: 0, y: -20, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
+        );
+      }
+    }, 100);
+    
+    // Pulse the header progress badge
+    const progressBadge = document.querySelector('.header-progress');
+    if (progressBadge) {
+      gsap.fromTo(progressBadge,
+        { scale: 1 },
+        { scale: 1.1, duration: 0.3, yoyo: true, repeat: 2, ease: 'power2.inOut' }
+      );
+    }
+  }
 }
