@@ -56,15 +56,15 @@
     />
 
     <!-- Timeline & Heatmap Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 my-8">
       <!-- Timeline View (New) -->
       <div class="lg:col-span-2">
-          <app-timeline-view [data]="heatmapData()" />
+        <app-timeline-view [data]="heatmapData()" />
       </div>
 
       <!-- Heatmap (Side) -->
       <div class="lg:col-span-1">
-          <app-calendar-heatmap [heatmapData]="heatmapData()" />
+        <app-calendar-heatmap [heatmapData]="heatmapData()" />
       </div>
     </div>
 

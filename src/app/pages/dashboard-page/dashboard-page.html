@@ -3,19 +3,40 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-text-dark-primary">
       <!-- Left Column - Main Content -->
       <div class="lg:col-span-2 space-y-6">
-        <!-- Page Title & Date Navigation -->
+        <!-- Page Title & Quick Actions -->
         <div class="flex items-center justify-between">
-          <h2 class="text-3xl font-bold text-text-dark-secondary">My Habits</h2>
+          <div>
+            <h2 class="text-3xl font-bold text-text-dark-secondary">Today</h2>
+            <p class="text-sm text-text-dark-secondary mt-1">{{ formatDate(currentDate()) }}</p>
+          </div>
+          <div class="flex gap-3">
+            <button
+              routerLink="/habit/new"
+              class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+            >
+              <span class="material-symbols-outlined text-base">add</span>
+              <span class="hidden sm:inline">Add Habit</span>
+            </button>
+            <button
+              routerLink="/calendar"
+              class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
+            >
+              <span class="material-symbols-outlined text-base">calendar_month</span>
+              <span class="hidden sm:inline">Calendar</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Daily Progress Card -->
+        <!-- Today Snapshot (Hero) -->
         <div class="bg-card-dark rounded-xl p-6">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <div class="text-sm text-text-dark-secondary mb-1">Daily Goal</div>
-              <div class="flex items-baseline gap-2">
+              <div class="text-sm text-text-dark-secondary mb-1">Today's Progress</div>
+              <div class="flex items-baseline gap-3">
                 <span class="text-4xl font-bold">{{ dailyProgress().percentage }}%</span>
-                <span class="text-text-dark-secondary">Completed</span>
+                <span class="text-text-dark-secondary">
+                  {{ dailyProgress().completedHabits }} of {{ dailyProgress().totalHabits }} habits
+                </span>
               </div>
             </div>
             <div class="text-6xl opacity-10">🎯</div>
@@ -29,15 +50,59 @@
             ></div>
           </div>
 
-          <div class="mt-3 text-sm text-text-dark-secondary">
-            {{ dailyProgress().completedHabits }} of {{ dailyProgress().totalHabits }} habits
-            completed today
+          <!-- Motivational Message -->
+          @if (motivationalMessage()) {
+          <div class="mt-3 text-sm text-primary font-medium">
+            {{ motivationalMessage() }}
           </div>
+          }
+
+          <!-- Streak Status -->
+          @if (atRiskHabits().length > 0) {
+          <div class="mt-3 flex items-center gap-2 text-sm text-orange-500">
+            <span class="material-symbols-outlined text-base">warning</span>
+            <span>{{ atRiskHabits().length }} habit(s) at risk</span>
+          </div>
+          }
         </div>
 
-        <!-- Active Habits List -->
+        <!-- Focus Section (At Risk Habits) -->
+        @if (atRiskHabits().length > 0 && !isLoading()) {
         <div class="space-y-4">
-          <h3 class="text-xl font-semibold">Active Habits</h3>
+          <h3 class="text-lg font-semibold flex items-center gap-2">
+            <span class="text-xl">⚠️</span>
+            Keep Your Streak Alive
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @for (habit of atRiskHabits(); track habit.id) {
+            <div class="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
+              <div class="flex items-start gap-3">
+                <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
+                <div class="flex-1">
+                  <h4 class="font-semibold mb-1">{{ habit.title }}</h4>
+                  <p class="text-sm text-text-dark-secondary mb-3">
+                    {{ habit.currentStreak || 0 }}-day streak at risk
+                  </p>
+                  <button
+                    (click)="toggleHabit(habit.id!); $event.stopPropagation()"
+                    class="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Complete Now
+                  </button>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Habits List with Grouping -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-semibold">Today's Habits</h3>
+          </div>
+
           <!-- Date Navigation -->
           <div class="flex items-center justify-between bg-card-dark rounded-xl p-4">
             <div class="flex items-center gap-4">
@@ -224,24 +289,60 @@
               </span>
               }
             </div>
-            } @if (isLoading()) {
+            }
+
+            <!-- Loading State -->
+            @if (isLoading()) {
             <div class="flex items-center justify-center py-12">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
-            } @else if (habits().length === 0) {
+            }
+
+            <!-- No Habits Yet -->
+            @else if (habits().length === 0) {
             <div class="bg-card-dark rounded-xl p-8 text-center">
               <div class="text-4xl mb-4">🎯</div>
-              <p class="text-text-dark-secondary mb-4">
-                No habits yet. Start building your routine!
+              <p class="text-lg font-semibold mb-2">Start Building Your Routine</p>
+              <p class="text-text-dark-secondary mb-6">
+                Choose from our starter templates or create your own habit
               </p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <button
+                  routerLink="/habit/new"
+                  class="p-4 bg-background-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors text-left"
+                >
+                  <div class="text-2xl mb-2">💧</div>
+                  <div class="font-medium mb-1">Hydration</div>
+                  <div class="text-xs text-text-dark-secondary">Drink 8 glasses daily</div>
+                </button>
+                <button
+                  routerLink="/habit/new"
+                  class="p-4 bg-background-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors text-left"
+                >
+                  <div class="text-2xl mb-2">📚</div>
+                  <div class="font-medium mb-1">Reading</div>
+                  <div class="text-xs text-text-dark-secondary">Read for 20 minutes</div>
+                </button>
+                <button
+                  routerLink="/habit/new"
+                  class="p-4 bg-background-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors text-left"
+                >
+                  <div class="text-2xl mb-2">🚶</div>
+                  <div class="font-medium mb-1">Walk</div>
+                  <div class="text-xs text-text-dark-secondary">10-minute daily walk</div>
+                </button>
+              </div>
               <button
                 routerLink="/habit/new"
                 class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
               >
-                Create Your First Habit
+                Create Custom Habit
               </button>
             </div>
-            } @else if (habitsForCurrentDate().length === 0) {
+            }
+
+            <!-- No Habits Scheduled for This Day -->
+            @else if (habitsForCurrentDate().length === 0) {
             <div class="bg-card-dark rounded-xl p-8 text-center">
               <div class="text-4xl mb-4">📅</div>
               <p class="text-text-dark-secondary mb-4">No habits scheduled for this day.</p>
@@ -249,7 +350,10 @@
                 You have {{ habits().length }} habit(s) on other days.
               </p>
             </div>
-            } @else if (filteredHabits().length === 0) {
+            }
+
+            <!-- No Results After Filtering -->
+            @else if (filteredHabits().length === 0) {
             <div class="bg-card-dark rounded-xl p-8 text-center">
               <div class="text-4xl mb-4">🔍</div>
               <p class="text-text-dark-secondary mb-4">No habits match your filters.</p>
@@ -260,83 +364,180 @@
                 Clear Filters
               </button>
             </div>
-            } @else { @for (habit of filteredHabits(); track habit.id) {
-            <div
-              class="bg-card-dark rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4"
-            >
-              <!-- Checkbox & Content -->
-              <div class="flex items-center gap-4 flex-1">
-                <button
-                  (click)="toggleHabit(habit.id!)"
-                  class="rounded-xl border-2 flex items-center justify-center transition-all w-12 h-12"
-                  [ngClass]="{
-                    'border-primary bg-primary': habit.completedToday,
-                    'border-border-dark-strong hover:border-primary': !habit.completedToday
-                  }"
-                >
-                  @if (habit.completedToday) {
-                  <span class="material-symbols-outlined text-white text-2xl">check</span>
-                  }
-                </button>
+            }
 
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-1">
-                    <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
-                    <h4
-                      class="font-semibold text-lg"
-                      [ngClass]="{
-                        'line-through text-text-dark-secondary/60': habit.completedToday
-                      }"
-                    >
-                      {{ habit.title }}
-                    </h4>
+            <!-- Habits Display (Grouped) -->
+            @else {
+            <!-- Pending Habits (To Do) -->
+            @if (pendingHabits().length > 0) {
+            <div class="space-y-3">
+              <h4 class="text-sm font-semibold text-text-dark-secondary uppercase tracking-wide">
+                To Do ({{ pendingHabits().length }})
+              </h4>
+              @for (habit of pendingHabits(); track habit.id) {
+              <div
+                class="bg-card-dark rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4"
+              >
+                <!-- Checkbox & Content -->
+                <div class="flex items-center gap-4 flex-1">
+                  <button
+                    (click)="toggleHabit(habit.id!)"
+                    class="rounded-xl border-2 flex items-center justify-center transition-all w-12 h-12 border-border-dark-strong hover:border-primary"
+                  ></button>
+
+                  <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-1">
+                      <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
+                      <h4 class="font-semibold text-lg">{{ habit.title }}</h4>
+                    </div>
+                    @if (habit.description) {
+                    <p class="text-sm text-text-dark-secondary">{{ habit.description }}</p>
+                    }
                   </div>
-                  @if (habit.description) {
-                  <p
-                    class="text-sm text-text-dark-secondary"
-                    [ngClass]="{ 'line-through': habit.completedToday }"
+                </div>
+
+                <!-- Stats & Actions -->
+                <div class="flex items-center gap-3">
+                  @if (habit.streakEnabled) {
+                  <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
+                    <span>🔥</span>
+                    <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
+                  </div>
+                  } @if (habit.category) {
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-medium"
+                    [ngClass]="{
+                      'bg-category-health/20 text-category-health': habit.category === 'health',
+                      'bg-category-fitness/20 text-category-fitness': habit.category === 'fitness',
+                      'bg-category-nutrition/20 text-category-nutrition':
+                        habit.category === 'nutrition',
+                      'bg-category-mindfulness/20 text-category-mindfulness':
+                        habit.category === 'mindfulness',
+                      'bg-category-learning/20 text-category-learning':
+                        habit.category === 'learning',
+                      'bg-category-productivity/20 text-category-productivity':
+                        habit.category === 'productivity',
+                      'bg-category-creative/20 text-category-creative':
+                        habit.category === 'creative',
+                      'bg-category-social/20 text-category-social': habit.category === 'social',
+                      'bg-category-finance/20 text-category-finance':
+                        habit.category === 'finance',
+                      'bg-category-sleep/20 text-category-sleep': habit.category === 'sleep',
+                      'bg-category-hydration/20 text-category-hydration':
+                        habit.category === 'hydration',
+                      'bg-category-personal/20 text-category-personal':
+                        habit.category === 'personal'
+                    }"
                   >
-                    {{ habit.description }}
-                  </p>
+                    {{ habit.category }}
+                  </span>
+                  }
+
+                  <!-- Quick Actions Menu -->
+                  <div class="relative" (click)="$event.stopPropagation()">
+                    <button
+                      (click)="toggleHabitActionsMenu(habit.id!)"
+                      class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <span class="material-symbols-outlined text-base">more_vert</span>
+                    </button>
+
+                    @if (showHabitActionsMenu() === habit.id) {
+                    <div
+                      class="absolute top-full right-0 mt-2 w-48 bg-card-dark border border-border-dark-strong rounded-xl shadow-xl z-50 overflow-hidden py-2"
+                    >
+                      <button
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-base">note_add</span>
+                        Add Note
+                      </button>
+                      <button
+                        [routerLink]="'/habit/' + habit.id"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-base">edit</span>
+                        Edit Habit
+                      </button>
+                      <button
+                        routerLink="/calendar"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors"
+                      >
+                        <span class="material-symbols-outlined text-base">history</span>
+                        View History
+                      </button>
+                      <button
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors text-text-dark-secondary"
+                      >
+                        <span class="material-symbols-outlined text-base">skip_next</span>
+                        Skip Today
+                      </button>
+                    </div>
+                    }
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+            }
+
+            <!-- Completed Habits (Done) -->
+            @if (completedHabits().length > 0) {
+            <div class="space-y-3 mt-6">
+              <button
+                (click)="toggleDoneSection()"
+                class="flex items-center gap-2 text-sm font-semibold text-text-dark-secondary uppercase tracking-wide hover:text-primary transition-colors"
+              >
+                <span class="material-symbols-outlined text-base">{{
+                  showDoneSection() ? 'expand_less' : 'expand_more'
+                }}</span>
+                Done ({{ completedHabits().length }})
+              </button>
+
+              @if (showDoneSection()) {
+              @for (habit of completedHabits(); track habit.id) {
+              <div
+                class="bg-card-dark/50 rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4 opacity-75"
+              >
+                <!-- Checkbox & Content -->
+                <div class="flex items-center gap-4 flex-1">
+                  <button
+                    (click)="toggleHabit(habit.id!)"
+                    class="rounded-xl border-2 border-primary bg-primary flex items-center justify-center transition-all w-12 h-12"
+                  >
+                    <span class="material-symbols-outlined text-white text-2xl">check</span>
+                  </button>
+
+                  <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-1">
+                      <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
+                      <h4 class="font-semibold text-lg line-through text-text-dark-secondary/60">
+                        {{ habit.title }}
+                      </h4>
+                    </div>
+                    @if (habit.description) {
+                    <p class="text-sm text-text-dark-secondary line-through">
+                      {{ habit.description }}
+                    </p>
+                    }
+                  </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="flex items-center gap-3">
+                  @if (habit.streakEnabled) {
+                  <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
+                    <span>🔥</span>
+                    <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
+                  </div>
                   }
                 </div>
               </div>
-
-              <!-- Stats -->
-              <div class="flex items-center gap-6">
-                @if (habit.streakEnabled) {
-                <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
-                  <span>🔥</span>
-                  <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
-                </div>
-                } @if (habit.category) {
-                <span
-                  class="px-3 py-1 rounded-full text-xs font-medium"
-                  [ngClass]="{
-                    'bg-category-health/20 text-category-health': habit.category === 'health',
-                    'bg-category-fitness/20 text-category-fitness': habit.category === 'fitness',
-                    'bg-category-nutrition/20 text-category-nutrition':
-                      habit.category === 'nutrition',
-                    'bg-category-mindfulness/20 text-category-mindfulness':
-                      habit.category === 'mindfulness',
-                    'bg-category-learning/20 text-category-learning': habit.category === 'learning',
-                    'bg-category-productivity/20 text-category-productivity':
-                      habit.category === 'productivity',
-                    'bg-category-creative/20 text-category-creative': habit.category === 'creative',
-                    'bg-category-social/20 text-category-social': habit.category === 'social',
-                    'bg-category-finance/20 text-category-finance': habit.category === 'finance',
-                    'bg-category-sleep/20 text-category-sleep': habit.category === 'sleep',
-                    'bg-category-hydration/20 text-category-hydration':
-                      habit.category === 'hydration',
-                    'bg-category-personal/20 text-category-personal': habit.category === 'personal'
-                  }"
-                >
-                  {{ habit.category }}
-                </span>
-                }
-              </div>
+              }
+              }
             </div>
-            } }
+            }
+            }
           </div>
 
           <!-- Add New Habit Button -->
@@ -366,18 +567,21 @@
             <div class="text-center">
               <div class="text-xs text-text-dark-secondary mb-2">{{ day.dayName.charAt(0) }}</div>
               <button
-                class="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                [title]="day.completed + ' of ' + day.total + ' completed'"
+                class="w-10 h-10 rounded-full flex items-center justify-center transition-all text-xs font-bold"
                 [ngClass]="{
                   'bg-primary text-background-dark': getWeekDayStatus(day) === 'complete',
-                  'bg-primary/50': getWeekDayStatus(day) === 'partial',
-                  'bg-background-dark': getWeekDayStatus(day) === 'incomplete',
+                  'bg-primary/50 text-background-dark': getWeekDayStatus(day) === 'partial',
+                  'bg-background-dark text-text-dark-secondary': getWeekDayStatus(day) === 'incomplete',
                   'border-2 border-primary': day.date === currentDate().toISOString().split('T')[0]
                 }"
               >
                 @if (getWeekDayStatus(day) === 'complete') {
                 <span class="material-symbols-outlined text-xl">check</span>
                 } @else if (getWeekDayStatus(day) === 'partial') {
-                <span class="text-xs font-bold">+{{ day.completed }}</span>
+                <span>{{ day.completed }}/{{ day.total }}</span>
+                } @else if (getWeekDayStatus(day) === 'incomplete' && day.total > 0) {
+                <span>0/{{ day.total }}</span>
                 }
               </button>
             </div>
@@ -417,19 +621,57 @@
           </div>
         </div>
 
-        <!-- Productivity Card -->
+        <!-- Insights Card -->
         <div
           class="bg-linear-to-br from-card-dark to-background-dark border border-primary/30 rounded-xl p-6"
         >
-          <h3 class="text-lg font-semibold mb-3">Feeling productive?</h3>
+          @if (atRiskHabits().length > 0) {
+          <!-- Keep Your Streak Alive -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">🔥</span>
+            <h3 class="text-lg font-semibold">Keep Your Streak Alive</h3>
+          </div>
           <p class="text-sm text-text-dark-secondary mb-4">
-            You have cleared all high priority tasks for today.
+            {{ atRiskHabits().length }} habit{{ atRiskHabits().length > 1 ? 's are' : ' is' }} at
+            risk today. Complete them to maintain your progress.
           </p>
           <button
+            class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+            (click)="setStatusFilter('pending'); clearFilters()"
+          >
+            Focus Now
+          </button>
+          } @else if (dailyProgress().percentage === 100) {
+          <!-- Perfect Day -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">🎉</span>
+            <h3 class="text-lg font-semibold">Perfect Day!</h3>
+          </div>
+          <p class="text-sm text-text-dark-secondary mb-4">
+            Amazing work! You've completed all your habits for today. Keep the momentum going!
+          </p>
+          <button
+            routerLink="/calendar"
             class="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
           >
-            Discover New Habits
+            View Calendar
           </button>
+          } @else {
+          <!-- Idea of the Day -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-2xl">💡</span>
+            <h3 class="text-lg font-semibold">Build Better Habits</h3>
+          </div>
+          <p class="text-sm text-text-dark-secondary mb-4">
+            Consistency is key! Small daily actions lead to big changes over time.
+          </p>
+          <button
+            routerLink="/habit/new"
+            class="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+          >
+            Add New Habit
+          </button>
+          }
         </div>
       </div>
     </div>

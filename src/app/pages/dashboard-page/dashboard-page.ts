@@ -116,6 +116,10 @@ export class DashboardPage {
     { value: 'created-oldest', label: 'Oldest First', icon: 'history' },
   ];
 
+  // UI State
+  showHabitActionsMenu = signal<string | null>(null);
+  showDoneSection = signal<boolean>(false);
+
   // Computed: habits scheduled for current date
   habitsForCurrentDate = computed(() => {
     const date = this.currentDate();
@@ -177,13 +181,43 @@ export class DashboardPage {
     const totalHabits = scheduledHabits.length;
     const completedHabits = scheduledHabits.filter((h) => h.completedToday).length;
     const percentage = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
+    const remaining = totalHabits - completedHabits;
 
     return {
       date: this.formatDateForAPI(this.currentDate()),
       totalHabits,
       completedHabits,
+      remaining,
       percentage,
     };
+  });
+
+  // Computed: habits at risk (streak-enabled habits not completed today)
+  atRiskHabits = computed(() => {
+    return this.habitsForCurrentDate()
+      .filter((h) => h.streakEnabled && !h.completedToday)
+      .sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0))
+      .slice(0, 2);
+  });
+
+  // Computed: pending habits (not completed)
+  pendingHabits = computed(() => {
+    return this.filteredHabits().filter((h) => !h.completedToday);
+  });
+
+  // Computed: completed habits (done)
+  completedHabits = computed(() => {
+    return this.filteredHabits().filter((h) => h.completedToday);
+  });
+
+  // Computed: motivational message
+  motivationalMessage = computed(() => {
+    const progress = this.dailyProgress();
+    if (progress.totalHabits === 0) return '';
+    if (progress.percentage === 100) return '🎉 Perfect day!';
+    if (progress.percentage >= 80) return `Just ${progress.remaining} more to hit 100%!`;
+    if (progress.percentage >= 50) return `${progress.remaining} habits left to hit 80% today`;
+    return `${progress.remaining} habits to go today`;
   });
 
   // Computed weekly progress based on habits and logs
@@ -261,34 +295,48 @@ export class DashboardPage {
       result = result.filter((h) => h.category === categoryFilter);
     }
 
-    // Apply sorting
+    // Apply sorting - Default: pending first, then by at-risk status
     const sortOption = this.activeSort();
-    switch (sortOption) {
-      case 'name-asc':
-        result.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'name-desc':
-        result.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      case 'streak-desc':
-        result.sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0));
-        break;
-      case 'streak-asc':
-        result.sort((a, b) => (a.currentStreak || 0) - (b.currentStreak || 0));
-        break;
-      case 'category':
-        result.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
-        break;
-      case 'created-newest':
-        result.sort(
-          (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-        );
-        break;
-      case 'created-oldest':
-        result.sort(
-          (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
-        );
-        break;
+    if (sortOption === 'name-asc') {
+      // Smart default: pending first, then sort by name
+      result.sort((a, b) => {
+        if (a.completedToday !== b.completedToday) {
+          return a.completedToday ? 1 : -1;
+        }
+        // Among pending, prioritize at-risk (streak-enabled)
+        if (!a.completedToday && !b.completedToday) {
+          if (a.streakEnabled !== b.streakEnabled) {
+            return a.streakEnabled ? -1 : 1;
+          }
+        }
+        return a.title.localeCompare(b.title);
+      });
+    } else {
+      // Apply other sorting options
+      switch (sortOption) {
+        case 'name-desc':
+          result.sort((a, b) => b.title.localeCompare(a.title));
+          break;
+        case 'streak-desc':
+          result.sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0));
+          break;
+        case 'streak-asc':
+          result.sort((a, b) => (a.currentStreak || 0) - (b.currentStreak || 0));
+          break;
+        case 'category':
+          result.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+          break;
+        case 'created-newest':
+          result.sort(
+            (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+          );
+          break;
+        case 'created-oldest':
+          result.sort(
+            (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+          );
+          break;
+      }
     }
 
     return result;
@@ -369,12 +417,34 @@ export class DashboardPage {
 
   async toggleHabit(habitId: string) {
     try {
+      // Optimistic update
+      const currentHabits = this.habits();
+      const habitIndex = currentHabits.findIndex((h) => h.id === habitId);
+      if (habitIndex !== -1) {
+        const updatedHabits = [...currentHabits];
+        updatedHabits[habitIndex] = {
+          ...updatedHabits[habitIndex],
+          completedToday: !updatedHabits[habitIndex].completedToday,
+        };
+        this.habits.set(updatedHabits);
+      }
+
       const dateString = this.formatDateForAPI(this.currentDate());
       await this.supabaseService.toggleHabitCompletion(habitId, dateString);
       await Promise.all([this.loadHabits(), this.loadWeeklyLogs()]);
     } catch (error) {
       console.error('Error toggling habit:', error);
+      // Revert optimistic update on error
+      await this.loadHabits();
     }
+  }
+
+  toggleHabitActionsMenu(habitId: string): void {
+    this.showHabitActionsMenu.update((current) => (current === habitId ? null : habitId));
+  }
+
+  toggleDoneSection(): void {
+    this.showDoneSection.update((v) => !v);
   }
 
   changeDate(direction: number) {
@@ -435,6 +505,7 @@ export class DashboardPage {
   closeMenus(): void {
     this.showFilterMenu.set(false);
     this.showSortMenu.set(false);
+    this.showHabitActionsMenu.set(null);
   }
 
   setStatusFilter(status: FilterStatus): void {
