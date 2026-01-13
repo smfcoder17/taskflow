@@ -1,25 +1,25 @@
 <div class="bg-background-dark min-h-screen flex pt-4" (click)="closeMenus()">
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-text-dark-primary">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Left Column - Main Content -->
       <div class="lg:col-span-2 space-y-6">
         <!-- Page Title & Quick Actions -->
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-3xl font-bold text-text-dark-secondary">Today</h2>
-            <p class="text-sm text-text-dark-secondary mt-1">{{ formatDate(currentDate()) }}</p>
+            <h2 class="text-modern-title">Today</h2>
+            <p class="text-modern-subtitle mt-1">{{ formatDate(currentDate()) }}</p>
           </div>
           <div class="flex gap-3">
             <button
               routerLink="/habit/new"
-              class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+              class="btn-primary-modern flex items-center gap-2"
             >
               <span class="material-symbols-outlined text-base">add</span>
               <span class="hidden sm:inline">Add Habit</span>
             </button>
             <button
               routerLink="/calendar"
-              class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
+              class="btn-modern flex items-center gap-2"
             >
               <span class="material-symbols-outlined text-base">calendar_month</span>
               <span class="hidden sm:inline">Calendar</span>
@@ -28,38 +28,38 @@
         </div>
 
         <!-- Today Snapshot (Hero) -->
-        <div class="bg-card-dark rounded-xl p-6">
-          <div class="flex items-center justify-between mb-4">
+        <div class="card-elevated card-padding">
+          <div class="flex items-center justify-between mb-6">
             <div>
-              <div class="text-sm text-text-dark-secondary mb-1">Today's Progress</div>
+              <div class="text-modern-subtitle mb-2">Today's Progress</div>
               <div class="flex items-baseline gap-3">
-                <span class="text-4xl font-bold">{{ dailyProgress().percentage }}%</span>
-                <span class="text-text-dark-secondary">
+                <span class="stat-number">{{ dailyProgress().percentage }}%</span>
+                <span class="stat-label">
                   {{ dailyProgress().completedHabits }} of {{ dailyProgress().totalHabits }} habits
                 </span>
               </div>
             </div>
-            <div class="text-6xl opacity-10">🎯</div>
+            <div class="text-6xl opacity-20">🎯</div>
           </div>
 
           <!-- Progress Bar -->
-          <div class="relative w-full h-3 bg-background-dark rounded-full overflow-hidden">
+          <div class="progress-track">
             <div
-              class="absolute top-0 left-0 h-full bg-linear-to-r from-primary to-primary/85 rounded-full transition-all duration-500"
+              class="progress-fill"
               [style.width.%]="dailyProgress().percentage"
             ></div>
           </div>
 
           <!-- Motivational Message -->
           @if (motivationalMessage()) {
-          <div class="mt-3 text-sm text-primary font-medium">
+          <div class="mt-3 text-sm text-success font-medium">
             {{ motivationalMessage() }}
           </div>
           }
 
           <!-- Streak Status -->
           @if (atRiskHabits().length > 0) {
-          <div class="mt-3 flex items-center gap-2 text-sm text-orange-500">
+          <div class="mt-3 flex items-center gap-2 text-sm text-warning">
             <span class="material-symbols-outlined text-base">warning</span>
             <span>{{ atRiskHabits().length }} habit(s) at risk</span>
           </div>
@@ -69,23 +69,23 @@
         <!-- Focus Section (At Risk Habits) -->
         @if (atRiskHabits().length > 0 && !isLoading()) {
         <div class="space-y-4">
-          <h3 class="text-lg font-semibold flex items-center gap-2">
+          <h3 class="text-lg font-semibold text-text-dark-primary flex items-center gap-2">
             <span class="text-xl">⚠️</span>
             Keep Your Streak Alive
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             @for (habit of atRiskHabits(); track habit.id) {
-            <div class="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
+            <div class="focus-card">
               <div class="flex items-start gap-3">
                 <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
                 <div class="flex-1">
-                  <h4 class="font-semibold mb-1">{{ habit.title }}</h4>
-                  <p class="text-sm text-text-dark-secondary mb-3">
+                  <h4 class="font-semibold text-text-dark-primary mb-1">{{ habit.title }}</h4>
+                  <p class="text-modern-muted mb-3">
                     {{ habit.currentStreak || 0 }}-day streak at risk
                   </p>
                   <button
                     (click)="toggleHabit(habit.id!); $event.stopPropagation()"
-                    class="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors"
+                    class="focus-card-button w-full"
                   >
                     Complete Now
                   </button>
@@ -100,28 +100,28 @@
         <!-- Habits List with Grouping -->
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-xl font-semibold">Today's Habits</h3>
+            <h3 class="text-xl font-semibold text-text-dark-primary">Today's Habits</h3>
           </div>
 
-          <!-- Date Navigation -->
-          <div class="flex items-center justify-between bg-card-dark rounded-xl p-4">
+          <!-- Date Navigation & Filters -->
+          <div class="flex items-center justify-between card-modern p-4">
             <div class="flex items-center gap-4">
               <button
                 (click)="changeDate(-1)"
-                class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors"
+                class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors text-text-dark-secondary"
               >
                 <span class="material-symbols-outlined">chevron_left</span>
               </button>
               <div>
-                <div class="text-sm text-text-dark-secondary">
+                <div class="text-xs font-semibold text-text-dark-secondary uppercase tracking-wide">
                   @if (isToday()) { TODAY } @else if (isYesterday()) { YESTERDAY } @else if
                   (isTomorrow()) { TOMORROW }
                 </div>
-                <div class="font-semibold">{{ formatDate(currentDate()) }}</div>
+                <div class="font-semibold text-text-dark-primary">{{ formatDate(currentDate()) }}</div>
               </div>
               <button
                 (click)="changeDate(1)"
-                class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors"
+                class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors text-text-dark-secondary"
               >
                 <span class="material-symbols-outlined">chevron_right</span>
               </button>
@@ -132,11 +132,11 @@
               <div class="relative" (click)="$event.stopPropagation()">
                 <button
                   (click)="toggleFilterMenu()"
-                  class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                  class="btn-modern flex items-center gap-2"
                   [ngClass]="
                     hasActiveFilters()
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-border-dark hover:bg-border-dark-strong/40'
+                      ? 'bg-primary/20! text-primary! border-primary/30!'
+                      : ''
                   "
                 >
                   <span class="material-symbols-outlined text-base">filter_list</span>
@@ -152,10 +152,10 @@
                 <!-- Filter Dropdown Menu -->
                 @if (showFilterMenu()) {
                 <div
-                  class="absolute top-full right-0 mt-2 w-72 bg-card-dark border border-border-dark-strong rounded-xl shadow-xl z-50 overflow-hidden"
+                  class="dropdown-modern absolute top-full right-0 mt-2 w-72 z-50 overflow-hidden"
                 >
                   <!-- Status Filter -->
-                  <div class="p-3 border-b border-border-dark-strong">
+                  <div class="p-3 border-b border-border-dark">
                     <p
                       class="text-xs text-text-dark-secondary font-medium mb-2 uppercase tracking-wide"
                     >
@@ -169,7 +169,7 @@
                         [ngClass]="
                           activeStatusFilter() === filter.value
                             ? 'bg-primary text-background-dark font-medium'
-                            : 'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary'
+                            : 'bg-border-dark hover:bg-border-dark-strong text-text-dark-primary'
                         "
                       >
                         <span class="material-symbols-outlined text-base">{{ filter.icon }}</span>
@@ -190,7 +190,7 @@
                       <select
                         [value]="activeCategoryFilter()"
                         (change)="setCategoryFilter($any($event.target).value)"
-                        class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
+                        class="w-full bg-card-dark border border-border-dark rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"
                       >
                         @for (cat of categoryFilters; track cat.value) { @if (cat.value === 'all') {
                         <option [value]="cat.value">
@@ -210,7 +210,7 @@
 
                   <!-- Clear Filters -->
                   @if (hasActiveFilters()) {
-                  <div class="p-3 border-t border-border-dark-strong">
+                  <div class="p-3 border-t border-border-dark">
                     <button
                       (click)="clearFilters()"
                       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-text-dark-secondary hover:text-primary transition-colors"
@@ -228,7 +228,7 @@
               <div class="relative" (click)="$event.stopPropagation()">
                 <button
                   (click)="toggleSortMenu()"
-                  class="flex items-center gap-2 px-4 py-2 bg-border-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors"
+                  class="btn-modern flex items-center gap-2"
                 >
                   <span class="material-symbols-outlined text-base">swap_vert</span>
                   <span class="hidden sm:inline">{{ getActiveSortLabel() }}</span>
@@ -238,16 +238,16 @@
                 <!-- Sort Dropdown Menu -->
                 @if (showSortMenu()) {
                 <div
-                  class="absolute top-full right-0 mt-2 w-48 bg-card-dark border border-border-dark-strong rounded-xl shadow-xl z-50 overflow-hidden py-2"
+                  class="dropdown-modern absolute top-full right-0 mt-2 w-48 z-50 overflow-hidden py-2"
                 >
                   @for (option of sortOptions; track option.value) {
                   <button
                     (click)="setSort(option.value)"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
+                    class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left"
                     [ngClass]="
                       activeSort() === option.value
-                        ? 'bg-primary/10 text-primary'
-                        : 'hover:bg-background-dark text-text-dark-primary'
+                        ? 'dropdown-item-active'
+                        : 'text-gray-700'
                     "
                   >
                     <span class="material-symbols-outlined text-base">{{ option.icon }}</span>
@@ -271,19 +271,19 @@
               <span class="text-sm text-text-dark-secondary">Showing:</span>
               @if (activeStatusFilter() !== 'all') {
               <span
-                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
+                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg border border-primary/30"
               >
                 {{ activeStatusFilter() === 'completed' ? 'Completed' : 'Pending' }}
-                <button (click)="setStatusFilter('all')" class="hover:text-primary/70">
+                <button (click)="setStatusFilter('all')" class="hover:opacity-70">
                   <span class="material-symbols-outlined text-sm">close</span>
                 </button>
               </span>
               } @if (activeCategoryFilter() !== 'all') {
               <span
-                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg"
+                class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded-lg border border-primary/30"
               >
                 {{ activeCategoryFilter() }}
-                <button (click)="setCategoryFilter('all')" class="hover:text-primary/70">
+                <button (click)="setCategoryFilter('all')" class="hover:opacity-70">
                   <span class="material-symbols-outlined text-sm">close</span>
                 </button>
               </span>
@@ -300,41 +300,41 @@
 
             <!-- No Habits Yet -->
             @else if (habits().length === 0) {
-            <div class="bg-card-dark rounded-xl p-8 text-center">
-              <div class="text-4xl mb-4">🎯</div>
-              <p class="text-lg font-semibold mb-2">Start Building Your Routine</p>
+            <div class="empty-state">
+              <div class="text-6xl mb-4 opacity-20">🎯</div>
+              <p class="text-lg font-semibold text-text-dark-primary mb-2">Start Building Your Routine</p>
               <p class="text-text-dark-secondary mb-6">
                 Choose from our starter templates or create your own habit
               </p>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <button
                   routerLink="/habit/new"
-                  class="p-4 bg-background-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors text-left"
+                  class="card-modern p-4 hover:shadow-md transition-all text-left"
                 >
-                  <div class="text-2xl mb-2">💧</div>
-                  <div class="font-medium mb-1">Hydration</div>
+                  <div class="text-3xl mb-2">💧</div>
+                  <div class="font-medium text-text-dark-primary mb-1">Hydration</div>
                   <div class="text-xs text-text-dark-secondary">Drink 8 glasses daily</div>
                 </button>
                 <button
                   routerLink="/habit/new"
-                  class="p-4 bg-background-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors text-left"
+                  class="card-modern p-4 hover:shadow-md transition-all text-left"
                 >
-                  <div class="text-2xl mb-2">📚</div>
-                  <div class="font-medium mb-1">Reading</div>
+                  <div class="text-3xl mb-2">📚</div>
+                  <div class="font-medium text-text-dark-primary mb-1">Reading</div>
                   <div class="text-xs text-text-dark-secondary">Read for 20 minutes</div>
                 </button>
                 <button
                   routerLink="/habit/new"
-                  class="p-4 bg-background-dark hover:bg-border-dark-strong/40 rounded-lg transition-colors text-left"
+                  class="card-modern p-4 hover:shadow-md transition-all text-left"
                 >
-                  <div class="text-2xl mb-2">🚶</div>
-                  <div class="font-medium mb-1">Walk</div>
+                  <div class="text-3xl mb-2">🚶</div>
+                  <div class="font-medium text-text-dark-primary mb-1">Walk</div>
                   <div class="text-xs text-text-dark-secondary">10-minute daily walk</div>
                 </button>
               </div>
               <button
                 routerLink="/habit/new"
-                class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+                class="btn-primary-modern"
               >
                 Create Custom Habit
               </button>
@@ -343,9 +343,9 @@
 
             <!-- No Habits Scheduled for This Day -->
             @else if (habitsForCurrentDate().length === 0) {
-            <div class="bg-card-dark rounded-xl p-8 text-center">
-              <div class="text-4xl mb-4">📅</div>
-              <p class="text-text-dark-secondary mb-4">No habits scheduled for this day.</p>
+            <div class="empty-state">
+              <div class="text-6xl mb-4 opacity-20">📅</div>
+              <p class="text-lg font-semibold text-text-dark-primary mb-2">No habits scheduled for this day</p>
               <p class="text-sm text-text-dark-secondary">
                 You have {{ habits().length }} habit(s) on other days.
               </p>
@@ -354,12 +354,12 @@
 
             <!-- No Results After Filtering -->
             @else if (filteredHabits().length === 0) {
-            <div class="bg-card-dark rounded-xl p-8 text-center">
-              <div class="text-4xl mb-4">🔍</div>
-              <p class="text-text-dark-secondary mb-4">No habits match your filters.</p>
+            <div class="empty-state">
+              <div class="text-6xl mb-4 opacity-20">🔍</div>
+              <p class="text-lg font-semibold text-text-dark-primary mb-2">No habits match your filters</p>
               <button
                 (click)="clearFilters()"
-                class="px-6 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+                class="btn-primary-modern mt-4"
               >
                 Clear Filters
               </button>
@@ -370,63 +370,49 @@
             @else {
             <!-- Pending Habits (To Do) -->
             @if (pendingHabits().length > 0) {
-            <div class="space-y-3">
-              <h4 class="text-sm font-semibold text-text-dark-secondary uppercase tracking-wide">
-                To Do ({{ pendingHabits().length }})
-              </h4>
+            <div class="table-container">
+              <div class="table-header">
+                <span class="table-header-text">To Do ({{ pendingHabits().length }})</span>
+              </div>
               @for (habit of pendingHabits(); track habit.id) {
-              <div
-                class="bg-card-dark rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4"
-              >
+              <div class="table-row group">
                 <!-- Checkbox & Content -->
                 <div class="flex items-center gap-4 flex-1">
                   <button
                     (click)="toggleHabit(habit.id!)"
-                    class="rounded-xl border-2 flex items-center justify-center transition-all w-12 h-12 border-border-dark-strong hover:border-primary"
+                    class="checkbox-modern flex items-center justify-center shrink-0"
                   ></button>
 
-                  <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-1">
-                      <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
-                      <h4 class="font-semibold text-lg">{{ habit.title }}</h4>
-                    </div>
+                  <div class="icon-circle">
+                    <span class="text-xl">{{ habit.icon || '🎯' }}</span>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-modern-body truncate">{{ habit.title }}</h4>
                     @if (habit.description) {
-                    <p class="text-sm text-text-dark-secondary">{{ habit.description }}</p>
+                    <p class="text-modern-muted truncate">{{ habit.description }}</p>
                     }
                   </div>
                 </div>
 
                 <!-- Stats & Actions -->
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 shrink-0">
                   @if (habit.streakEnabled) {
-                  <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
-                    <span>🔥</span>
-                    <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
+                  <div class="flex items-center gap-1.5 px-2.5 py-1 bg-background-dark rounded-lg">
+                    <span class="text-sm">🔥</span>
+                    <span class="text-sm font-semibold text-text-dark-primary">{{ habit.currentStreak || 0 }}</span>
                   </div>
-                  } @if (habit.category) {
+                  } 
+                  
+                  @if (habit.category) {
                   <span
-                    class="px-3 py-1 rounded-full text-xs font-medium"
+                    class="badge-status"
                     [ngClass]="{
-                      'bg-category-health/20 text-category-health': habit.category === 'health',
-                      'bg-category-fitness/20 text-category-fitness': habit.category === 'fitness',
-                      'bg-category-nutrition/20 text-category-nutrition':
-                        habit.category === 'nutrition',
-                      'bg-category-mindfulness/20 text-category-mindfulness':
-                        habit.category === 'mindfulness',
-                      'bg-category-learning/20 text-category-learning':
-                        habit.category === 'learning',
-                      'bg-category-productivity/20 text-category-productivity':
-                        habit.category === 'productivity',
-                      'bg-category-creative/20 text-category-creative':
-                        habit.category === 'creative',
-                      'bg-category-social/20 text-category-social': habit.category === 'social',
-                      'bg-category-finance/20 text-category-finance':
-                        habit.category === 'finance',
-                      'bg-category-sleep/20 text-category-sleep': habit.category === 'sleep',
-                      'bg-category-hydration/20 text-category-hydration':
-                        habit.category === 'hydration',
-                      'bg-category-personal/20 text-category-personal':
-                        habit.category === 'personal'
+                      'badge-active': habit.category === 'health' || habit.category === 'fitness',
+                      'badge-pending': habit.category === 'nutrition' || habit.category === 'learning',
+                      'badge-branding': habit.category === 'mindfulness' || habit.category === 'personal',
+                      'badge-on-sale': habit.category === 'productivity',
+                      'badge-inactive': habit.category === 'creative' || habit.category === 'social'
                     }"
                   >
                     {{ habit.category }}
@@ -437,37 +423,37 @@
                   <div class="relative" (click)="$event.stopPropagation()">
                     <button
                       (click)="toggleHabitActionsMenu(habit.id!)"
-                      class="w-8 h-8 flex items-center justify-center hover:bg-background-dark rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                      class="action-dots w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors md:opacity-0 md:group-hover:opacity-100"
                     >
                       <span class="material-symbols-outlined text-base">more_vert</span>
                     </button>
 
                     @if (showHabitActionsMenu() === habit.id) {
                     <div
-                      class="absolute top-full right-0 mt-2 w-48 bg-card-dark border border-border-dark-strong rounded-xl shadow-xl z-50 overflow-hidden py-2"
+                      class="dropdown-modern absolute top-full right-0 mt-2 w-48 z-50 overflow-hidden py-2"
                     >
                       <button
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors"
+                        class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left"
                       >
                         <span class="material-symbols-outlined text-base">note_add</span>
                         Add Note
                       </button>
                       <button
                         [routerLink]="'/habit/' + habit.id"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors"
+                        class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left"
                       >
                         <span class="material-symbols-outlined text-base">edit</span>
                         Edit Habit
                       </button>
                       <button
                         routerLink="/calendar"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors"
+                        class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left"
                       >
                         <span class="material-symbols-outlined text-base">history</span>
                         View History
                       </button>
                       <button
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-background-dark transition-colors text-text-dark-secondary"
+                        class="dropdown-item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left"
                       >
                         <span class="material-symbols-outlined text-base">skip_next</span>
                         Skip Today
@@ -495,45 +481,42 @@
               </button>
 
               @if (showDoneSection()) {
-              @for (habit of completedHabits(); track habit.id) {
-              <div
-                class="bg-card-dark/50 rounded-xl flex items-center justify-between hover:bg-card-dark/80 transition-colors group p-4 opacity-75"
-              >
-                <!-- Checkbox & Content -->
-                <div class="flex items-center gap-4 flex-1">
-                  <button
-                    (click)="toggleHabit(habit.id!)"
-                    class="rounded-xl border-2 border-primary bg-primary flex items-center justify-center transition-all w-12 h-12"
-                  >
-                    <span class="material-symbols-outlined text-white text-2xl">check</span>
-                  </button>
+              <div class="table-container opacity-75">
+                @for (habit of completedHabits(); track habit.id) {
+                <div class="table-row group">
+                  <!-- Checkbox & Content -->
+                  <div class="flex items-center gap-4 flex-1">
+                    <button
+                      (click)="toggleHabit(habit.id!)"
+                      class="checkbox-modern checkbox-modern-checked flex items-center justify-center shrink-0"
+                    >
+                      <span class="material-symbols-outlined text-white text-sm">check</span>
+                    </button>
 
-                  <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-1">
-                      <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
-                      <h4 class="font-semibold text-lg line-through text-text-dark-secondary/60">
-                        {{ habit.title }}
-                      </h4>
+                    <div class="icon-circle">
+                      <span class="text-xl">{{ habit.icon || '🎯' }}</span>
                     </div>
-                    @if (habit.description) {
-                    <p class="text-sm text-text-dark-secondary line-through">
-                      {{ habit.description }}
-                    </p>
+
+                    <div class="flex-1 min-w-0">
+                      <h4 class="text-modern-body truncate line-through opacity-60">{{ habit.title }}</h4>
+                      @if (habit.description) {
+                      <p class="text-modern-muted truncate line-through">{{ habit.description }}</p>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Stats -->
+                  <div class="flex items-center gap-3 shrink-0">
+                    @if (habit.streakEnabled) {
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 bg-background-dark rounded-lg">
+                      <span class="text-sm">🔥</span>
+                      <span class="text-sm font-semibold text-text-dark-primary">{{ habit.currentStreak || 0 }}</span>
+                    </div>
                     }
                   </div>
                 </div>
-
-                <!-- Stats -->
-                <div class="flex items-center gap-3">
-                  @if (habit.streakEnabled) {
-                  <div class="flex items-center gap-2 px-3 py-1 bg-background-dark rounded-lg">
-                    <span>🔥</span>
-                    <span class="font-semibold">{{ habit.currentStreak || 0 }}</span>
-                  </div>
-                  }
-                </div>
+                }
               </div>
-              }
               }
             </div>
             }
@@ -543,7 +526,7 @@
           <!-- Add New Habit Button -->
           <button
             routerLink="/habit/new"
-            class="w-full border-2 border-dashed cursor-pointer border-border-dark-strong hover:border-primary rounded-xl p-6 flex items-center justify-center gap-2 text-text-dark-secondary hover:text-primary transition-all group"
+            class="w-full border-2 border-dashed border-border-dark hover:border-primary rounded-xl p-6 flex items-center justify-center gap-2 text-text-dark-secondary hover:text-primary transition-all group"
           >
             <span class="material-symbols-outlined">add</span>
             <span class="font-medium">Add new habit</span>
@@ -554,10 +537,10 @@
       <!-- Right Column - Sidebar -->
       <div class="space-y-6">
         <!-- This Week Progress -->
-        <div class="bg-card-dark rounded-xl p-6">
+        <div class="card-modern card-padding">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold">This Week</h3>
-            <a routerLink="/calendar" class="text-sm text-primary hover:text-primary/80"
+            <h3 class="text-lg font-semibold text-text-dark-primary">This Week</h3>
+            <a routerLink="/calendar" class="text-sm text-primary hover:opacity-80"
               >View All</a
             >
           </div>
@@ -565,23 +548,23 @@
           <div class="grid grid-cols-7 gap-2">
             @for (day of weeklyProgress().days; track day.date) {
             <div class="text-center">
-              <div class="text-xs text-text-dark-secondary mb-2">{{ day.dayName.charAt(0) }}</div>
+              <div class="text-xs text-text-dark-secondary mb-2 font-medium">{{ day.dayName.charAt(0) }}</div>
               <button
                 [title]="day.completed + ' of ' + day.total + ' completed'"
-                class="w-10 h-10 rounded-full flex items-center justify-center transition-all text-xs font-bold"
+                class="week-day-circle"
                 [ngClass]="{
-                  'bg-primary text-background-dark': getWeekDayStatus(day) === 'complete',
-                  'bg-primary/50 text-background-dark': getWeekDayStatus(day) === 'partial',
-                  'bg-background-dark text-text-dark-secondary': getWeekDayStatus(day) === 'incomplete',
-                  'border-2 border-primary': day.date === currentDate().toISOString().split('T')[0]
+                  'week-day-complete': getWeekDayStatus(day) === 'complete',
+                  'week-day-partial': getWeekDayStatus(day) === 'partial',
+                  'week-day-incomplete': getWeekDayStatus(day) === 'incomplete',
+                  'week-day-current': day.date === currentDate().toISOString().split('T')[0]
                 }"
               >
                 @if (getWeekDayStatus(day) === 'complete') {
-                <span class="material-symbols-outlined text-xl">check</span>
+                <span class="material-symbols-outlined text-base">check</span>
                 } @else if (getWeekDayStatus(day) === 'partial') {
-                <span>{{ day.completed }}/{{ day.total }}</span>
+                <span class="text-xs">{{ day.completed }}/{{ day.total }}</span>
                 } @else if (getWeekDayStatus(day) === 'incomplete' && day.total > 0) {
-                <span>0/{{ day.total }}</span>
+                <span class="text-xs">0/{{ day.total }}</span>
                 }
               </button>
             </div>
@@ -590,28 +573,28 @@
         </div>
 
         <!-- Top Streaks -->
-        <div class="bg-card-dark rounded-xl p-6">
+        <div class="card-modern card-padding">
           <div class="flex items-center gap-2 mb-6">
             <span class="text-2xl">🏆</span>
-            <h3 class="text-lg font-semibold">Top Streaks</h3>
+            <h3 class="text-lg font-semibold text-text-dark-primary">Top Streaks</h3>
           </div>
 
           <div class="space-y-4">
             @for (streak of topStreaks(); track streak.habitId) {
             <div class="flex items-center gap-4">
-              <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+              <div class="icon-circle">
                 <span class="text-xl">{{ streak.icon }}</span>
               </div>
               <div class="flex-1">
-                <div class="font-medium">{{ streak.habitTitle }}</div>
+                <div class="font-medium text-text-dark-primary">{{ streak.habitTitle }}</div>
                 <div class="text-sm text-text-dark-secondary">{{ streak.currentStreak }} days</div>
               </div>
               <div
                 class="text-2xl font-bold"
                 [ngClass]="{
                   'text-yellow-500': streak.rank === 1,
-                  'text-gray-300': streak.rank === 2,
-                  'text-orange-600': streak.rank === 3
+                  'text-gray-400': streak.rank === 2,
+                  'text-orange-500': streak.rank === 3
                 }"
               >
                 #{{ streak.rank }}
@@ -623,20 +606,20 @@
 
         <!-- Insights Card -->
         <div
-          class="bg-linear-to-br from-card-dark to-background-dark border border-primary/30 rounded-xl p-6"
+          class="card-modern card-padding border-primary/30"
         >
           @if (atRiskHabits().length > 0) {
           <!-- Keep Your Streak Alive -->
           <div class="flex items-center gap-2 mb-3">
             <span class="text-2xl">🔥</span>
-            <h3 class="text-lg font-semibold">Keep Your Streak Alive</h3>
+            <h3 class="text-lg font-semibold text-text-dark-primary">Keep Your Streak Alive</h3>
           </div>
           <p class="text-sm text-text-dark-secondary mb-4">
             {{ atRiskHabits().length }} habit{{ atRiskHabits().length > 1 ? 's are' : ' is' }} at
             risk today. Complete them to maintain your progress.
           </p>
           <button
-            class="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+            class="focus-card-button w-full"
             (click)="setStatusFilter('pending'); clearFilters()"
           >
             Focus Now
@@ -645,14 +628,14 @@
           <!-- Perfect Day -->
           <div class="flex items-center gap-2 mb-3">
             <span class="text-2xl">🎉</span>
-            <h3 class="text-lg font-semibold">Perfect Day!</h3>
+            <h3 class="text-lg font-semibold text-text-dark-primary">Perfect Day!</h3>
           </div>
           <p class="text-sm text-text-dark-secondary mb-4">
             Amazing work! You've completed all your habits for today. Keep the momentum going!
           </p>
           <button
             routerLink="/calendar"
-            class="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+            class="btn-primary-modern w-full"
           >
             View Calendar
           </button>
@@ -660,14 +643,14 @@
           <!-- Idea of the Day -->
           <div class="flex items-center gap-2 mb-3">
             <span class="text-2xl">💡</span>
-            <h3 class="text-lg font-semibold">Build Better Habits</h3>
+            <h3 class="text-lg font-semibold text-text-dark-primary">Build Better Habits</h3>
           </div>
           <p class="text-sm text-text-dark-secondary mb-4">
             Consistency is key! Small daily actions lead to big changes over time.
           </p>
           <button
             routerLink="/habit/new"
-            class="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-background-dark rounded-lg font-medium transition-colors"
+            class="btn-primary-modern w-full"
           >
             Add New Habit
           </button>

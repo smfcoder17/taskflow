@@ -1,0 +1,400 @@
+/* ============================================
+   Dashboard Page - Premium UI Components
+   ============================================ */
+
+/* ===========================================
+   CARD COMPONENTS (Borderless & Elevated)
+   =========================================== */
+
+.card-modern {
+  background: var(--color-card-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm), var(--inner-border); /* Inner border for subtle definition */
+  /* border: 1px solid var(--color-border-dark); REMOVED for clean look */
+  border: none;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--inner-border);
+}
+
+/* Subtle glow effect on hover */
+.card-modern::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.card-modern:hover::after {
+  opacity: 1;
+}
+
+.card-elevated {
+  background: var(--color-surface-elevated); /* Slightly lighter than card */
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: none;
+}
+
+.card-padding {
+  padding: var(--space-6); /* Increased padding for breathing room */
+}
+
+/* ===========================================
+   TABLE/LIST COMPONENTS (Clean & Spacious)
+   =========================================== */
+
+.table-container {
+  background: var(--color-card-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: none;
+  overflow: hidden;
+}
+
+.table-header {
+  background: rgba(255, 255, 255, 0.02);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+.table-header-text {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-dark-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.table-row {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-dark); /* Very subtle separator */
+  transition: background-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.table-row:hover {
+  background-color: var(--color-surface-elevated, var(--color-background-dark));
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+/* ===========================================
+   STATUS BADGES (Pill + Glow)
+   =========================================== */
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35em 0.85em; /* Optical alignment */
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transition: all var(--transition-fast);
+}
+
+.badge-pending {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.05); /* Subtle glow */
+}
+
+.badge-active {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #4ade80; /* Lighter green for dark mode readability */
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.05);
+}
+
+.badge-inactive {
+  background-color: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+}
+
+.badge-completed {
+  background-color: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.05);
+}
+
+.badge-branding {
+  background-color: rgba(167, 139, 250, 0.1);
+  color: #a78bfa;
+}
+
+/* ===========================================
+   BUTTONS (Tactile & Clean)
+   =========================================== */
+
+.btn-modern {
+  background: var(--color-surface-elevated);
+  /* border: 1px solid var(--color-border-dark); REMOVED */
+  border: none;
+  border-radius: var(--radius-default);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-xs);
+  transition: all var(--transition-base);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dark-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-modern:hover {
+  background: #2a2e37; /* Slightly lighter surface */
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.btn-modern:active {
+  transform: translateY(0);
+}
+
+.btn-primary-modern {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-default);
+  padding: var(--space-2) var(--space-6);
+  box-shadow: var(--shadow-sm), 0 0 15px -5px var(--color-primary); /* Glow shadow */
+  transition: all var(--transition-base);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.01em;
+}
+
+.btn-primary-modern:hover {
+  box-shadow: var(--shadow-md), 0 0 20px -5px var(--color-primary);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.btn-primary-modern:active {
+  transform: translateY(0);
+}
+
+/* ===========================================
+   CHECKBOX (Custom Design)
+   =========================================== */
+
+.checkbox-modern {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border-dark-strong);
+  border-radius: 6px; /* Squircle-ish */
+  background: var(--color-background-dark);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+}
+
+.checkbox-modern:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-muted);
+}
+
+.checkbox-modern-checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px -2px var(--color-primary);
+}
+
+/* ===========================================
+   PROGRESS BAR (Smooth & Glowing)
+   =========================================== */
+
+.progress-track {
+  background: rgba(255, 255, 255, 0.05);
+  height: 6px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #a78bfa); /* Gradient for visual interest */
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bounce effect */
+  position: relative;
+  box-shadow: 0 0 10px var(--color-primary);
+}
+
+/* ===========================================
+   FOCUS CARD (At Risk - Glassmorphism)
+   =========================================== */
+
+.focus-card {
+  background: linear-gradient(145deg, rgba(249, 115, 22, 0.05), rgba(249, 115, 22, 0.01));
+  border: 1px solid rgba(249, 115, 22, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.focus-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background: #f97316;
+  opacity: 0.8;
+}
+
+.focus-card:hover {
+  background: linear-gradient(145deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.02));
+  border-color: rgba(249, 115, 22, 0.2);
+  transform: translateX(4px);
+}
+
+.focus-card-button {
+  background: rgba(249, 115, 22, 0.1);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: var(--radius-default);
+  padding: var(--space-2) var(--space-4);
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.focus-card-button:hover {
+  background: #f97316;
+  color: white;
+  box-shadow: 0 4px 12px -4px #f97316;
+}
+
+/* ===========================================
+   WEEK WIDGET (Minimal)
+   =========================================== */
+
+.week-day-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px; /* Squircle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  transition: all var(--transition-base);
+  background: var(--color-card-dark);
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-text-dark-secondary);
+}
+
+.week-day-complete {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 6px -2px rgba(0,0,0,0.3);
+}
+
+.week-day-partial {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.week-day-current {
+  box-shadow: 0 0 0 2px var(--color-background-dark), 0 0 0 4px var(--color-primary);
+  z-index: 10;
+}
+
+/* ===========================================
+   DROPDOWN MENU (Glass)
+   =========================================== */
+
+.dropdown-modern {
+  background: rgba(15, 17, 21, 0.95); /* Deep dark background */
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.05); /* Inner border ring */
+  border: none;
+  backdrop-filter: blur(12px);
+  padding: 4px;
+}
+
+.dropdown-item {
+  padding: var(--space-2) var(--space-4);
+  margin: 2px;
+  border-radius: var(--radius-default);
+  transition: background-color var(--transition-fast);
+  color: var(--color-text-dark-primary);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-surface-elevated);
+}
+
+.dropdown-item-active {
+  background-color: var(--color-primary-muted);
+  color: var(--color-primary);
+}
+
+/* ===========================================
+   EMPTY STATE (Illustration style)
+   =========================================== */
+
+.empty-state {
+  background: linear-gradient(180deg, var(--color-card-dark) 0%, rgba(22, 25, 32, 0) 100%);
+  border: 1px dashed var(--color-border-dark-strong);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  text-align: center;
+}
+
+/* ===========================================
+   TYPOGRAPHY POLISH
+   =========================================== */
+
+.text-modern-title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-dark-primary);
+  letter-spacing: -0.02em;
+}
+
+.text-modern-subtitle {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dark-muted);
+}
+
+.stat-number {
+  font-family: var(--font-family-display);
+  font-size: 3rem; /* Big impact */
+  font-weight: 700;
+  background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+

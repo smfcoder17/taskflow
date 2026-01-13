@@ -1,7 +1,26 @@
+/* ============================================
+   All Habits Page - Refined Styles
+   ============================================ */
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -10,12 +29,58 @@
 }
 
 main > div {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* Stagger effect for cards */
+main > div > div:nth-child(1) { animation-delay: 0ms; }
+main > div > div:nth-child(2) { animation-delay: 50ms; }
+main > div > div:nth-child(3) { animation-delay: 100ms; }
+main > div > div:nth-child(4) { animation-delay: 150ms; }
+main > div > div:nth-child(5) { animation-delay: 200ms; }
+
+/* ===========================================
+   CARD HOVER EFFECTS
+   =========================================== */
 
 .group-hover\:scale-110:hover {
   transform: scale(1.1);
 }
+
+/* Enhanced card transitions */
+.group {
+  transition: all var(--transition-base);
+}
+
+.group:hover {
+  transform: translateY(-2px);
+}
+
+.group:active {
+  transform: translateY(0);
+}
+
+/* ===========================================
+   CATEGORY HEADER
+   =========================================== */
+
+.mb-10 > div:first-child h2 {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Category badge styling (Emoji container) */
+.mb-10 span[class*="text-xs"] {
+  transition: all var(--transition-fast);
+  background: var(--color-card-dark) !important;
+  border: 1px solid var(--color-border-dark) !important; /* Subtle border for emoji */
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===========================================
+   GRID/LIST VIEW TRANSITIONS
+   =========================================== */
 
 .transition-all {
   transition-property: all;
@@ -23,20 +88,64 @@ main > div {
   transition-duration: 200ms;
 }
 
-/* Custom scrollbar for better polish */
-::-webkit-scrollbar {
-  width: 6px;
+/* Grid card aspect ratio for visual consistency */
+.grid > div.group {
+  min-height: 180px;
+  background: var(--color-card-dark);
+  border-radius: var(--radius-lg);
+  border: none; /* Borderless */
+  box-shadow: var(--shadow-sm);
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-background-dark);
+.grid > div.group:hover {
+  background: var(--color-surface-elevated);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md), 0 10px 20px -5px rgba(0,0,0,0.2);
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-dark-strong);
-  border-radius: 10px;
+/* ===========================================
+   SEARCH INPUT
+   =========================================== */
+
+input[type="text"] {
+  background: var(--color-card-dark);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-xs);
+  border-radius: var(--radius-full); /* Pill shape search */
+  padding-left: var(--space-10); /* Space for icon */
+  transition: all var(--transition-base);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
+input[type="text"]:focus {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-muted), var(--shadow-md);
 }
+
+/* ===========================================
+   ACTION BUTTONS
+   =========================================== */
+
+.group button[class*="hover:text-red"] {
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+}
+
+.group button[class*="hover:text-red"]:hover {
+  opacity: 1;
+  background-color: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1);
+}
+
+.group button[class*="hover:text-primary"] {
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+}
+
+.group button[class*="hover:text-primary"]:hover {
+  opacity: 1;
+  background-color: var(--color-primary-muted);
+  transform: scale(1.1);
+}
+
+

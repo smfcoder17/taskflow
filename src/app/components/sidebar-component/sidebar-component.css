@@ -1,0 +1,79 @@
+/* ============================================
+   Sidebar Component - Premium Styles
+   ============================================ */
+
+/* Navigation Item Active Indicator */
+.nav-link-active {
+  position: relative;
+  background: var(--color-primary-muted); /* Main indicator is now background */
+  color: var(--color-primary);
+}
+
+.nav-link-active::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 10%;
+  height: 80%;
+  width: 4px;
+  background: var(--color-primary);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4); /* Glow */
+}
+
+/* Sidebar Scrollbar */
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Logo Hover Effect with Glow */
+aside a:first-of-type:hover h1 {
+  background: linear-gradient(135deg, #fff 0%, var(--color-primary) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transform: scale(1.02);
+  transition: all var(--transition-base);
+}
+
+/* Navigation Link Transitions */
+aside nav a {
+  position: relative;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-default);
+  margin: 0 0.5rem; /* Indent slightly */
+  font-family: var(--font-family-body);
+  font-weight: 500;
+}
+
+aside nav a:hover {
+  background: var(--color-surface-elevated);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+aside nav a:active {
+  transform: scale(0.98) translateX(4px);
+}
+
+/* User Profile Section (Top Border Removal) */
+aside .border-t {
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important; /* Extremely subtle */
+}
+
+aside .border-t a:hover .ring-2 {
+  box-shadow: 0 0 0 2px var(--color-primary), 0 0 15px var(--color-primary);
+}
