@@ -1,339 +1,187 @@
 /* ============================================
-   DASHBOARD - BEHAVIORAL PSYCHOLOGY LAYER
+   DASHBOARD V5: FUNCTIONAL DENSITY
    ============================================ */
 
 /* ==========================================
-   CONFETTI CELEBRATION ANIMATION
+   LAYOUT CONTAINERS
    ========================================== */
-.confetti-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1000;
-  overflow: hidden;
+.widget-card {
+  background: var(--color-card-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-dark);
 }
 
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  top: -10px;
-  animation: confetti-fall 2.5s ease-out forwards;
-  animation-delay: calc(var(--i) * 0.08s);
+.widget-header {
+  margin-bottom: var(--space-2);
 }
 
-.confetti:nth-child(odd) {
-  background: var(--color-primary);
-  border-radius: 50%;
-}
-
-.confetti:nth-child(even) {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border-radius: 2px;
-  transform: rotate(45deg);
-}
-
-.confetti:nth-child(3n) {
-  background: linear-gradient(135deg, #ec4899, #be185d);
-  width: 8px;
-  height: 8px;
-}
-
-.confetti:nth-child(4n) {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-  width: 12px;
-  height: 6px;
-  border-radius: 3px;
-}
-
-@keyframes confetti-fall {
-  0% {
-    transform: translateY(0) rotate(0deg) scale(1);
-    opacity: 1;
-    left: calc(5% + var(--i) * 4.5%);
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(720deg) scale(0.5);
-    opacity: 0;
-    left: calc(5% + var(--i) * 4.5% + 100px);
-  }
+.widget-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dark-secondary);
 }
 
 /* ==========================================
-   IDENTITY BANNER (Long-term users)
+   FOCUS STRIP (COMPRESSED HERO)
    ========================================== */
-.identity-banner {
+.focus-strip {
+  background: linear-gradient(90deg, var(--color-card-dark), var(--color-background-dark));
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-dark);
+  padding: var(--space-2);
+  transition: all var(--transition-base);
+}
+
+.focus-strip:hover {
+  border-color: var(--color-primary-muted);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.focus-icon-wrapper {
+  background: var(--color-background-dark);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
-  background: linear-gradient(90deg, var(--color-primary-muted), transparent, var(--color-primary-muted));
-  border-radius: var(--radius-full);
-  color: var(--color-text-dark-primary);
-  font-size: var(--text-sm);
+  border: 1px solid var(--color-border-dark);
+  flex-shrink: 0;
 }
 
-/* ==========================================
-   HERO ACTION CARD
-   ========================================== */
-.hero-action-card {
-  background: var(--color-card-dark);
-  border-radius: var(--radius-xl);
-  padding: var(--space-12);
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-action-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(ellipse at center, var(--color-primary-muted) 0%, transparent 60%);
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-/* Hero complete state */
-.hero-stage-complete {
-  background: linear-gradient(135deg, var(--color-card-dark) 0%, rgba(34, 197, 94, 0.1) 100%);
-  border: 1px solid var(--color-primary-muted);
-}
-
-.hero-context {
-  min-height: 48px;
-}
-
-.hero-complete-button {
+.focus-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-10);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   background: var(--color-primary);
   color: var(--color-background-dark);
-  font-size: var(--text-lg);
+  font-size: var(--text-sm);
   font-weight: 600;
   border-radius: var(--radius-full);
-  transition: all var(--transition-base);
-  box-shadow: 0 4px 15px var(--color-primary-muted), var(--shadow-md);
-  cursor: pointer;
   border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
-.hero-complete-button:hover {
-  transform: scale(1.05) translateY(-2px);
-  box-shadow: 0 8px 25px var(--color-primary-muted), var(--shadow-lg);
+.focus-action-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
-.hero-complete-button:active {
-  transform: scale(0.98);
-}
-
-/* ==========================================
-   PROGRESS BAR WITH EMOTIONAL STAGES
-   ========================================== */
-.progress-narrative-bar {
-  background: var(--color-card-dark);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-base);
-}
-
-/* Stage-based border accents */
-.progress-narrative-bar[data-stage="zero"] {
-  border-left: 3px solid #64748b;
-}
-.progress-narrative-bar[data-stage="early"] {
-  border-left: 3px solid #22c55e;
-}
-.progress-narrative-bar[data-stage="mid"] {
-  border-left: 3px solid #f59e0b;
-}
-.progress-narrative-bar[data-stage="late"] {
-  border-left: 3px solid #ef4444;
-}
-.progress-narrative-bar[data-stage="complete"] {
-  border-left: 3px solid #22c55e;
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent);
-}
-
-.progress-track-slim {
-  height: 8px;
-  background: var(--color-background-dark);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.progress-fill-animated {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Stage-based progress colors */
-.progress-early {
-  background: linear-gradient(90deg, #22c55e, #4ade80);
-}
-.progress-mid {
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
-}
-.progress-late {
-  background: linear-gradient(90deg, #ef4444, #f87171);
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
-  animation: progress-pulse 1.5s ease-in-out infinite;
-}
-.progress-complete {
-  background: linear-gradient(90deg, #22c55e, #4ade80);
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
-}
-
-@keyframes progress-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+.focus-action-btn:active {
+  transform: translateY(0);
 }
 
 /* ==========================================
-   HABIT LIST (ACTIVE/TAPPABLE ROWS)
+   DENSE HABIT LIST
    ========================================== */
-.habit-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.habit-row {
-  display: flex;
+.habit-row-dense {
+  display: grid;
+  grid-template-columns: 40px 1fr auto 40px;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  background: var(--color-card-dark);
-  border-radius: var(--radius-lg);
-  border: none;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  background: transparent;
+  border-bottom: 1px solid var(--color-border-dark);
+  transition: all var(--transition-fast);
   cursor: pointer;
-  transition: all var(--transition-base);
-  width: 100%;
-  text-align: left;
+  border-radius: var(--radius-md);
 }
 
-.habit-row:hover {
+.habit-row-dense:last-child {
+  border-bottom: none;
+}
+
+.habit-row-dense:hover {
   background: var(--color-surface-elevated);
-  transform: translateX(4px);
-  box-shadow: var(--shadow-sm);
 }
 
-.habit-row:active {
-  transform: scale(0.99);
+/* Status Column */
+.habit-status-col {
+  display: flex;
+  justify-content: center;
 }
 
-/* Next habit highlight */
-.habit-row-next {
-  background: linear-gradient(90deg, var(--color-card-dark), rgba(var(--color-primary-rgb, 34, 197, 94), 0.1));
-  border-left: 3px solid var(--color-primary);
-}
-
-/* Completed habits - CELEBRATION, not punishment */
-.habit-row-completed {
-  background: linear-gradient(90deg, var(--color-card-dark), rgba(34, 197, 94, 0.08));
-}
-
-.habit-row-completed:hover {
-  background: linear-gradient(90deg, var(--color-surface-elevated), rgba(34, 197, 94, 0.12));
-}
-
-/* Checkbox Visual */
-.habit-checkbox {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+.status-pending {
+  width: 18px;
+  height: 18px;
   border: 2px solid var(--color-border-dark-strong);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.habit-row-dense:hover .status-pending {
+  border-color: var(--color-primary-muted);
+}
+
+.status-check {
+  width: 20px;
+  height: 20px;
+  /* color: var(--color-primary); */
+  color: var(--color-text-dark-muted); /* Neutral by default */
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: all var(--transition-fast);
 }
 
-.habit-row:hover .habit-checkbox {
+/* Active Focus Highlight */
+.habit-row-dense.active-focus {
+  background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.05), transparent);
+  border-left: 3px solid var(--color-primary);
+}
+
+.habit-row-dense.active-focus .status-pending {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
 }
 
-.habit-checkbox-checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  animation: checkbox-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* Completed State - NEUTRAL */
+.habit-row-dense.completed .habit-title-dense {
+  color: var(--color-text-dark-muted);
+  text-decoration: none; /* No strikethrough, just dim */
 }
 
-@keyframes checkbox-pop {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-
-/* Habit Icon */
-.habit-icon {
-  font-size: var(--text-2xl);
-  flex-shrink: 0;
-}
-
-/* Completion Indicator */
-.habit-completion-indicator {
-  flex-shrink: 0;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-full);
-  background: var(--color-background-dark);
-  transition: all var(--transition-fast);
-}
-
-.habit-completion-indicator.active {
-  background: var(--color-primary-muted);
+/* Typography */
+.habit-title-dense {
+  font-weight: 500;
+  color: var(--color-text-dark-primary);
+  font-size: var(--text-base);
 }
 
 /* ==========================================
-   CELEBRATION CARD (PERFECT DAY)
+   VICTORY OVERLAY (SUBTLE TOAST)
    ========================================== */
-.celebration-card {
-  background: linear-gradient(135deg, var(--color-card-dark) 0%, rgba(34, 197, 94, 0.15) 100%);
-  border-radius: var(--radius-xl);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-primary-muted);
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-/* ==========================================
-   UTILITY CLASSES
-   ========================================== */
-.font-display {
-  font-family: var(--font-family-display);
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ==========================================
-   LIGHT THEME ADJUSTMENTS
-   ========================================== */
-body.theme-light .hero-action-card::before {
-  opacity: 0.08;
+/* Light Theme Adjustments */
+body.theme-light .focus-strip {
+  background: #fff;
+  border-color: #e2e8f0;
 }
 
-body.theme-light .habit-row:hover {
-  background: #f1f5f9;
+body.theme-light .focus-icon-wrapper {
+  background: #f8fafc;
+  border-color: #e2e8f0;
 }
 
-body.theme-light .progress-fill-animated {
-  box-shadow: none;
+body.theme-light .habit-row-dense:hover {
+  background: #f8fafc;
 }
 
-body.theme-light .identity-banner {
-  background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent, rgba(34, 197, 94, 0.1));
+body.theme-light .widget-card {
+  background: #fff;
+  border-color: #e2e8f0;
 }

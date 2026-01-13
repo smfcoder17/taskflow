@@ -1,193 +1,234 @@
-<div class="bg-background-dark min-h-screen flex pt-4" (click)="closeMenus()">
-  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+<div class="bg-background-dark min-h-screen flex pt-0" (click)="closeMenus()">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full opacity-0 animate-fade-in" [class.opacity-100]="!isLoading()">
     
-    <!-- ==================== CONFETTI CELEBRATION ==================== -->
-    @if (showConfetti()) {
-    <div class="confetti-container" aria-hidden="true">
-      @for (i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; track i) {
-      <div class="confetti" [style.--i]="i"></div>
-      }
-    </div>
-    }
-
-    <!-- ==================== IDENTITY MESSAGE (Long-term users) ==================== -->
-    @if (identityMessage() && !isLoading()) {
-    <div class="identity-banner mb-6">
-      <span class="text-lg">✨</span>
-      <span class="font-medium">{{ identityMessage() }}</span>
-    </div>
-    }
-
-    <!-- ==================== HERO: SINGLE ACTION FOCUS ==================== -->
-    <section class="hero-action-card mb-8" [class.hero-stage-complete]="progressNarrative().stage === 'complete'">
-      @if (isLoading()) {
-      <div class="flex items-center justify-center py-16">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-      } @else if (nextHabit(); as habit) {
-      <!-- Next Habit to Complete -->
-      <div class="text-center">
-        <p class="text-sm uppercase tracking-widest text-text-dark-muted mb-4 font-medium">Your Next Action</p>
-        <div class="text-6xl mb-4">{{ habit.icon || '🎯' }}</div>
-        <h1 class="text-3xl font-bold text-text-dark-primary mb-2 font-display">{{ habit.title }}</h1>
-        
-        <!-- Context: Consequence or Urgency -->
-        @if (heroContext(); as ctx) {
-        <div class="hero-context mb-4">
-          @if (ctx.consequence) {
-          <p class="text-primary font-medium">{{ ctx.consequence }}</p>
+    <!-- ==================== TOP BAR: DATE & SETTINGS ==================== -->
+    <header class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-text-dark-primary font-display flex items-center gap-2">
+          Dashboard
+          <!-- Global Progress Micro-Indicator -->
+          @if (dailyProgress().percentage > 0) {
+            <span class="text-sm font-normal text-text-dark-muted px-2 py-0.5 bg-surface-elevated rounded-full">
+              {{ dailyProgress().percentage }}% Done
+            </span>
           }
-          @if (ctx.urgency) {
-          <p class="text-text-dark-secondary text-sm mt-1">{{ ctx.urgency }}</p>
-          }
-        </div>
-        }
-        
-        <!-- Explicit CTA with clear action -->
-        <button 
-          (click)="toggleHabit(habit.id!)"
-          class="hero-complete-button"
-        >
-          <span class="material-symbols-outlined text-2xl">check_circle</span>
-          {{ heroContext()?.actionLabel || 'Mark as Done' }}
-        </button>
-
-        <!-- Remaining habits indicator -->
-        @if (dailyProgress().remaining > 1) {
-        <p class="text-sm text-text-dark-muted mt-6">
-          ↓ {{ dailyProgress().remaining - 1 }} more habit{{ dailyProgress().remaining > 2 ? 's' : '' }} today
+        </h1>
+        <p class="text-text-dark-secondary text-sm mt-0.5">
+          {{ formatDate(currentDate()) }} · {{ isToday() ? 'Today' : '' }}
         </p>
-        }
       </div>
-      } @else if (habits().length === 0) {
-      <!-- No Habits Yet -->
-      <div class="text-center py-8">
-        <div class="text-6xl mb-4 opacity-30">🌱</div>
-        <h2 class="text-2xl font-bold text-text-dark-primary mb-2 font-display">Start Your Journey</h2>
-        <p class="text-text-dark-secondary mb-6">Create your first habit to begin building consistency.</p>
-        <button routerLink="/habit/new" class="hero-complete-button">
-          <span class="material-symbols-outlined">add</span>
-          Create First Habit
-        </button>
-      </div>
-      } @else {
-      <!-- All Done for Today -->
-      <div class="text-center py-8">
-        <div class="text-6xl mb-4">{{ progressNarrative().emoji }}</div>
-        <h2 class="text-2xl font-bold text-text-dark-primary mb-2 font-display">{{ progressNarrative().main }}</h2>
-        <p class="text-text-dark-secondary mb-4">{{ progressNarrative().sub }}</p>
-        <div class="flex justify-center gap-4">
-          <button routerLink="/calendar" class="btn-modern flex items-center gap-2">
-            <span class="material-symbols-outlined">calendar_month</span>
-            View Calendar
-          </button>
-          <button routerLink="/habit/new" class="btn-modern flex items-center gap-2">
-            <span class="material-symbols-outlined">add</span>
-            Add Habit
-          </button>
-        </div>
-      </div>
-      }
-    </section>
-
-    <!-- ==================== PROGRESS BAR WITH EMOTIONAL STAGES ==================== -->
-    @if (!isLoading() && dailyProgress().totalHabits > 0) {
-    <div class="progress-narrative-bar mb-8" [attr.data-stage]="progressNarrative().stage">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">{{ progressNarrative().emoji }}</span>
-          <span class="text-lg font-semibold text-text-dark-primary">{{ progressNarrative().main }}</span>
-        </div>
-        <span class="text-sm text-text-dark-muted">{{ dailyProgress().completedHabits }}/{{ dailyProgress().totalHabits }}</span>
-      </div>
-      <div class="progress-track-slim">
-        <div 
-          class="progress-fill-animated" 
-          [class.progress-early]="progressNarrative().stage === 'early' || progressNarrative().stage === 'zero'"
-          [class.progress-mid]="progressNarrative().stage === 'mid'"
-          [class.progress-late]="progressNarrative().stage === 'late'"
-          [class.progress-complete]="progressNarrative().stage === 'complete'"
-          [style.width.%]="dailyProgress().percentage"
-        ></div>
-      </div>
-      <p class="text-sm text-text-dark-secondary mt-2">{{ progressNarrative().sub }}</p>
-    </div>
-    }
-
-    <!-- ==================== TODAY'S HABITS ==================== -->
-    @if (!isLoading() && habitsForCurrentDate().length > 0) {
-    <section class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-text-dark-primary">Today's Habits</h2>
-        <span class="text-sm text-text-dark-muted">{{ formatDate(currentDate()) }}</span>
-      </div>
-
-      <!-- Habit List -->
-      <div class="habit-list-container">
-        @for (habit of filteredHabits(); track habit.id) {
+      
+      <!-- Quick Stats / Actions -->
+      <div class="flex items-center gap-3">
+         <!-- Add Habit (Compact) -->
         <button 
-          (click)="toggleHabit(habit.id!)"
-          class="habit-row group"
-          [class.habit-row-completed]="habit.completedToday"
-          [class.habit-row-next]="nextHabit()?.id === habit.id && !habit.completedToday"
+          routerLink="/habit/new" 
+          class="flex items-center gap-2 px-3 py-1.5 bg-surface-elevated hover:bg-primary/10 text-text-dark-primary hover:text-primary rounded-lg border border-border-dark transition-all text-sm font-medium"
         >
-          <!-- Checkbox Visual -->
-          <div class="habit-checkbox" [class.habit-checkbox-checked]="habit.completedToday">
-            @if (habit.completedToday) {
-            <span class="material-symbols-outlined text-white text-lg">check</span>
-            }
-          </div>
-
-          <!-- Habit Info -->
-          <div class="habit-icon">{{ habit.icon || '🎯' }}</div>
-          <div class="flex-1 text-left">
-            <h3 class="font-medium text-text-dark-primary" [class.opacity-80]="habit.completedToday">
-              {{ habit.title }}
-            </h3>
-            @if (habit.streakEnabled && (habit.currentStreak || 0) > 0) {
-            <span class="text-xs text-text-dark-muted flex items-center gap-1">
-              <span>🔥</span> {{ habit.currentStreak }} day streak
-            </span>
-            }
-          </div>
-
-          <!-- Completion Indicator (Celebration, not Punishment) -->
-          <div class="habit-completion-indicator" [class.active]="habit.completedToday">
-            @if (habit.completedToday) {
-            <span class="text-primary font-medium text-sm flex items-center gap-1">
-              <span class="material-symbols-outlined text-base">check_circle</span>
-              Done!
-            </span>
-            } @else if (nextHabit()?.id === habit.id) {
-            <span class="text-primary text-sm font-medium">← Start here</span>
-            } @else {
-            <span class="text-text-dark-muted text-sm group-hover:text-primary transition-colors">Tap to complete</span>
-            }
-          </div>
+          <span class="material-symbols-outlined text-base">add</span>
+          New Habit
         </button>
-        }
+      </div>
+    </header>
+
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-20">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    } @else {
+
+    <!-- ==================== FOCUS STRIP (Compressed Hero) ==================== -->
+    @if (nextHabit(); as habit) {
+    <section class="focus-strip mb-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6 p-1">
+        
+        <!-- Left: Context & Icon -->
+        <div class="flex items-center gap-4 flex-1">
+          <div class="focus-icon-wrapper">
+            <span class="text-2xl">{{ habit.icon || '🎯' }}</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-primary">Next Focus</span>
+              @if (heroContext(); as ctx) {
+                @if (ctx.urgency) {
+                  <span class="text-xs text-text-dark-muted border-l border-border-dark pl-2">{{ ctx.urgency }}</span>
+                }
+              }
+            </div>
+            <h2 class="text-xl font-bold text-text-dark-primary leading-tight">{{ habit.title }}</h2>
+          </div>
+        </div>
+
+        <!-- Right: Action & Stats -->
+        <div class="flex items-center gap-4 w-full md:w-auto">
+          <!-- Mini Stats for Context -->
+          @if (habit.streakEnabled) {
+          <div class="hidden md:flex flex-col items-end mr-2">
+            <span class="text-xs text-text-dark-muted">Current Streak</span>
+            <span class="text-sm font-bold text-text-dark-primary">{{ habit.currentStreak || 0 }} days</span>
+          </div>
+          }
+
+          <!-- Honest CTA -->
+          <button 
+            (click)="toggleHabit(habit.id!)"
+            class="focus-action-btn"
+          >
+            <span class="material-symbols-outlined">check</span>
+            Complete
+          </button>
+        </div>
+
+      </div>
+    </section>
+    } 
+
+    <!-- ==================== MAIN GRID LAYOUT ==================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- LEFT COL: HABIT LIST (DENSE) -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- List Header -->
+        <div class="flex items-center justify-between border-b border-border-dark pb-2">
+          <h3 class="text-sm font-semibold text-text-dark-secondary uppercase tracking-wider">All Habits</h3>
+          <span class="text-xs text-text-dark-muted">{{ dailyProgress().completedHabits }} of {{ dailyProgress().totalHabits }} completed</span>
+        </div>
+
+        <!-- Dense List -->
+        <div class="space-y-1">
+          @for (habit of filteredHabits(); track habit.id) {
+          <div 
+            class="habit-row-dense group"
+            [class.completed]="habit.completedToday"
+            [class.active-focus]="nextHabit()?.id === habit.id && !habit.completedToday"
+            (click)="toggleHabit(habit.id!)"
+          >
+            <!-- 1. Check/Status -->
+            <div class="habit-status-col">
+              @if (habit.completedToday) {
+                <div class="status-check">
+                  <span class="material-symbols-outlined text-sm">check</span>
+                </div>
+              } @else {
+                <div class="status-pending"></div>
+              }
+            </div>
+
+            <!-- 2. Content -->
+            <div class="habit-content-col">
+              <span class="habit-title-dense">{{ habit.title }}</span>
+              <!-- Weekly Frequency Dots (Mini Viz) -->
+              <div class="flex items-center gap-0.5 mt-1 opacity-50">
+                 @for (i of [0,1,2,3,4,5,6]; track i) {
+                   <div class="w-1 h-1 rounded-full bg-text-dark-muted"></div>
+                 }
+              </div>
+            </div>
+
+            <!-- 3. Metrics (Streak) -->
+            <div class="habit-metrics-col text-right">
+              @if (habit.streakEnabled) {
+                <div class="flex items-center justify-end gap-1 text-text-dark-muted group-hover:text-text-dark-primary transition-colors">
+                  <span class="text-xs font-mono">{{ habit.currentStreak || 0 }}</span>
+                  <span class="material-symbols-outlined text-[10px] opacity-70">local_fire_department</span>
+                </div>
+              } @else {
+                <span class="text-xs text-text-dark-muted">-</span>
+              }
+            </div>
+            
+            <!-- 4. Quick Action (Hover) -->
+            <div class="habit-action-col">
+               @if (!habit.completedToday) {
+                 <span class="material-symbols-outlined text-text-dark-muted hover:text-primary transition-colors">check_circle</span>
+               }
+            </div>
+
+          </div>
+          }
+          
+          @if (habits().length === 0) {
+            <div class="text-center py-12 border border-dashed border-border-dark rounded-lg">
+              <p class="text-text-dark-muted mb-2">No habits tracked today.</p>
+              <a routerLink="/habit/new" class="text-primary hover:underline text-sm">Create a habit</a>
+            </div>
+          }
+        </div>
       </div>
 
-      <!-- Add New Habit (Subtle) -->
-      <button
-        routerLink="/habit/new"
-        class="w-full border border-dashed border-border-dark hover:border-primary/50 rounded-xl p-4 flex items-center justify-center gap-2 text-text-dark-muted hover:text-primary transition-all"
-      >
-        <span class="material-symbols-outlined text-lg">add</span>
-        <span class="text-sm">Add new habit</span>
-      </button>
-    </section>
+      <!-- RIGHT COL: DATA & INSIGHTS (SIDEBAR REPLACEMENT) -->
+      <div class="space-y-6">
+        
+        <!-- Weekly Heatmap Widget -->
+        <div class="widget-card">
+          <div class="widget-header">
+            <h3 class="widget-title">Last 7 Days</h3>
+          </div>
+          <div class="flex justify-between items-end h-24 pt-4 px-2">
+            @for (day of weeklyProgress().days; track day.date) {
+            <div class="flex flex-col items-center gap-2 group relative">
+              <!-- Tooltip -->
+              <div class="absolute -top-8 bg-surface-elevated px-2 py-1 rounded text-xs text-text-dark-primary opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-border-dark shadow-xl z-10">
+                {{ day.completed }}/{{ day.total }}
+              </div>
+              <!-- Bar -->
+              <div class="w-2 bg-surface-elevated rounded-full relative h-16 overflow-hidden">
+                <div 
+                  class="absolute bottom-0 left-0 w-full rounded-full transition-all duration-500"
+                  [class.bg-primary]="getWeekDayStatus(day) === 'complete'"
+                  [class.bg-primary-muted]="getWeekDayStatus(day) === 'partial'"
+                  [class.opacity-30]="getWeekDayStatus(day) === 'empty'"
+                  [style.height.%]="day.total > 0 ? (day.completed / day.total * 100) : 0"
+                ></div>
+              </div>
+              <!-- Label -->
+              <span class="text-[10px] text-text-dark-muted font-mono uppercase">{{ day.dayName.charAt(0) }}</span>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Identity/Stats Widget -->
+        @if (topStreaks().length > 0) {
+        <div class="widget-card">
+          <div class="widget-header mb-3">
+            <h3 class="widget-title">Top Streaks</h3>
+          </div>
+          <div class="space-y-3">
+            @for (streak of topStreaks(); track streak.habitId) {
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-text-dark-secondary truncate max-w-[120px]">{{ streak.habitTitle }}</span>
+              <div class="flex items-center gap-1">
+                <span class="font-mono font-bold text-text-dark-primary">{{ streak.currentStreak }}</span>
+                <span class="text-[10px] text-text-dark-muted">days</span>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+      </div>
+
+    </div>
+
     }
 
-    <!-- ==================== CELEBRATION CARD (When All Done) ==================== -->
-    @if (!isLoading() && dailyProgress().percentage === 100 && habits().length > 0) {
-    <section class="celebration-card mt-8">
-      <div class="text-center">
-        <div class="text-5xl mb-3">🏆</div>
-        <h3 class="text-xl font-bold text-text-dark-primary mb-2">Perfect Day Achieved!</h3>
-        <p class="text-text-dark-secondary">You completed all {{ dailyProgress().totalHabits }} habits. Keep building.</p>
+    <!-- ==================== VICTORY OVERLAY (Subtle) ==================== -->
+    @if (showVictoryMoment()) {
+    <div class="fixed bottom-8 right-8 z-50 animate-slide-up">
+      <div class="bg-surface-elevated border border-border-dark shadow-2xl rounded-lg p-4 flex items-center gap-4 pr-6">
+        <div class="bg-green-500/10 p-2 rounded-full text-green-500">
+          <span class="material-symbols-outlined">emoji_events</span>
+        </div>
+        <div>
+          <h4 class="font-bold text-text-dark-primary">All Done</h4>
+          <p class="text-xs text-text-dark-secondary">You hit 100% completion today.</p>
+        </div>
       </div>
-    </section>
+    </div>
     }
 
   </main>

@@ -120,6 +120,7 @@ export class DashboardPage {
   showHabitActionsMenu = signal<string | null>(null);
   showDoneSection = signal<boolean>(false);
   showConfetti = signal<boolean>(false); // Celebration animation state
+  showVictoryMoment = signal<boolean>(false); // Final habit completion screen takeover
 
   // Computed: The ONE habit to focus on (behavior-driving)
   nextHabit = computed(() => {
@@ -621,4 +622,5 @@ export class DashboardPage {
   getActiveSortLabel(): string {
     return this.sortOptions.find((s) => s.value === this.activeSort())?.label || 'Sort';
   }
+  // Force Rebuild V5
 }
