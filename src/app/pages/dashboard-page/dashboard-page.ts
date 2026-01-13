@@ -119,6 +119,42 @@ export class DashboardPage {
   // UI State
   showHabitActionsMenu = signal<string | null>(null);
   showDoneSection = signal<boolean>(false);
+  showConfetti = signal<boolean>(false); // Celebration animation state
+
+  // Computed: The ONE habit to focus on (behavior-driving)
+  nextHabit = computed(() => {
+    const pending = this.habitsForCurrentDate().filter(h => !h.completedToday);
+    if (pending.length === 0) return null;
+    
+    // Prioritize: 1) At-risk (streak-enabled), 2) Highest streak, 3) First alphabetically
+    const atRisk = pending.filter(h => h.streakEnabled).sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0));
+    if (atRisk.length > 0) return atRisk[0];
+    
+    return pending.sort((a, b) => a.title.localeCompare(b.title))[0];
+  });
+
+  // Computed: Emotionally-reframed progress message
+  progressNarrative = computed(() => {
+    const progress = this.dailyProgress();
+    const next = this.nextHabit();
+    
+    if (progress.totalHabits === 0) return { main: 'No habits today', sub: 'Enjoy your rest day!' };
+    if (progress.percentage === 100) return { main: '🎉 All done!', sub: 'You crushed it today.' };
+    
+    if (progress.completedHabits === 0) {
+      return { main: 'Start strong', sub: `${progress.totalHabits} habits waiting for you.` };
+    }
+    
+    if (progress.remaining === 1) {
+      return { main: 'One more to go!', sub: 'Finish strong to complete your day.' };
+    }
+    
+    if (next?.streakEnabled && (next.currentStreak || 0) > 0) {
+      return { main: `${progress.completedHabits} down`, sub: `Complete ${next.title} to keep your ${next.currentStreak}-day streak.` };
+    }
+    
+    return { main: `${progress.completedHabits} down, ${progress.remaining} to go`, sub: 'Keep the momentum!' };
+  });
 
   // Computed: habits scheduled for current date
   habitsForCurrentDate = computed(() => {
@@ -417,8 +453,12 @@ export class DashboardPage {
 
   async toggleHabit(habitId: string) {
     try {
-      // Optimistic update
+      // Check if we're completing (not uncompleting)
       const currentHabits = this.habits();
+      const habit = currentHabits.find((h) => h.id === habitId);
+      const isCompleting = habit && !habit.completedToday;
+
+      // Optimistic update
       const habitIndex = currentHabits.findIndex((h) => h.id === habitId);
       if (habitIndex !== -1) {
         const updatedHabits = [...currentHabits];
@@ -427,6 +467,12 @@ export class DashboardPage {
           completedToday: !updatedHabits[habitIndex].completedToday,
         };
         this.habits.set(updatedHabits);
+      }
+
+      // Trigger confetti celebration on completion
+      if (isCompleting) {
+        this.showConfetti.set(true);
+        setTimeout(() => this.showConfetti.set(false), 2500);
       }
 
       const dateString = this.formatDateForAPI(this.currentDate());
