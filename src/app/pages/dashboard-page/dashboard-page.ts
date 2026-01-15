@@ -852,7 +852,7 @@ export class DashboardPage {
   isFutureDate = computed(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const selected = this.currentDate();
+    const selected = new Date(this.currentDate());
     selected.setHours(0, 0, 0, 0);
     return selected > today;
   });

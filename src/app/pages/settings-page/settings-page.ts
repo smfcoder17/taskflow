@@ -128,13 +128,6 @@ export class SettingsPage implements OnInit, CanComponentDeactivate {
 
   async ngOnInit() {
     await this.loadSettings();
-
-    // Intercept navigation events to warn about unsaved changes
-    this.router.events.subscribe(() => {
-      if (this.hasUnsavedChanges()) {
-        // This will be caught by the canDeactivate guard
-      }
-    });
   }
 
   // Change detection

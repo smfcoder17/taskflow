@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../services/supabase-service';
-import { HabitWithStats, HabitCategory } from '../../models/models';
+import { HabitWithStats, HabitCategory, getIconByCategory, getLabelByCategory } from '../../models/models';
 import { ConfirmationModalComponent } from '../../components/confirmation-modal/confirmation-modal';
 
 type ViewMode = 'list' | 'grid';
@@ -33,6 +33,9 @@ export class AllHabitsPage implements OnInit {
   showDeleteModal = signal<boolean>(false);
   habitToDelete = signal<HabitWithStats | null>(null);
 
+  // Action menu state
+  openMenuId = signal<string | null>(null);
+
   // Filtered habits based on search
   filteredHabits = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -46,8 +49,18 @@ export class AllHabitsPage implements OnInit {
   });
 
   // Stats
-  totalHabits = computed(() => this.habits().length);
   activeHabits = computed(() => this.habits().filter((h) => !h.archived).length);
+
+  // Habit Breakdown for sidebar widget
+  habitBreakdown = computed(() => {
+    const all = this.habits();
+    return {
+      daily: all.filter(h => h.frequency === 'daily').length,
+      weekly: all.filter(h => h.frequency === 'weekly').length,
+      monthly: all.filter(h => h.frequency === 'monthly').length,
+      custom: all.filter(h => h.frequency === 'custom').length,
+    };
+  });
 
   // Group habits by category
   groupedHabits = computed(() => {
@@ -110,6 +123,27 @@ export class AllHabitsPage implements OnInit {
     this.searchQuery.set('');
   }
 
+  // Close any open menus (for layout click handler)
+  closeMenus() {
+    this.openMenuId.set(null);
+  }
+
+  // Toggle action menu for a specific habit
+  toggleMenu(habitId: string, event: Event) {
+    event.stopPropagation();
+    if (this.openMenuId() === habitId) {
+      this.openMenuId.set(null);
+    } else {
+      this.openMenuId.set(habitId);
+    }
+  }
+
+  // Format time: 07:00:00 → 07:00
+  formatTime(time: string | undefined): string {
+    if (!time) return '';
+    return time.slice(0, 5); // Truncate seconds
+  }
+
   toggleView(mode: ViewMode) {
     this.viewMode.set(mode);
   }
@@ -137,29 +171,11 @@ export class AllHabitsPage implements OnInit {
   }
 
   getCategoryEmoji(category: string): string {
-    const emojiMap: Record<string, string> = {
-      'Health & Fitness': '💪',
-      Productivity: '📚',
-      Mindfulness: '🧘',
-      Social: '👥',
-      Learning: '🎓',
-      Creative: '🎨',
-      Uncategorized: '📋',
-    };
-    return emojiMap[category] || '📌';
+    return getIconByCategory(category);
   }
 
   getHabitIcon(category: string | null | undefined): string {
-    if (!category) return '📋';
-    const iconMap: Record<string, string> = {
-      'Health & Fitness': '💪',
-      Productivity: '📚',
-      Mindfulness: '🧘',
-      Social: '👥',
-      Learning: '🎓',
-      Creative: '🎨',
-    };
-    return iconMap[category] || '✨';
+    return getIconByCategory(category);
   }
 
   editHabit(habit: HabitWithStats) {
@@ -199,23 +215,7 @@ export class AllHabitsPage implements OnInit {
   }
 
   getCategoryIcon(category: HabitCategory | undefined): string {
-    if (!category) return '⭐';
-
-    const icons: Record<HabitCategory, string> = {
-      health: '🏥',
-      fitness: '💪',
-      nutrition: '🥗',
-      mindfulness: '🧘',
-      learning: '📚',
-      productivity: '⚡',
-      creative: '🎨',
-      social: '👥',
-      finance: '💰',
-      sleep: '😴',
-      hydration: '💧',
-      personal: '⭐',
-    };
-    return icons[category] || '⭐';
+    return getIconByCategory(category);
   }
 
   getFrequencyLabel(habit: HabitWithStats): string {

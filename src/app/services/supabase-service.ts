@@ -32,6 +32,7 @@ import id from '@angular/common/locales/id';
 })
 export class SupabaseService {
   private supabase: SupabaseClient;
+  private STREAK_HISTORY_DAYS = 365;
   isLoading = signal(true);
   session = signal<Session | null>(null);
   userSettings = signal<UserSettings>({ ...DEFAULT_SETTINGS });
@@ -447,8 +448,9 @@ export class SupabaseService {
 
     // 2. Fetch Logs (Batch fetch for efficiency)
     // Fetch logs for last 365 days to see enough history for comparison & reasonable streaks
+
     const yearStart = new Date();
-    yearStart.setDate(yearStart.getDate() - 365);
+    yearStart.setDate(yearStart.getDate() - this.STREAK_HISTORY_DAYS);
     const dateLimit = yearStart.toISOString().split('T')[0];
 
     // Fetch all logs since limit
@@ -527,7 +529,7 @@ export class SupabaseService {
 
     // Fetch logs for the last year
     const yearStart = new Date();
-    yearStart.setDate(yearStart.getDate() - 365);
+    yearStart.setDate(yearStart.getDate() - this.STREAK_HISTORY_DAYS);
     const dateLimit = yearStart.toISOString().split('T')[0];
 
     const { data: allLogs } = await this.supabase

@@ -66,7 +66,7 @@ export interface AccentColorOption {
 
 /** Available accent color presets */
 export const AccentColorOptions: AccentColorOption[] = [
-  { value: 'green', label: 'Green', colorClass: 'bg-primary' },
+  { value: 'green', label: 'Green', colorClass: 'bg-green-500' },
   { value: 'blue', label: 'Blue', colorClass: 'bg-blue-500' },
   { value: 'purple', label: 'Purple', colorClass: 'bg-purple-500' },
   { value: 'pink', label: 'Pink', colorClass: 'bg-pink-500' },
@@ -272,4 +272,39 @@ export interface HeatmapDay {
   completionRate: number; // 0-100
   completedCount: number;
   totalScheduled: number;
+}
+
+// ==================== Helper Functions ====================
+
+/**
+ * Gets the icon for a given category string (either token or label)
+ * @param category The category string to look up
+ * @returns The icon emoji or a default icon if not found
+ */
+export function getIconByCategory(category?: string | null): string {
+  if (!category) return '🎯'; // Default icon
+
+  const normalized = category.toLowerCase().trim();
+  const iconPair = DefaultHabitIcons.find(
+    (item) => item.category.toLowerCase() === normalized || item.label.toLowerCase() === normalized
+  );
+
+  return iconPair?.icon || '🎯';
+}
+
+/**
+ * Gets the display label for a given category token
+ * @param category The category token to look up
+ * @returns The display label or capitalized category if not found
+ */
+export function getLabelByCategory(category?: string | null): string {
+  if (!category) return 'Personal';
+
+  const normalized = category.toLowerCase().trim();
+  const iconPair = DefaultHabitIcons.find((item) => item.category.toLowerCase() === normalized);
+
+  if (iconPair) return iconPair.label;
+
+  // Fallback: capitalize first letter
+  return category.charAt(0).toUpperCase() + category.slice(1);
 }
