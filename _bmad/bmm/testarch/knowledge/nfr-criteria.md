@@ -55,7 +55,7 @@ test.describe('Security NFR: Authentication & Authorization', () => {
     expect(token).toBeTruthy();
 
     // Wait 16 minutes (use mock clock in real tests)
-    await page.clock.fastForward('00:16:00');
+    await page.clock.fastForward(16 * 60 * 1000); // 16 minutes in milliseconds
 
     // Token should be expired, API call should fail
     const response = await request.get('/api/user/profile', {
