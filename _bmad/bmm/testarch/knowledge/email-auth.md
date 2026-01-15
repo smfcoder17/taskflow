@@ -70,7 +70,8 @@ async function getMagicLinkFromEmail(email: string): Promise<string> {
     throw new Error(`Magic link not found in email to ${email}`);
   }
 
-  console.log(`📧 Email received. Magic link extracted: ${magicLink}`);
+  const magicLinkPreview = `${magicLink.slice(0, 32)}...`;
+  console.log(`📧 Email received. Magic link extracted (preview): ${magicLinkPreview}`);
   return magicLink;
 }
 
