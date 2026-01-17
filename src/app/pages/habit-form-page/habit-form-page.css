@@ -1,0 +1,161 @@
+/* ============================================
+   Habit Form Page - Refined Styles
+   ============================================ */
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+
+.animate-in {
+  animation: fadeIn var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form entry animation */
+form {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===========================================
+   RANGE SLIDER
+   =========================================== */
+
+input[type='range'] {
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--color-surface-elevated, var(--color-background-dark));
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-dark-strong);
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 12px -2px var(--color-primary);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 16px -2px var(--color-primary);
+}
+
+input[type='range']:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px var(--color-primary-muted, rgba(34, 197, 94, 0.2)), 0 0 12px -2px var(--color-primary);
+}
+
+/* Firefox support */
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 12px -2px var(--color-primary);
+}
+
+/* ===========================================
+   FORM SECTIONS
+   =========================================== */
+
+/* Glass effect for sections */
+.bg-card-dark {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Section hover effect */
+form .bg-card-dark {
+  transition: box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+form .bg-card-dark:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-border-dark-strong);
+}
+
+/* ===========================================
+   CATEGORY BUTTONS
+   =========================================== */
+
+form button[type="button"].flex-col {
+  transition: all var(--transition-fast);
+}
+
+form button[type="button"].flex-col:hover {
+  transform: translateY(-2px);
+}
+
+form button[type="button"].flex-col:active {
+  transform: translateY(0);
+}
+
+/* ===========================================
+   FORM INPUTS
+   =========================================== */
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px var(--color-primary-muted, rgba(34, 197, 94, 0.15)) !important;
+}
+
+/* Date/time input dark mode support */
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+input[type="time"]:hover::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* ===========================================
+   SUBMIT BUTTON
+   =========================================== */
+
+button[type="submit"]:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+button[type="submit"]:not(:disabled):active {
+  transform: translateY(0);
+}
+

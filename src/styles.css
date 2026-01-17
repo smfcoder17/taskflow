@@ -1,41 +1,238 @@
-/* You can add global styles to this file, and also import other style files */
+/* TaskFlow Design System v3.0 - Premium Polish */
+/* "Deep Space" Aesthetic - Clean, Borderless, Intentional */
 
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-@theme {
-  /* Colors */
-  --color-primary: #13ec5b;
-  --color-background-light: #f6f8f6;
-  --color-background-dark: #102216;
-  --color-card-dark: #1c2d21;
-  --color-border-dark: #23482f;
-  --color-border-dark-strong: #326744;
-  --color-text-dark-primary: #ffffff;
-  --color-text-dark-secondary: #92c9a4;
+/* ============================================
+   DESIGN TOKENS
+   ============================================ */
 
-  /* Category Colors */
-  --color-category-health: #3b82f6;
-  --color-category-fitness: #22c55e;
-  --color-category-nutrition: #84cc16;
-  --color-category-mindfulness: #14b8a6;
-  --color-category-learning: #eab308;
-  --color-category-productivity: #f97316;
-  --color-category-creative: #ec4899;
-  --color-category-social: #0ea5e9;
-  --color-category-finance: #10b981;
-  --color-category-sleep: #6366f1;
-  --color-category-hydration: #06b6d4;
-  --color-category-personal: #a855f7;
+:root {
+  /* ===========================================
+     PREMIUM "DEEP SPACE" THEME (Base)
+     =========================================== */
+  /* Replaces generic black/green with rich slate/charcoal tones */
+  
+  --theme-primary: #6366f1; /* Indigo-500: More premium than standard green */
+  --theme-primary-hover: #4f46e5;
+  --theme-primary-muted: rgba(99, 102, 241, 0.12);
+  
+  /* Backgrounds - Moving away from flat colors to rich neutrals */
+  --theme-background-light: #f8fafc;
+  --theme-background-dark: #0f1115; /* Deep rich charcoal, not pure black */
+  
+  /* Surfaces - Lighter, warmer slates for cards */
+  --theme-card-dark: #161920; 
+  --theme-surface-elevated: #1e222b;
+  
+  /* Borders - EXTREMELY subtle or non-existent (used for inner interaction mostly) */
+  --theme-border-dark: rgba(255, 255, 255, 0.04);
+  --theme-border-dark-strong: rgba(255, 255, 255, 0.08);
+  
+  /* Text */
+  --theme-text-dark-primary: #ffffff; /* Crisp white */
+  --theme-text-dark-secondary: #94a3b8; /* Slate-400 - high readability */
 
-  /* Fonts */
-  --font-family-display: Inter, sans-serif;
+  /* ===========================================
+     DYNAMIC VARIABLES
+     =========================================== */
+  --color-primary: var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
+  --color-primary-muted: var(--theme-primary-muted);
+  --color-background-light: var(--theme-background-light);
+  --color-background-dark: var(--theme-background-dark);
+  --color-card-dark: var(--theme-card-dark);
+  --color-surface-elevated: var(--theme-surface-elevated);
+  --color-border-dark: var(--theme-border-dark);
+  --color-border-dark-strong: var(--theme-border-dark-strong);
+  --color-text-dark-primary: var(--theme-text-dark-primary);
+  --color-text-dark-secondary: var(--theme-text-dark-secondary);
+  --color-text-dark-muted: #64748b;
 
-  /* Border Radius */
-  --radius-default: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* ===========================================
+     TYPOGRAPHY SYSTEM (Humanist & Clean)
+     =========================================== */
+  /* Outfit for headings (personality), Inter for UI (readability) */
+  --font-family-display: 'Outfit', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px - Bumped up for readability */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-md: 1.125rem;     /* 18px */
+  --font-size-lg: 1.25rem;      /* 20px */
+  --font-size-xl: 1.5rem;       /* 24px */
+  --font-size-2xl: 2rem;        /* 32px */
+  --font-size-3xl: 2.5rem;      /* 40px */
+  
+  /* Premium Leading */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.6; /* More breathing room */
+  --line-height-relaxed: 1.8;
+
+  /* ===========================================
+     REFINED SPACING (Grid 4px/8px)
+     =========================================== */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;    /* 24px - Section padding */
+  --space-6: 2rem;      /* 32px - Layout gaps */
+  --space-8: 3rem;      /* 48px - Section breaks */
+  --space-10: 4rem;
+
+  /* ===========================================
+     DEPTH SYSTEM (Shadows & Glass)
+     =========================================== */
+  /* Multi-layered shadows for "lift" without heavy borders */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.3);
+  
+  --shadow-glow: 0 0 15px var(--color-primary-muted);
+  
+  /* Inner borders for subtle definition */
+  --inner-border: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+
+  /* ===========================================
+     BORDER RADIUS (Handcrafted "Squircle" Feel)
+     =========================================== */
+  --radius-sm: 0.5rem;     /* 8px */
+  --radius-default: 0.75rem; /* 12px */
+  --radius-lg: 1rem;       /* 16px */
+  --radius-xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;
+
+  /* ===========================================
+     ANIMATION (Snappy yet Smooth)
+     =========================================== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* @plugin 'daisyui' {
-  themes: light --default, dark --prefersdark, lemonade;
-} */
+/* ============================================
+   LIGHT THEME ("Crisp Daylight")
+   ============================================ */
+/* Overrides existing variables when .theme-light is active */
+body.theme-light {
+  /* Backgrounds */
+  --color-background-dark: #f8fafc; /* Slate-50 - Main BG */
+  --color-card-dark: #ffffff;       /* White - Cards */
+  --color-surface-elevated: #f1f5f9; /* Slate-100 - Hover/Elevated */
+  
+  /* Text */
+  --color-text-dark-primary: #0f172a;   /* Slate-900 - Main Text */
+  --color-text-dark-secondary: #64748b; /* Slate-500 - Secondary Text */
+  --color-text-dark-muted: #94a3b8;     /* Slate-400 - Muted */
+  
+  /* Borders */
+  --color-border-dark: #e2e8f0;        /* Slate-200 */
+  --color-border-dark-strong: #cbd5e1; /* Slate-300 */
+  
+  /* Shadows (Re-tuned for light mode) */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.1), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+  
+  /* Inner borders & Gloss */
+  --inner-border: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+/* ============================================
+   REFINED ACCENT THEMES (De-saturated for Pro look)
+   ============================================ */
+
+body.accent-green {
+  --color-primary: #10b981; /* Emerald-500 */
+  --color-primary-hover: #059669;
+  --color-primary-muted: rgba(16, 185, 129, 0.12);
+  /* Keep background consistent for "App" feel */
+}
+
+body.accent-blue {
+  --color-primary: #3b82f6; /* Blue-500 */
+  --color-primary-hover: #2563eb;
+  --color-primary-muted: rgba(59, 130, 246, 0.12);
+}
+
+body.accent-purple {
+  --color-primary: #8b5cf6; /* Violet-500 */
+  --color-primary-hover: #7c3aed;
+  --color-primary-muted: rgba(139, 92, 246, 0.12);
+}
+
+body.accent-pink {
+  --color-primary: #f43f5e; /* Rose-500 */
+  --color-primary-hover: #e11d48;
+  --color-primary-muted: rgba(244, 63, 94, 0.12);
+}
+
+body.accent-orange {
+  --color-primary: #f97316; /* Orange-500 */
+  --color-primary-hover: #ea580c;
+  --color-primary-muted: rgba(249, 115, 22, 0.12);
+}
+
+body.accent-cyan {
+  --color-primary: #06b6d4; /* Cyan-500 */
+  --color-primary-hover: #0891b2;
+  --color-primary-muted: rgba(6, 182, 212, 0.12);
+}
+
+/* ============================================
+   TAILWIND THEME BRIDGE
+   ============================================ */
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-background-light: var(--color-background-light);
+  --color-background-dark: var(--color-background-dark);
+  --color-card-dark: var(--color-card-dark);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-border-dark: var(--color-border-dark);
+  --color-border-dark-strong: var(--color-border-dark-strong);
+  
+  --font-family-display: 'Outfit', sans-serif; /* Override default sans */
+  
+  --radius-default: var(--radius-default);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+/* ============================================
+   GLOBAL POLISH
+   ============================================ */
+
+body {
+  font-family: var(--font-family-body); /* Body text uses Inter for readability */
+  background-color: var(--color-background-dark);
+  color: var(--color-text-dark-primary);
+  line-height: var(--line-height-normal);
+  letter-spacing: -0.01em; /* Tighten up for modern feel */
+}
+
+/* Headings use Outfit for character */
+h1, h2, h3, h4, h5, h6, .display-font {
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Smooth Scrolling & Rendering */
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Selection Polish */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}

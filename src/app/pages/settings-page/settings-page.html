@@ -1,1 +1,510 @@
-<p>settings-page works!</p>
+<div class="bg-background-dark min-h-screen pt-4">
+  <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-text-dark-primary">Settings</h1>
+      <p class="text-text-dark-secondary mt-1">Manage your account and preferences</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+    } @else {
+    <div class="space-y-6">
+      <!-- ==================== Account Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">account_circle</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Account</h2>
+        </div>
+
+        <!-- User Info Display -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between py-3 border-b border-border-dark">
+            <div>
+              <p class="text-sm text-text-dark-secondary">Name</p>
+              <p class="text-text-dark-primary font-medium">{{ userName() || 'Not set' }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-3 border-b border-border-dark">
+            <div>
+              <p class="text-sm text-text-dark-secondary">Email</p>
+              <p class="text-text-dark-primary font-medium">{{ userEmail() }}</p>
+            </div>
+          </div>
+
+          <!-- Logout Button -->
+          <div class="pt-4">
+            <button
+              (click)="logout()"
+              class="flex items-center gap-2 px-4 py-2.5 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+            >
+              <span class="material-symbols-outlined">logout</span>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Preferences Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">tune</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Preferences</h2>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Timezone -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-text-dark-primary font-medium">Timezone</p>
+              <p class="text-sm text-text-dark-secondary">
+                Used for habit dates & streak calculations
+              </p>
+            </div>
+            <div class="relative w-full sm:w-64">
+              <select
+                [(ngModel)]="timezoneModel"
+                class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 appearance-none cursor-pointer"
+              >
+                @for (tz of timezones; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+                }
+              </select>
+              <span
+                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-dark-secondary pointer-events-none text-lg"
+              >
+                expand_more
+              </span>
+            </div>
+          </div>
+
+          <!-- Theme -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-text-dark-primary font-medium">Theme</p>
+              <p class="text-sm text-text-dark-secondary">Choose your preferred appearance</p>
+            </div>
+            <div class="flex gap-2">
+              @for (theme of themeOptions; track theme.value) {
+              <button
+                (click)="setTheme(theme.value)"
+                class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
+                [ngClass]="{
+                  'bg-primary text-background-dark font-medium':
+                    userSettings().theme === theme.value,
+                  'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary':
+                    userSettings().theme !== theme.value
+                }"
+              >
+                <span class="material-symbols-outlined text-lg">{{ theme.icon }}</span>
+                {{ theme.label }}
+              </button>
+              }
+            </div>
+          </div>
+
+          <!-- Accent Color -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-text-dark-primary font-medium">Accent Color</p>
+              <p class="text-sm text-text-dark-secondary">Customize your app's look</p>
+            </div>
+            <div class="flex gap-2">
+              @for (color of accentColors; track color.value) {
+              <button
+                (click)="setAccentColor(color.value)"
+                [title]="color.label"
+                class="w-8 h-8 rounded-full transition-all ring-offset-2 ring-offset-card-dark {{
+                  color.colorClass
+                }}"
+                [ngClass]="{
+                  'ring-2 ring-white scale-110': userSettings().accentColor === color.value,
+                }"
+              ></button>
+              }
+            </div>
+          </div>
+
+          <!-- Start of Week -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-text-dark-primary font-medium">Start of Week</p>
+              <p class="text-sm text-text-dark-secondary">For calendar and weekly views</p>
+            </div>
+            <div class="flex gap-2">
+              @for (option of startOfWeekOptions; track option.value) {
+              <button
+                (click)="setStartOfWeek(option.value)"
+                class="px-4 py-2 rounded-lg text-sm transition-colors"
+                [ngClass]="{
+                  'bg-primary text-background-dark font-medium':
+                    userSettings().startOfWeek === option.value,
+                  'bg-background-dark hover:bg-border-dark-strong/50 text-text-dark-primary':
+                    userSettings().startOfWeek !== option.value
+                }"
+              >
+                {{ option.label }}
+              </button>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Default Habit Settings Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">add_task</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Default Habit Settings</h2>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Default Frequency -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-text-dark-primary font-medium">Default Frequency</p>
+              <p class="text-sm text-text-dark-secondary">Pre-selected when creating new habits</p>
+            </div>
+            <select
+              [value]="userSettings().defaultFrequency"
+              (change)="setDefaultFrequency($any($event.target).value)"
+              class="bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-2.5 text-sm outline-none focus:border-primary w-full sm:w-40"
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <!-- Default Start Date -->
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-text-dark-primary font-medium">Start Date: Today</p>
+              <p class="text-sm text-text-dark-secondary">New habits start immediately</p>
+            </div>
+            <button
+              (click)="toggleDefaultStartDateToday()"
+              class="relative w-12 h-6 rounded-full transition-colors"
+              [ngClass]="{
+                'bg-primary': userSettings().defaultStartDateToday,
+                'bg-border-dark-strong': !userSettings().defaultStartDateToday
+              }"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
+                [ngClass]="{ 'translate-x-6': userSettings().defaultStartDateToday }"
+              ></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Notifications Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">notifications</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Notifications</h2>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Master Toggle -->
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-text-dark-primary font-medium">Enable Notifications</p>
+              <p class="text-sm text-text-dark-secondary">Receive reminders and updates</p>
+            </div>
+            <button
+              (click)="toggleNotifications()"
+              class="relative w-12 h-6 rounded-full transition-colors"
+              [ngClass]="{
+                'bg-primary': userSettings().notificationsEnabled,
+                'bg-border-dark-strong': !userSettings().notificationsEnabled
+              }"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
+                [ngClass]="{ 'translate-x-6': userSettings().notificationsEnabled }"
+              ></span>
+            </button>
+          </div>
+
+          @if (userSettings().notificationsEnabled) {
+          <!-- Daily Reminder -->
+          <div class="flex items-center justify-between pl-4 border-l-2 border-primary/30">
+            <div>
+              <p class="text-text-dark-primary font-medium">Daily Reminder</p>
+              <p class="text-sm text-text-dark-secondary">Get reminded to complete your habits</p>
+            </div>
+            <div class="flex items-center gap-3">
+              @if (userSettings().dailyReminderEnabled) {
+              <input
+                type="time"
+                [value]="userSettings().dailyReminderTime"
+                (change)="setDailyReminderTime($any($event.target).value)"
+                class="bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-1.5 text-sm outline-none focus:border-primary"
+              />
+              }
+              <button
+                (click)="toggleDailyReminder()"
+                class="relative w-12 h-6 rounded-full transition-colors"
+                [ngClass]="{
+                  'bg-primary': userSettings().dailyReminderEnabled,
+                  'bg-border-dark-strong': !userSettings().dailyReminderEnabled
+                }"
+              >
+                <span
+                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
+                  [ngClass]="{ 'translate-x-6': userSettings().dailyReminderEnabled }"
+                ></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Missed Habit Reminder -->
+          <div class="flex items-center justify-between pl-4 border-l-2 border-primary/30">
+            <div>
+              <p class="text-text-dark-primary font-medium">Missed Habit Reminder</p>
+              <p class="text-sm text-text-dark-secondary">Alert when habits are incomplete</p>
+            </div>
+            <div class="flex items-center gap-3">
+              @if (userSettings().missedHabitReminderEnabled) {
+              <input
+                type="time"
+                [value]="userSettings().missedHabitReminderTime"
+                (change)="setMissedHabitReminderTime($any($event.target).value)"
+                class="bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-3 py-1.5 text-sm outline-none focus:border-primary"
+              />
+              }
+              <button
+                (click)="toggleMissedHabitReminder()"
+                class="relative w-12 h-6 rounded-full transition-colors"
+                [ngClass]="{
+                  'bg-primary': userSettings().missedHabitReminderEnabled,
+                  'bg-border-dark-strong': !userSettings().missedHabitReminderEnabled
+                }"
+              >
+                <span
+                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
+                  [ngClass]="{ 'translate-x-6': userSettings().missedHabitReminderEnabled }"
+                ></span>
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+      </section>
+
+      <!-- ==================== Data & Privacy Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">shield</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">Data & Privacy</h2>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Export Data -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-dark"
+          >
+            <div>
+              <p class="text-text-dark-primary font-medium">Export Your Data</p>
+              <p class="text-sm text-text-dark-secondary">Download all habits and logs</p>
+            </div>
+            <div class="flex gap-2">
+              <button
+                (click)="exportData('json')"
+                class="flex items-center gap-2 px-4 py-2 bg-background-dark hover:bg-border-dark-strong/50 rounded-lg text-sm text-text-dark-primary transition-colors"
+              >
+                <span class="material-symbols-outlined text-lg">download</span>
+                JSON
+              </button>
+              <button
+                (click)="exportData('csv')"
+                class="flex items-center gap-2 px-4 py-2 bg-background-dark hover:bg-border-dark-strong/50 rounded-lg text-sm text-text-dark-primary transition-colors"
+              >
+                <span class="material-symbols-outlined text-lg">download</span>
+                CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Clear Local Cache -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-border-dark"
+          >
+            <div>
+              <p class="text-text-dark-primary font-medium">Clear Local Cache</p>
+              <p class="text-sm text-text-dark-secondary">Remove locally stored data</p>
+            </div>
+            <button
+              (click)="clearLocalCache()"
+              class="flex items-center gap-2 px-4 py-2 text-yellow-400 hover:bg-yellow-400/10 rounded-lg text-sm transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">delete_sweep</span>
+              Clear Cache
+            </button>
+          </div>
+
+          <!-- Delete Account -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3">
+            <div>
+              <p class="font-medium text-red-400">Delete Account</p>
+              <p class="text-sm text-text-dark-secondary">
+                Permanently delete your account and all data
+              </p>
+            </div>
+            <button
+              (click)="openDeleteAccountModal()"
+              class="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-sm transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">delete_forever</span>
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== About Section ==================== -->
+      <section class="bg-card-dark rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="material-symbols-outlined text-2xl text-primary">info</span>
+          <h2 class="text-xl font-semibold text-text-dark-primary">About</h2>
+        </div>
+
+        <div class="space-y-4">
+          <!-- App Version -->
+          <div class="flex items-center justify-between py-2">
+            <p class="text-text-dark-secondary">Version</p>
+            <p class="text-text-dark-primary font-medium">{{ appVersion }}</p>
+          </div>
+
+          <!-- Links -->
+          <div class="flex flex-wrap gap-3 pt-4 border-t border-border-dark">
+            <a
+              href="#"
+              class="flex items-center gap-2 px-4 py-2 bg-background-dark hover:bg-border-dark-strong/50 rounded-lg text-sm text-text-dark-primary transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">description</span>
+              Privacy Policy
+            </a>
+            <a
+              href="#"
+              class="flex items-center gap-2 px-4 py-2 bg-background-dark hover:bg-border-dark-strong/50 rounded-lg text-sm text-text-dark-primary transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">gavel</span>
+              Terms of Service
+            </a>
+            <a
+              href="#"
+              class="flex items-center gap-2 px-4 py-2 bg-background-dark hover:bg-border-dark-strong/50 rounded-lg text-sm text-text-dark-primary transition-colors"
+            >
+              <span class="material-symbols-outlined text-lg">help</span>
+              Support
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Save Changes Button ==================== -->
+      <div class="sticky bottom-4 flex justify-end gap-3">
+        @if (hasUnsavedChanges()) {
+        <button
+          (click)="discardChanges()"
+          class="px-6 py-3 bg-card-dark hover:bg-border-dark-strong rounded-xl font-medium text-text-dark-primary transition-colors shadow-lg"
+        >
+          Discard
+        </button>
+        <button
+          (click)="saveChanges()"
+          [disabled]="isSaving()"
+          class="px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium text-background-dark transition-colors shadow-lg flex items-center gap-2"
+        >
+          @if (isSaving()) {
+          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-background-dark"></div>
+          Saving... } @else {
+          <span class="material-symbols-outlined">save</span>
+          Save Changes }
+        </button>
+        }
+      </div>
+
+      <!-- ==================== Toast Messages ==================== -->
+      @if (toastMessage()) {
+      <div
+        class="fixed bottom-6 right-6 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-slide-in"
+        [ngClass]="{
+          'bg-green-500/90 text-white': toastMessage()?.type === 'success',
+          'bg-red-500/90 text-white': toastMessage()?.type === 'error'
+        }"
+      >
+        <span class="material-symbols-outlined">
+          {{ toastMessage()?.type === 'success' ? 'check_circle' : 'error' }}
+        </span>
+        {{ toastMessage()?.text }}
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ==================== Delete Account Modal ==================== -->
+    @if (showDeleteModal()) {
+    <div
+      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+      (click)="closeDeleteModal()"
+    >
+      <div
+        class="bg-card-dark rounded-2xl p-6 max-w-md w-full shadow-2xl"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl text-red-400">warning</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-text-dark-primary">Delete Account</h3>
+            <p class="text-sm text-text-dark-secondary">This action cannot be undone</p>
+          </div>
+        </div>
+
+        <p class="text-text-dark-secondary mb-6">
+          Are you sure you want to delete your account? All your habits, logs, and settings will be
+          permanently removed.
+        </p>
+
+        <div class="mb-6">
+          <label class="text-sm text-text-dark-secondary block mb-2">
+            Type <span class="font-mono text-red-400">DELETE</span> to confirm
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="deleteConfirmInput"
+            placeholder="Type DELETE"
+            class="w-full bg-background-dark border border-border-dark-strong rounded-lg text-text-dark-primary px-4 py-2.5 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/30"
+          />
+        </div>
+
+        <div class="flex gap-3 justify-end">
+          <button
+            (click)="closeDeleteModal()"
+            class="px-4 py-2.5 text-text-dark-secondary hover:text-text-dark-primary transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="confirmDeleteAccount()"
+            [disabled]="deleteConfirmInput !== 'DELETE'"
+            class="px-4 py-2.5 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+          >
+            Delete My Account
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+  </main>
+</div>

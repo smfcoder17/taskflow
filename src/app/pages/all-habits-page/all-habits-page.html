@@ -1,1 +1,230 @@
-<p>all-habits works!</p>
+﻿<div class="habits-layout" (click)="closeMenus()">
+  <div class="habits-content">
+    
+    <!-- ==================== HEADER ==================== -->
+    <header class="habits-header">
+      <div class="header-left">
+        <h1 class="page-title">Habits</h1>
+        <span class="header-subtitle">
+          Manage and track your habits
+        </span>
+      </div>
+    </header>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <span class="loading-text">Loading your habits...</span>
+      </div>
+    } @else {
+
+      <!-- ==================== MAIN CONTENT ==================== -->
+      <div class="habits-main">
+        
+        <!-- Search & View Toggle -->
+        <div class="search-filter-bar">
+          <div class="search-input-wrapper">
+            <span class="material-symbols-outlined">search</span>
+            <input
+              type="text"
+              class="search-input"
+              [value]="searchQuery()"
+              (input)="onSearchChange($event)"
+              placeholder="Search habits..."
+            />
+            @if (searchQuery()) {
+              <button class="search-clear" (click)="clearSearch()">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            }
+          </div>
+
+          <div class="view-toggle">
+            <button
+              class="view-toggle-btn"
+              [class.active]="viewMode() === 'list'"
+              (click)="toggleView('list')"
+            >
+              <span class="material-symbols-outlined">view_list</span>
+              <span>List</span>
+            </button>
+            <button
+              class="view-toggle-btn"
+              [class.active]="viewMode() === 'grid'"
+              (click)="toggleView('grid')"
+            >
+              <span class="material-symbols-outlined">grid_view</span>
+              <span>Grid</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        @if (habits().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <h2 class="empty-title">Start Your Journey</h2>
+            <p class="empty-text">You haven't created any habits yet. Today is a great day to build something new.</p>
+            <button class="empty-cta" (click)="createNewHabit()">
+              <span class="material-symbols-outlined">add</span>
+              Create Your First Habit
+            </button>
+          </div>
+        }
+
+        <!-- No Search Results -->
+        @else if (filteredHabits().length === 0) {
+          <div class="no-results">
+            <span class="material-symbols-outlined">search_off</span>
+            <h3 class="no-results-title">No matches found</h3>
+            <p class="no-results-text">We couldn't find any habits matching "{{ searchQuery() }}"</p>
+            <button class="clear-search-btn" (click)="clearSearch()">Clear search</button>
+          </div>
+        }
+
+        <!-- Habits Content -->
+        @else {
+          <!-- LIST VIEW -->
+          @if (viewMode() === 'list') {
+            <div class="habit-list">
+              @for (habit of filteredHabits(); track habit.id) {
+                <div class="habit-card">
+                  <div class="habit-icon">{{ getHabitIcon(habit.category) }}</div>
+                  <div class="habit-content">
+                    <h3 class="habit-title">{{ habit.title }}</h3>
+                    <div class="habit-meta">
+                      <span class="habit-frequency">{{ getFrequencyLabel(habit) }}</span>
+                      @if (habit.timeOfDay) {
+                        <span class="habit-time">
+                          <span class="material-symbols-outlined">schedule</span>
+                          {{ formatTime(habit.timeOfDay) }}
+                        </span>
+                      }
+                      <span class="habit-category-tag" [attr.data-category]="habit.category || 'default'">
+                        {{ habit.category || 'Uncategorized' }}
+                      </span>
+                    </div>
+                  </div>
+                  <div 
+                    class="habit-streak" 
+                    [class.zero]="(habit.currentStreak || 0) === 0"
+                    [class.fire]="(habit.currentStreak || 0) >= 7"
+                    [class.star]="(habit.currentStreak || 0) >= 30"
+                    [class.diamond]="(habit.currentStreak || 0) >= 100"
+                  >
+                    <span class="streak-icon">{{ getStreakIcon(habit.currentStreak || 0) }}</span>
+                    <span class="streak-count">{{ habit.currentStreak || 0 }}</span>
+                  </div>
+                  
+                  <!-- Actions Menu -->
+                  <div class="habit-actions-wrapper">
+                    <button 
+                      class="actions-trigger" 
+                      (click)="toggleMenu(habit.id!, $event)"
+                      title="More actions"
+                    >
+                      <span class="material-symbols-outlined">more_vert</span>
+                    </button>
+                    @if (openMenuId() === habit.id) {
+                      <div class="actions-dropdown" (click)="$event.stopPropagation()">
+                        <button class="dropdown-item" (click)="editHabit(habit)">
+                          <span class="material-symbols-outlined">edit</span>
+                          <span>Edit</span>
+                        </button>
+                        <button class="dropdown-item danger" (click)="openDeleteModal(habit)">
+                          <span class="material-symbols-outlined">delete</span>
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- GRID VIEW -->
+          @else {
+            <div class="habit-grid">
+              @for (habit of filteredHabits(); track habit.id) {
+                <div class="habit-card">
+                  <div class="habit-card-header">
+                    <div class="habit-icon">{{ getHabitIcon(habit.category) }}</div>
+                    <div 
+                      class="habit-streak" 
+                      [class.zero]="(habit.currentStreak || 0) === 0"
+                      [class.fire]="(habit.currentStreak || 0) >= 7"
+                      [class.star]="(habit.currentStreak || 0) >= 30"
+                      [class.diamond]="(habit.currentStreak || 0) >= 100"
+                    >
+                      <span class="streak-icon">{{ getStreakIcon(habit.currentStreak || 0) }}</span>
+                      <span class="streak-count">{{ habit.currentStreak || 0 }}</span>
+                    </div>
+                  </div>
+                  <div class="habit-content">
+                    <h3 class="habit-title">{{ habit.title }}</h3>
+                    <div class="habit-meta">
+                      <span class="habit-frequency">{{ getFrequencyLabel(habit) }}</span>
+                      @if (habit.timeOfDay) {
+                        <span class="habit-time">
+                          <span class="material-symbols-outlined">schedule</span>
+                          {{ formatTime(habit.timeOfDay) }}
+                        </span>
+                      }
+                    </div>
+                    <span class="habit-category-tag" [attr.data-category]="habit.category || 'default'">
+                      {{ habit.category || 'Uncategorized' }}
+                    </span>
+                  </div>
+                  
+                  <!-- Actions Menu -->
+                  <div class="habit-actions-wrapper grid-actions">
+                    <button 
+                      class="actions-trigger" 
+                      (click)="toggleMenu(habit.id!, $event)"
+                      title="More actions"
+                    >
+                      <span class="material-symbols-outlined">more_vert</span>
+                    </button>
+                    @if (openMenuId() === habit.id) {
+                      <div class="actions-dropdown" (click)="$event.stopPropagation()">
+                        <button class="dropdown-item" (click)="editHabit(habit)">
+                          <span class="material-symbols-outlined">edit</span>
+                          <span>Edit</span>
+                        </button>
+                        <button class="dropdown-item danger" (click)="openDeleteModal(habit)">
+                          <span class="material-symbols-outlined">delete</span>
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal()) {
+<app-confirmation-modal
+  [isOpen]="showDeleteModal()"
+  [title]="'Delete Habit'"
+  [message]="
+    'Are you sure you want to delete &quot;' +
+    (habitToDelete()?.title || '') +
+    '&quot;? This action cannot be undone.'
+  "
+  [confirmText]="'Delete'"
+  [cancelText]="'Cancel'"
+  [confirmClass]="'bg-red-500 hover:bg-red-600'"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>
+}

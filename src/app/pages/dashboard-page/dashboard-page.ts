@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, effect, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../../models/models';
 import { SupabaseService } from '../../services/supabase-service';
 import { isSameDay, getDayOfWeek } from '../../models/utilities';
+import { gsap } from 'gsap';
 
 interface TodayHabit {
   id: number;
@@ -78,6 +79,27 @@ export class DashboardPage {
   currentDate = signal<Date>(new Date());
   isLoading = signal<boolean>(true);
 
+  // Computed: Date strip for horizontal navigation (3 days before + today + 3 days after)
+  dateStrip = computed(() => {
+    const today = new Date();
+    const selected = this.currentDate();
+    const days = [];
+    
+    for (let i = -3; i <= 3; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() + i);
+      days.push({
+        date: d,
+        dayNum: d.getDate(),
+        dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        isToday: i === 0,
+        isSelected: isSameDay(d, selected),
+        isFuture: d > today
+      });
+    }
+    return days;
+  });
+
   // Filter & Sort state
   showFilterMenu = signal(false);
   showSortMenu = signal(false);
@@ -85,6 +107,10 @@ export class DashboardPage {
   activeStatusFilter = signal<FilterStatus>('all');
   activeCategoryFilter = signal<FilterCategory>('all');
   activeSort = signal<SortOption>('name-asc');
+
+  constructor() {
+    // Note: Sort state managed locally in dashboard
+  }
 
   // Filter options
   statusFilters: FilterOption[] = [
@@ -111,6 +137,241 @@ export class DashboardPage {
     { value: 'created-newest', label: 'Newest First', icon: 'schedule' },
     { value: 'created-oldest', label: 'Oldest First', icon: 'history' },
   ];
+
+
+  // Custom Widget Slots (3 slots) - with localStorage persistence
+  private readonly WIDGET_STORAGE_KEY = 'dashboard_widget_slots';
+  widgetSlots = signal<(string | null)[]>(this.loadWidgetSlotsFromStorage());
+  showWidgetPicker = signal<number | null>(null); // Index of slot being configured
+
+  // Drag-and-drop state
+  draggedWidgetIndex = signal<number | null>(null);
+  dragOverIndex = signal<number | null>(null);
+
+  availableWidgets = [
+    { id: 'blank-a', name: 'Widget A', icon: 'widgets' },
+    { id: 'blank-b', name: 'Widget B', icon: 'dashboard' },
+    { id: 'blank-c', name: 'Widget C', icon: 'view_module' },
+  ];
+
+  // Load widget slots from localStorage
+  private loadWidgetSlotsFromStorage(): (string | null)[] {
+    try {
+      const stored = localStorage.getItem(this.WIDGET_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length === 3) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load widget slots from storage:', e);
+    }
+    return [null, null, null]; // Default
+  }
+
+  // Save widget slots to localStorage
+  private saveWidgetSlotsToStorage(): void {
+    try {
+      localStorage.setItem(this.WIDGET_STORAGE_KEY, JSON.stringify(this.widgetSlots()));
+    } catch (e) {
+      console.warn('Failed to save widget slots to storage:', e);
+    }
+  }
+
+  openWidgetPicker(slotIndex: number) {
+    this.showWidgetPicker.set(slotIndex);
+  }
+
+  closeWidgetPicker() {
+    this.showWidgetPicker.set(null);
+  }
+
+  addWidget(slotIndex: number, widgetId: string) {
+    this.widgetSlots.update(slots => {
+      const newSlots = [...slots];
+      newSlots[slotIndex] = widgetId;
+      return newSlots;
+    });
+    this.closeWidgetPicker();
+    this.saveWidgetSlotsToStorage();
+  }
+
+  removeWidget(slotIndex: number) {
+    this.widgetSlots.update(slots => {
+      const newSlots = [...slots];
+      newSlots[slotIndex] = null;
+      return newSlots;
+    });
+    this.saveWidgetSlotsToStorage();
+  }
+
+  // Widget Edit Mode
+  isWidgetEditMode = signal<boolean>(false);
+
+  toggleWidgetEditMode() {
+    this.isWidgetEditMode.update(v => !v);
+    if (!this.isWidgetEditMode()) {
+      this.closeWidgetPicker();
+      this.draggedWidgetIndex.set(null);
+      this.dragOverIndex.set(null);
+    }
+  }
+
+  // Drag-and-Drop Handlers
+  onDragStart(event: DragEvent, index: number) {
+    if (!this.isWidgetEditMode()) {
+      event.preventDefault();
+      return;
+    }
+    this.draggedWidgetIndex.set(index);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', index.toString());
+    }
+  }
+
+  onDragOver(event: DragEvent, index: number) {
+    if (!this.isWidgetEditMode()) return;
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverIndex.set(index);
+  }
+
+  onDrop(event: DragEvent, targetIndex: number) {
+    event.preventDefault();
+    const sourceIndex = this.draggedWidgetIndex();
+    
+    if (sourceIndex === null || sourceIndex === targetIndex || !this.isWidgetEditMode()) {
+      this.dragOverIndex.set(null);
+      return;
+    }
+
+    // Swap widget positions (Note: -1 is Weekly Consistency which is fixed position in DOM)
+    // Only swap actual widget slots (indices 0, 1, 2)
+    if (sourceIndex >= 0 && targetIndex >= 0) {
+      this.widgetSlots.update(slots => {
+        const newSlots = [...slots];
+        const temp = newSlots[targetIndex];
+        newSlots[targetIndex] = newSlots[sourceIndex];
+        newSlots[sourceIndex] = temp;
+        return newSlots;
+      });
+      this.saveWidgetSlotsToStorage();
+    }
+
+    this.draggedWidgetIndex.set(null);
+    this.dragOverIndex.set(null);
+  }
+
+  onDragEnd() {
+    this.draggedWidgetIndex.set(null);
+    this.dragOverIndex.set(null);
+  }
+
+
+  // Time Formatting (HH:mm:ss → HH:mm)
+  formatTime(time: string | undefined): string {
+    if (!time) return '';
+    return time.slice(0, 5); // "07:00:00" → "07:00"
+  }
+
+  // UI State
+  showHabitActionsMenu = signal<string | null>(null);
+  showDoneSection = signal<boolean>(false);
+  showConfetti = signal<boolean>(false); // Celebration animation state
+  isCelebrationCollapsed = signal<boolean>(false); // New: Auto-collapse state
+  viewMode = signal<'today' | 'week'>('today'); // New: Week view toggle
+  
+  // User Context
+  userName = signal<string>('Alex'); // TODO: Fetch from auth/profile
+
+  // Computed: The ONE habit to focus on (behavior-driving)
+  nextHabit = computed(() => {
+    const pending = this.habitsForCurrentDate().filter(h => !h.completedToday);
+    if (pending.length === 0) return null;
+    
+    // Strict priority sort:
+    // 1. Time-specific habits (if we had time data, but we don't yet so skipping)
+    // 2. Streak-enabled (high stakes) descending by streak length
+    // 3. Alphabetical as stable fallback
+    return pending.sort((a, b) => {
+      if (a.streakEnabled !== b.streakEnabled) return a.streakEnabled ? -1 : 1;
+      if (a.streakEnabled) return (b.currentStreak || 0) - (a.currentStreak || 0);
+      return a.title.localeCompare(b.title);
+    })[0];
+  });
+
+  // Computed: Hero card context (urgency, consequence, time)
+  heroContext = computed(() => {
+    const habit = this.nextHabit();
+    if (!habit) return null;
+
+    const context: { urgency?: string; consequence?: string; actionLabel: string } = {
+      actionLabel: 'Mark as Done'
+    };
+
+    // Add streak consequence if applicable
+    if (habit.streakEnabled && (habit.currentStreak || 0) > 0) {
+      context.consequence = `Keeps your ${habit.currentStreak}-day streak alive`;
+    } else if (habit.streakEnabled) {
+      context.consequence = 'Start building your streak today';
+    }
+
+    // Urgency based on time of day
+    const hour = new Date().getHours();
+    if (hour >= 20) {
+      context.urgency = '⏰ Evening — finish before bed';
+    } else if (hour >= 17) {
+      context.urgency = '🌆 Winding down — a few hours left';
+    }
+
+    return context;
+  });
+
+  // Computed: Emotional progress with stages
+  progressNarrative = computed(() => {
+    const progress = this.dailyProgress();
+    const percentage = progress.percentage;
+    const completed = progress.completedHabits;
+    const remaining = progress.remaining;
+    const total = progress.totalHabits;
+
+    // Stage-based emotional messaging
+    if (total === 0) {
+      return { stage: 'rest', emoji: '☀️', main: 'Rest day', sub: 'No habits scheduled. Enjoy!' };
+    }
+    if (percentage === 100) {
+      return { stage: 'complete', emoji: '🏆', main: 'Perfect day!', sub: `All ${total} habits crushed. You're building something.` };
+    }
+    if (percentage >= 75) {
+      return { stage: 'late', emoji: '🔥', main: 'Almost there!', sub: `Just ${remaining} more. Don't stop now.` };
+    }
+    if (percentage >= 50) {
+      return { stage: 'mid', emoji: '💪', main: 'Halfway warrior', sub: `${completed} done, ${remaining} to go. You've got this.` };
+    }
+    if (percentage > 0) {
+      return { stage: 'early', emoji: '🌱', main: 'Off to a start', sub: `${completed} down. Every habit counts.` };
+    }
+    return { stage: 'zero', emoji: '🎯', main: 'Fresh start', sub: `${total} habits ready. Begin with one.` };
+  });
+
+  // Computed: Habits grouped by time of day (for later UI enhancement)
+  morningHabits = computed(() => this.habitsForCurrentDate().filter(h => h.category === 'health' || h.category === 'fitness'));
+  eveningHabits = computed(() => this.habitsForCurrentDate().filter(h => h.category === 'mindfulness' || h.category === 'personal'));
+
+  // Computed: Identity message for long-term users
+  identityMessage = computed(() => {
+    const streaks = this.topStreaks();
+    const longestStreak = streaks.length > 0 ? Math.max(...streaks.map(s => s.currentStreak)) : 0;
+    
+    if (longestStreak >= 30) return `You're becoming someone who never misses.`;
+    if (longestStreak >= 14) return `Two weeks strong. This is who you are now.`;
+    if (longestStreak >= 7) return `One week in. The habit is taking root.`;
+    return null;
+  });
 
   // Computed: habits scheduled for current date
   habitsForCurrentDate = computed(() => {
@@ -173,13 +434,76 @@ export class DashboardPage {
     const totalHabits = scheduledHabits.length;
     const completedHabits = scheduledHabits.filter((h) => h.completedToday).length;
     const percentage = totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0;
+    const remaining = totalHabits - completedHabits;
 
     return {
       date: this.formatDateForAPI(this.currentDate()),
       totalHabits,
       completedHabits,
+      remaining,
       percentage,
     };
+  });
+
+  // Computed: habits at risk (streak-enabled habits not completed today)
+  atRiskHabits = computed(() => {
+    return this.habitsForCurrentDate()
+      .filter((h) => h.streakEnabled && !h.completedToday)
+      .sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0))
+      .slice(0, 2);
+  });
+
+  // Computed: pending habits (not completed) - NOW FILTERS OUT nextHabit to avoid duplication
+  pendingHabits = computed(() => {
+    const allPending = this.filteredHabits().filter((h) => !h.completedToday);
+    const focusHabit = this.nextHabit();
+    
+    if (!focusHabit) return allPending;
+    
+    // Remove the focus habit from the list
+    return allPending.filter(h => h.id !== focusHabit.id);
+  });
+
+  // Computed: Tomorrow's habits preview
+  tomorrowHabits = computed(() => {
+    const tomorrow = new Date(this.currentDate());
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayOfWeek = getDayOfWeek(tomorrow);
+    const dayOfMonth = tomorrow.getDate();
+    const isLastDayOfMonth = new Date(tomorrow.getFullYear(), tomorrow.getMonth() + 1, 0).getDate() === dayOfMonth;
+    
+    return this.habits().filter(habit => {
+       // Check date range
+       if (habit.startDate && tomorrow < new Date(habit.startDate)) return false;
+       if (habit.endDate && tomorrow > new Date(habit.endDate)) return false;
+
+       switch (habit.frequency) {
+         case 'daily': return true;
+         case 'weekly': 
+           if (!habit.customDays || habit.customDays.length === 0) return true;
+           return habit.customDays.includes(dayOfWeek);
+         case 'monthly':
+           if (!habit.customDays || habit.customDays.length === 0) return true;
+           return (habit.customDays.includes(dayOfMonth as any) || (isLastDayOfMonth && habit.customDays.includes('last' as any)));
+         case 'custom': return true;
+         default: return true;
+       }
+    }).slice(0, 3); // Limit to top 3 for preview
+  });
+
+  // Computed: completed habits (done)
+  completedHabits = computed(() => {
+    return this.filteredHabits().filter((h) => h.completedToday);
+  });
+
+  // Computed: motivational message
+  motivationalMessage = computed(() => {
+    const progress = this.dailyProgress();
+    if (progress.totalHabits === 0) return '';
+    if (progress.percentage === 100) return '🎉 Perfect day!';
+    if (progress.percentage >= 80) return `Just ${progress.remaining} more to hit 100%!`;
+    if (progress.percentage >= 50) return `${progress.remaining} habits left to hit 80% today`;
+    return `${progress.remaining} habits to go today`;
   });
 
   // Computed weekly progress based on habits and logs
@@ -236,7 +560,35 @@ export class DashboardPage {
       });
     }
 
-    return { days };
+    // Calculate overall completion rate for the week
+    const totalWeek = days.reduce((sum, d) => sum + d.total, 0);
+    const completedWeek = days.reduce((sum, d) => sum + d.completed, 0);
+    const completionRate = totalWeek > 0 ? (completedWeek / totalWeek) * 100 : 0;
+
+    return { days, completionRate };
+  });
+
+  // Computed: 3-Day View Data (Yesterday, Today, Tomorrow)
+  threeDayView = computed(() => {
+    const today = this.currentDate();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Get Yesterday from weekly logs/progress
+    const yStr = this.formatDateForAPI(yesterday);
+    const yDay = this.weeklyProgress().days.find(d => d.date === yStr) || { completed: 0, total: 0 };
+    
+    // Get Today from dailyProgress
+    const tStats = this.dailyProgress();
+    
+    // Get Tomorrow from tomorrowHabits
+    const tomHabits = this.tomorrowHabits();
+    
+    return {
+      yesterday: { stats: yDay, label: 'Yesterday' },
+      today: { stats: { completed: tStats.completedHabits, total: tStats.totalHabits }, label: 'Today' },
+      tomorrow: { total: tomHabits.length, habits: tomHabits, label: 'Tomorrow' }
+    };
   });
 
   // Computed filtered & sorted habits (now uses habitsForCurrentDate)
@@ -257,34 +609,48 @@ export class DashboardPage {
       result = result.filter((h) => h.category === categoryFilter);
     }
 
-    // Apply sorting
+    // Apply sorting - Default: pending first, then by at-risk status
     const sortOption = this.activeSort();
-    switch (sortOption) {
-      case 'name-asc':
-        result.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'name-desc':
-        result.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      case 'streak-desc':
-        result.sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0));
-        break;
-      case 'streak-asc':
-        result.sort((a, b) => (a.currentStreak || 0) - (b.currentStreak || 0));
-        break;
-      case 'category':
-        result.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
-        break;
-      case 'created-newest':
-        result.sort(
-          (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-        );
-        break;
-      case 'created-oldest':
-        result.sort(
-          (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
-        );
-        break;
+    if (sortOption === 'name-asc') {
+      // Smart default: pending first, then sort by name
+      result.sort((a, b) => {
+        if (a.completedToday !== b.completedToday) {
+          return a.completedToday ? 1 : -1;
+        }
+        // Among pending, prioritize at-risk (streak-enabled)
+        if (!a.completedToday && !b.completedToday) {
+          if (a.streakEnabled !== b.streakEnabled) {
+            return a.streakEnabled ? -1 : 1;
+          }
+        }
+        return a.title.localeCompare(b.title);
+      });
+    } else {
+      // Apply other sorting options
+      switch (sortOption) {
+        case 'name-desc':
+          result.sort((a, b) => b.title.localeCompare(a.title));
+          break;
+        case 'streak-desc':
+          result.sort((a, b) => (b.currentStreak || 0) - (a.currentStreak || 0));
+          break;
+        case 'streak-asc':
+          result.sort((a, b) => (a.currentStreak || 0) - (b.currentStreak || 0));
+          break;
+        case 'category':
+          result.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+          break;
+        case 'created-newest':
+          result.sort(
+            (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+          );
+          break;
+        case 'created-oldest':
+          result.sort(
+            (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+          );
+          break;
+      }
     }
 
     return result;
@@ -326,6 +692,28 @@ export class DashboardPage {
       return;
     }
     this.habits.set(data || []);
+    
+    // Once habits are loaded, enhance them with completion details from logs
+    if (this.weeklyLogs().length > 0) {
+      this.enhanceHabitsWithLogs();
+    }
+  }
+
+  enhanceHabitsWithLogs() {
+    const currentHabits = this.habits();
+    const todayLogs = this.weeklyLogs().filter(log => 
+       new Date(log.logDate).toDateString() === this.currentDate().toDateString()
+    );
+
+    const improvedHabits = currentHabits.map(habit => {
+       const log = todayLogs.find(l => l.habitId === habit.id);
+       return {
+         ...habit,
+         completedAt: log ? log.completedAt : undefined
+       };
+    });
+    
+    this.habits.set(improvedHabits);
   }
 
   async loadWeeklyLogs() {
@@ -356,6 +744,11 @@ export class DashboardPage {
     }));
 
     this.weeklyLogs.set(mappedLogs);
+    
+    // Refresh habits to include potentially loaded completion times
+    if (this.habits().length > 0) {
+        this.enhanceHabitsWithLogs();
+    }
   }
 
   async loadTopStreaks() {
@@ -365,12 +758,52 @@ export class DashboardPage {
 
   async toggleHabit(habitId: string) {
     try {
+      // Check if we're completing (not uncompleting)
+      const currentHabits = this.habits();
+      const habit = currentHabits.find((h) => h.id === habitId);
+      const isCompleting = habit && !habit.completedToday;
+
+      // Optimistic update
+      const habitIndex = currentHabits.findIndex((h) => h.id === habitId);
+      if (habitIndex !== -1) {
+        const updatedHabits = [...currentHabits];
+        updatedHabits[habitIndex] = {
+          ...updatedHabits[habitIndex],
+          completedToday: !updatedHabits[habitIndex].completedToday,
+        };
+        this.habits.set(updatedHabits);
+      }
+
+      // Trigger celebration on completion
+      if (isCompleting) {
+        // Check if this completes the day
+        const remainingAfter = this.habitsForCurrentDate().filter(h => h.id !== habitId && !h.completedToday).length;
+        
+        if (remainingAfter === 0) {
+          // DAY COMPLETE: Big celebration
+          this.triggerDayCompleteAnimation();
+        } else {
+          // SINGLE HABIT: Quick celebratory pulse
+          this.triggerHabitCompleteAnimation();
+        }
+      }
+
       const dateString = this.formatDateForAPI(this.currentDate());
       await this.supabaseService.toggleHabitCompletion(habitId, dateString);
       await Promise.all([this.loadHabits(), this.loadWeeklyLogs()]);
     } catch (error) {
       console.error('Error toggling habit:', error);
+      // Revert optimistic update on error
+      await this.loadHabits();
     }
+  }
+
+  toggleHabitActionsMenu(habitId: string): void {
+    this.showHabitActionsMenu.update((current) => (current === habitId ? null : habitId));
+  }
+
+  toggleDoneSection(): void {
+    this.showDoneSection.update((v) => !v);
   }
 
   changeDate(direction: number) {
@@ -378,6 +811,11 @@ export class DashboardPage {
     newDate.setDate(newDate.getDate() + direction);
     this.currentDate.set(newDate);
     // Reload habits for the new date
+    this.loadHabits();
+  }
+
+  goToDate(date: Date) {
+    this.currentDate.set(date);
     this.loadHabits();
   }
 
@@ -410,6 +848,29 @@ export class DashboardPage {
     return isSameDay(this.currentDate(), tomorrow);
   });
 
+  // Check if viewing a future date (cannot complete habits)
+  isFutureDate = computed(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selected = new Date(this.currentDate());
+    selected.setHours(0, 0, 0, 0);
+    return selected > today;
+  });
+
+  // Dynamic label for "Next Day Focus" section (Tomorrow vs Next Day)
+  nextDayLabel = computed(() => {
+    return this.isToday() ? "Tomorrow's Focus" : "Next Day";
+  });
+
+  // Formatted date with day prefix (Today/Yesterday/Tomorrow)
+  formattedDateWithPrefix = computed(() => {
+    const dateStr = this.formatDate(this.currentDate());
+    if (this.isToday()) return `Today — ${dateStr}`;
+    if (this.isYesterday()) return `Yesterday — ${dateStr}`;
+    if (this.isTomorrow()) return `Tomorrow — ${dateStr}`;
+    return dateStr;
+  });
+
   getWeekDayStatus(day: any): string {
     if (day.total === 0) return 'empty';
     if (day.completed === day.total) return 'complete';
@@ -431,6 +892,7 @@ export class DashboardPage {
   closeMenus(): void {
     this.showFilterMenu.set(false);
     this.showSortMenu.set(false);
+    this.showHabitActionsMenu.set(null);
   }
 
   setStatusFilter(status: FilterStatus): void {
@@ -453,5 +915,64 @@ export class DashboardPage {
 
   getActiveSortLabel(): string {
     return this.sortOptions.find((s) => s.value === this.activeSort())?.label || 'Sort';
+  }
+
+  // Expose Math for template
+  Math = Math;
+  
+  // Helper for template
+  isSameDate(date1: string | Date, date2: string | Date): boolean {
+    return isSameDay(new Date(date1), new Date(date2));
+  }
+
+  // GSAP Animation: Single Habit Complete (fireworks burst)
+  triggerHabitCompleteAnimation(): void {
+    this.showConfetti.set(true);
+    
+    // Quick fireworks burst (600ms)
+    setTimeout(() => this.showConfetti.set(false), 600);
+    
+    // Animate the focus strip if present
+    const focusStrip = document.querySelector('.focus-strip');
+    if (focusStrip) {
+      gsap.fromTo(focusStrip, 
+        { scale: 1 },
+        { scale: 1.02, duration: 0.15, yoyo: true, repeat: 1, ease: 'power2.out' }
+      );
+    }
+  }
+
+  // GSAP Animation: Day Complete (big celebration)
+  triggerDayCompleteAnimation(): void {
+    this.showConfetti.set(true);
+    this.isCelebrationCollapsed.set(false); // Reset collapse state
+    
+    // Confetti duration
+    setTimeout(() => this.showConfetti.set(false), 4000);
+    
+    // Auto-collapse hero card after 3.5 seconds to show insights
+    setTimeout(() => {
+      this.isCelebrationCollapsed.set(true);
+    }, 3500);
+    
+    // Animate celebration banner entrance
+    setTimeout(() => {
+      const banner = document.querySelector('.celebration-banner');
+      if (banner) {
+        gsap.fromTo(banner,
+          { opacity: 0, y: -20, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
+        );
+      }
+    }, 100);
+    
+  }
+
+  toggleCelebrationCollapse(): void {
+    this.isCelebrationCollapsed.update(v => !v);
+  }
+
+  setViewMode(mode: 'today' | 'week'): void {
+    this.viewMode.set(mode);
   }
 }

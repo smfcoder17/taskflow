@@ -1,0 +1,206 @@
+/* ============================================
+   Settings Page - Refined Styles
+   ============================================ */
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===========================================
+   TOGGLE SWITCHES
+   =========================================== */
+
+button[class*="rounded-full"] {
+  transition: background-color var(--transition-base);
+}
+
+button[class*="rounded-full"] span {
+  transition: transform var(--transition-base);
+}
+
+/* ===========================================
+   SECTION CARDS (Borderless & Glass)
+   =========================================== */
+
+section {
+  transition: all var(--transition-base);
+  /* border: 1px solid var(--color-border-dark); REMOVED */
+  border: 1px solid transparent; /* Placeholder to prevent layout shift */
+  background: var(--color-card-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+section:hover {
+  box-shadow: var(--shadow-md);
+  background: var(--color-surface-elevated);
+  transform: translateY(-2px);
+}
+
+/* Section Icon Styling */
+section .material-symbols-outlined {
+  transition: all var(--transition-base);
+}
+
+section .material-symbols-outlined.text-primary {
+  opacity: 0.8;
+  text-shadow: 0 0 15px var(--color-primary-muted);
+}
+
+section:hover .material-symbols-outlined.text-primary {
+  opacity: 1;
+  transform: scale(1.1);
+  text-shadow: 0 0 10px var(--color-primary);
+}
+
+/* ===========================================
+   MODAL (Glassmorphism)
+   =========================================== */
+
+.fixed.inset-0 {
+  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.fixed.inset-0 > div {
+  animation: modal-appear var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ===========================================
+   ACCENT COLOR BUTTONS
+   =========================================== */
+
+button[style*="background-color"],
+button[class*="bg-green"],
+button[class*="bg-blue"],
+button[class*="bg-purple"],
+button[class*="bg-pink"],
+button[class*="bg-orange"],
+button[class*="bg-cyan"] {
+  transition: all var(--transition-base);
+  position: relative;
+  z-index: 1;
+}
+
+button[style*="background-color"]::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity var(--transition-base);
+  filter: blur(8px);
+}
+
+button[style*="background-color"]:hover::after {
+  opacity: 0.6;
+}
+
+button[style*="background-color"]:hover,
+button.w-8.h-8:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--color-background-dark), 0 0 0 4px currentColor;
+}
+
+/* ===========================================
+   FORM INPUTS
+   =========================================== */
+
+input[type="time"] {
+  color-scheme: dark;
+  background: var(--color-background-dark);
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-default);
+  padding: var(--space-2);
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+}
+
+input[type="time"]:hover::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Select dropdown styling */
+select {
+  background-image: none;
+  background-color: var(--color-card-dark);
+  border-color: var(--color-border-dark);
+}
+
+/* Input Focus Enhancements */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px var(--color-primary-muted) !important;
+  background: var(--color-surface-elevated);
+}
+
+/* ===========================================
+   STICKY SAVE BUTTON
+   =========================================== */
+
+.sticky {
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  padding-bottom: var(--space-4);
+  /* Mask linear gradient to fade out content under it */
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+.sticky button {
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.sticky button:hover {
+  box-shadow: var(--shadow-xl), 0 0 30px var(--color-primary-muted);
+}
+
+
+/* ===========================================
+   ACTION BUTTONS
+   =========================================== */
+
+/* Danger button hover glow */
+button[class*="text-red"]:hover {
+  box-shadow: 0 0 12px -4px rgba(239, 68, 68, 0.4);
+}
+
+/* Warning button hover glow */
+button[class*="text-yellow"]:hover {
+  box-shadow: 0 0 12px -4px rgba(251, 191, 36, 0.4);
+}
+

@@ -20,7 +20,6 @@ export class SidebarComponent {
     { path: '/all-habits', icon: 'checklist', name: 'Habits' },
     { path: '/calendar', icon: 'calendar_today', name: 'Calendar' },
     { path: '/reports', icon: 'bar_chart', name: 'Reports' },
-    { path: '/settings', icon: 'settings', name: 'Settings' },
   ]);
 
   isOpen = signal(false);

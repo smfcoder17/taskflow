@@ -1,9 +1,80 @@
 export interface Profile {
   id?: string;
   username: string;
+  email?: string;
   website: string;
   avatar_url: string;
 }
+
+// ==================== Settings Types ====================
+
+/** Theme mode options for the app appearance */
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+/** Preset accent colors available for customization */
+export type AccentColor = 'green' | 'blue' | 'purple' | 'pink' | 'orange' | 'cyan';
+
+/** Start of week preference for calendar/streak calculations */
+export type StartOfWeek = 'monday' | 'sunday';
+
+/** Notification mode settings */
+export type NotificationMode = 'Zen' | 'Balanced' | 'Persistent';
+
+/** User settings for preferences, notifications, and defaults */
+export interface UserSettings {
+  id?: string;
+  userId: string;
+  timezone: string;
+  theme: ThemeMode;
+  accentColor: string; // Adjusted to string to match any color name
+  startOfWeek: StartOfWeek;
+  defaultFrequency: HabitFrequency;
+  defaultStartDateToday: boolean;
+  notificationsEnabled: boolean;
+  notificationMode: NotificationMode;
+  dailyReminderEnabled: boolean;
+  dailyReminderTime: string; // HH:mm format
+  missedHabitReminderEnabled: boolean;
+  missedHabitReminderTime: string; // HH:mm format
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Default settings for new users */
+export const DEFAULT_SETTINGS: UserSettings = {
+  userId: '',
+  timezone: 'UTC+00:00',
+  theme: 'system',
+  accentColor: 'green',
+  startOfWeek: 'monday',
+  defaultFrequency: 'daily',
+  defaultStartDateToday: true,
+  notificationsEnabled: true,
+  notificationMode: 'Balanced',
+  dailyReminderEnabled: false,
+  dailyReminderTime: '09:00',
+  missedHabitReminderEnabled: false,
+  missedHabitReminderTime: '20:00',
+};
+
+/** Accent color configuration with display properties */
+export interface AccentColorOption {
+  value: AccentColor;
+  label: string;
+  colorClass: string;
+}
+
+/** Available accent color presets */
+export const AccentColorOptions: AccentColorOption[] = [
+  { value: 'green', label: 'Green', colorClass: 'bg-green-500' },
+  { value: 'blue', label: 'Blue', colorClass: 'bg-blue-500' },
+  { value: 'purple', label: 'Purple', colorClass: 'bg-purple-500' },
+  { value: 'pink', label: 'Pink', colorClass: 'bg-pink-500' },
+  { value: 'orange', label: 'Orange', colorClass: 'bg-orange-500' },
+  { value: 'cyan', label: 'Cyan', colorClass: 'bg-cyan-500' },
+];
+
+// ==================== Habit Types ====================
 
 export type HabitCategory =
   | 'health'
@@ -43,7 +114,39 @@ export const DefaultHabitIcons: HabitIconPair[] = [
 ];
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
-export type MonthDay = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 'last';
+export type MonthDay =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16
+  | 17
+  | 18
+  | 19
+  | 20
+  | 21
+  | 22
+  | 23
+  | 24
+  | 25
+  | 26
+  | 27
+  | 28
+  | 29
+  | 30
+  | 31
+  | 'last';
 
 export interface Habit {
   id?: string;
@@ -70,6 +173,9 @@ export interface Habit {
   // Streak
   streakEnabled: boolean;
   streakResetAfterMissingDays?: number;
+
+  // Reminders
+  // reminderEnabled: boolean;
 
   // UI
   sortOrder?: number;
@@ -100,6 +206,7 @@ export interface HabitWithStats extends Habit {
   completionsLast7Days?: number;
   completionsLast30Days?: number;
   lastCompletedDate?: string;
+  completedAt?: string; // ISO string time of completion for today
 }
 
 export interface DailyProgress {
@@ -134,4 +241,70 @@ export interface AnalyticsSnapshot {
   completionRate: number;
   streak: number;
   totalCompleted: number;
+}
+
+export interface HabitAnalytics {
+  habitId: string;
+  habitTitle: string;
+  icon: string;
+  completionRate: number; // percentage
+  consistencyScore: number; // percentage with gap penalty
+  totalCompletions: number;
+  bestDayOfWeek: DayOfWeek;
+  bestTimeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
+}
+
+export interface WeekComparison {
+  currentWeek: { completions: number; rate: number; startDate: string; endDate: string };
+  lastWeek: { completions: number; rate: number; startDate: string; endDate: string };
+  change: number; // percentage change
+}
+
+export interface BehavioralInsights {
+  bestDayOfWeek: { day: DayOfWeek; completionRate: number };
+  bestTimeOfDay: { period: string; completionRate: number };
+  averageConsistencyScore: number;
+  totalActiveHabits: number;
+}
+
+export interface HeatmapDay {
+  date: string;
+  completionRate: number; // 0-100
+  completedCount: number;
+  totalScheduled: number;
+}
+
+// ==================== Helper Functions ====================
+
+/**
+ * Gets the icon for a given category string (either token or label)
+ * @param category The category string to look up
+ * @returns The icon emoji or a default icon if not found
+ */
+export function getIconByCategory(category?: string | null): string {
+  if (!category) return '🎯'; // Default icon
+
+  const normalized = category.toLowerCase().trim();
+  const iconPair = DefaultHabitIcons.find(
+    (item) => item.category.toLowerCase() === normalized || item.label.toLowerCase() === normalized
+  );
+
+  return iconPair?.icon || '🎯';
+}
+
+/**
+ * Gets the display label for a given category token
+ * @param category The category token to look up
+ * @returns The display label or capitalized category if not found
+ */
+export function getLabelByCategory(category?: string | null): string {
+  if (!category) return 'Personal';
+
+  const normalized = category.toLowerCase().trim();
+  const iconPair = DefaultHabitIcons.find((item) => item.category.toLowerCase() === normalized);
+
+  if (iconPair) return iconPair.label;
+
+  // Fallback: capitalize first letter
+  return category.charAt(0).toUpperCase() + category.slice(1);
 }

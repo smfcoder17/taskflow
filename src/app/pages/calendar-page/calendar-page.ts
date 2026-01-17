@@ -32,7 +32,16 @@ export class CalendarPage implements OnInit {
   monthLogs = signal<HabitLog[]>([]);
   isLoading = signal(true);
 
-  weekDayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Computed week day labels based on user's start of week preference
+  weekDayLabels = computed(() => {
+    const startOfWeek = this.supabaseService.userSettings().startOfWeek;
+    const allDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    if (startOfWeek === 'monday') {
+      return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    }
+    return allDays;
+  });
 
   // Computed: calendar days for current month view
   calendarDays = computed<CalendarDay[]>(() => {
@@ -49,13 +58,18 @@ export class CalendarPage implements OnInit {
     // Last day of the month
     const lastDay = new Date(year, monthIndex + 1, 0);
 
-    // Start from Sunday of the week containing the first day
+    // Start from beginning of week (based on user preference)
+    const startOfWeek = this.supabaseService.userSettings().startOfWeek;
     const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    const firstDayOfWeek = startOfWeek === 'monday' ? 1 : 0;
+    const offset = (firstDay.getDay() - firstDayOfWeek + 7) % 7;
+    startDate.setDate(startDate.getDate() - offset);
 
-    // End on Saturday of the week containing the last day
+    // End on last day of week (based on user preference)
     const endDate = new Date(lastDay);
-    endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
+    const lastDayOfWeek = startOfWeek === 'monday' ? 0 : 6;
+    const endOffset = (lastDayOfWeek - lastDay.getDay() + 7) % 7;
+    endDate.setDate(endDate.getDate() + endOffset);
 
     const days: CalendarDay[] = [];
     const currentDate = new Date(startDate);

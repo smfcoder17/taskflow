@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, effect, inject, OnInit, signal } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
@@ -6,11 +6,20 @@ import {
   ReactiveFormsModule,
   FormControl,
 } from '@angular/forms';
-import { DayOfWeek, DefaultHabitIcons, Habit, HabitIconPair, MonthDay } from '../../models/models';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import {
+  DayOfWeek,
+  DefaultHabitIcons,
+  Habit,
+  HabitIconPair,
+  HabitWithStats,
+  MonthDay,
+} from '../../models/models';
 import { SupabaseService } from '../../services/supabase-service';
 import { DateUtils } from '../../models/utilities';
+
+type FormMode = 'create' | 'edit';
 
 @Component({
   selector: 'app-habit-form',
@@ -20,21 +29,25 @@ import { DateUtils } from '../../models/utilities';
   styleUrl: './habit-form-page.css',
 })
 export class HabitFormPage implements OnInit {
+  private router = inject(Router);
+  private supabaseService = inject(SupabaseService);
+  private activatedRoute = inject(ActivatedRoute);
+
   habitForm: FormGroup;
-  router = inject(Router);
-  supabaseService = inject(SupabaseService);
-  isSubmitting: boolean = false;
+  mode = signal<FormMode>('create');
+  editingHabitId = signal<string | null>(null);
+  editingHabitTitle = signal<string>('');
+  isSubmitting = signal<boolean>(false);
+  isLoading = signal<boolean>(false);
 
-  // Options pour les selects
+  // Options
   availableHabitIcons: HabitIconPair[] = DefaultHabitIcons;
-
   frequencies = [
     { value: 'daily', label: 'Daily' },
     { value: 'weekly', label: 'Weekly' },
     { value: 'monthly', label: 'Monthly' },
     { value: 'custom', label: 'Custom' },
   ];
-
   weekDays = DateUtils.weekDays;
   monthDays: (number | 'last')[] = [...Array.from({ length: 31 }, (_, i) => i + 1), 'last'];
 
@@ -53,10 +66,60 @@ export class HabitFormPage implements OnInit {
       streakEnabled: new FormControl(true),
       streakResetAfterMissingDays: new FormControl(1),
     });
+
+    // Sync frequency with user settings (only in create mode)
+    effect(() => {
+      if (this.mode() === 'create') {
+        const defaultFrequency = this.supabaseService.userSettings().defaultFrequency;
+        if (defaultFrequency && !this.habitForm.get('title')?.value) {
+          this.habitForm.patchValue({ frequency: defaultFrequency }, { emitEvent: false });
+        }
+      }
+    });
   }
 
-  ngOnInit(): void {
-    console.log('Categories:', this.availableHabitIcons);
+  async ngOnInit(): Promise<void> {
+    const id = this.activatedRoute.snapshot.paramMap.get('id');
+    if (id) {
+      this.mode.set('edit');
+      this.editingHabitId.set(id);
+      await this.loadHabitData(id);
+    }
+  }
+
+  async loadHabitData(id: string): Promise<void> {
+    this.isLoading.set(true);
+    try {
+      const { data, error } = await this.supabaseService.getHabitById(id);
+      if (error) throw error;
+      if (data) {
+        this.editingHabitTitle.set(data.title);
+
+        // Map snake_case from DB to camelCase for form if needed,
+        // but getHabitById already returns mapped data if the service does it.
+        // Let's check getHabitById in SupabaseService.
+
+        this.habitForm.patchValue({
+          title: data.title,
+          description: data.description || '',
+          icon: data.icon || '🎯',
+          color: data.color || '#10b981',
+          category: data.category || 'personal',
+          frequency: data.frequency,
+          customDays: data.customDays || [],
+          timeOfDay: data.timeOfDay || '',
+          startDate: data.startDate || '',
+          endDate: data.endDate || '',
+          streakEnabled: data.streakEnabled ?? true,
+          streakResetAfterMissingDays: data.streakResetAfterMissingDays || 1,
+        });
+      }
+    } catch (err) {
+      console.error('Error loading habit:', err);
+      this.router.navigate(['/all-habits']);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   onWeekDayToggle(day: DayOfWeek): void {
@@ -107,56 +170,49 @@ export class HabitFormPage implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.habitForm.invalid) return;
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
 
     try {
       const formValue = this.habitForm.value;
 
-      const newHabit: Habit = {
+      const habitData: Partial<Habit> = {
         title: formValue.title,
         description: formValue.description,
         icon: formValue.icon || '🎯',
         color: formValue.color || '#10b981',
         category: formValue.category || 'personal',
         frequency: formValue.frequency,
-        customDays: formValue.customDays || undefined,
+        customDays: formValue.customDays || [],
         timeOfDay: formValue.timeOfDay || undefined,
-        startDate: formValue.startDate
-          ? new Date(formValue.startDate + 'T00:00:00').toISOString().split('T')[0]
-          : undefined,
-        endDate: formValue.endDate
-          ? new Date(formValue.endDate + 'T00:00:00').toISOString().split('T')[0]
-          : undefined,
+        startDate: formValue.startDate || undefined,
+        endDate: formValue.endDate || undefined,
         streakEnabled: formValue.streakEnabled ?? true,
         streakResetAfterMissingDays: formValue.streakResetAfterMissingDays || 1,
       };
-      console.log('New Habit:', newHabit);
 
-      const { data, error } = await this.supabaseService.createHabit(newHabit);
-
-      if (error) {
-        console.error('Erreur lors de la création:', error);
-        alert("Erreur lors de la création de l'habitude");
-        return;
+      let result;
+      if (this.mode() === 'edit' && this.editingHabitId()) {
+        result = await this.supabaseService.updateHabit(this.editingHabitId()!, habitData);
+      } else {
+        result = await this.supabaseService.createHabit(habitData as Habit);
       }
 
-      console.log('Habit created successfully:', data);
-      this.habitForm.reset({
-        icon: '🎯',
-        color: '#10b981',
-        category: 'personal',
-        frequency: 'daily',
-        streakEnabled: true,
-        streakResetAfterMissingDays: 1,
-      });
+      const { data, error } = result;
 
-      this.router.navigate(['/dashboard']);
-      // this.router.navigate(['/all-habits']); // ou ta route de liste
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Une erreur est survenue');
+      if (error) {
+        console.error('Error saving habit:', error);
+      } else {
+        this.goBack();
+      }
+    } catch (err) {
+      console.error('Error during submission:', err);
     } finally {
-      this.isSubmitting = false;
+      this.isSubmitting.set(false);
     }
+  }
+
+  goBack(): void {
+    // Navigate to all-habits as requested
+    this.router.navigate(['/all-habits']);
   }
 }

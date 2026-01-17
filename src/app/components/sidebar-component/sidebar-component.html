@@ -1,17 +1,17 @@
-<!-- Mobile Toggle Button (visible on small screens or when sidebar collapsed) -->
+<!-- Mobile Toggle Button -->
 <button
   (click)="toggleSidebar()"
-  class="fixed top-4 left-4 z-50 sm:hidden p-2 rounded-lg bg-card-dark border border-border-dark text-text-dark-primary hover:bg-border-dark/50 transition-colors"
+  class="fixed top-4 left-4 z-50 sm:hidden p-2 rounded-lg bg-card-dark border border-border-dark text-text-dark-primary hover:bg-background-dark transition-colors"
   [class.hidden]="isOpen()"
 >
-  <span class="material-symbols-outlined">menu</span>
+  <span class="material-symbols-outlined text-xl">menu</span>
 </button>
 
-<!-- Desktop Collapse Toggle (visible on larger screens when sidebar is visible) -->
+<!-- Desktop Collapse Toggle -->
 <button
   (click)="toggleCollapse()"
-  class="hidden sm:flex fixed top-4 z-45 p-2 rounded-lg bg-card-dark border border-border-dark text-text-dark-primary hover:bg-border-dark/50 transition-all duration-300"
-  [class.left-52]="!isCollapsed()"
+  class="hidden sm:flex fixed top-4 z-45 p-2 rounded-lg bg-card-dark border border-border-dark text-text-dark-primary hover:bg-background-dark transition-all duration-300"
+  [class.left-64]="!isCollapsed()"
   [class.left-4]="isCollapsed()"
 >
   <span
@@ -29,9 +29,9 @@
 
 <!-- Sidebar -->
 <aside
-  class="h-screen bg-card-dark p-4 flex-col justify-between border-r border-border-dark overflow-y-auto transition-all duration-300 z-40"
+  class="h-screen bg-card-dark flex flex-col border-r border-border-dark overflow-y-auto transition-all duration-300 z-40"
   [ngClass]="{
-    'fixed inset-y-0 left-0 w-64': true,
+    'fixed inset-y-0 left-0 w-72': true,
     'translate-x-0': isOpen(),
     '-translate-x-full': !isOpen(),
     'sm:translate-x-0': !isCollapsed(),
@@ -47,54 +47,69 @@
     <span class="material-symbols-outlined">close</span>
   </button>
 
-  <div class="flex flex-col gap-8">
-    <a routerLink="/dashboard" class="flex items-center gap-2 p-2" (click)="onNavClick()">
-      <div class="size-8 text-primary">
+  <!-- Logo/Brand -->
+  <div class="p-6 border-b border-border-dark">
+    <a routerLink="/dashboard" class="flex items-center gap-3" (click)="onNavClick()">
+      <div class="size-10 text-primary shrink-0">
         <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
           <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
         </svg>
       </div>
-      <h1 class="text-text-dark-primary text-xl font-bold">HabitFlow</h1>
+      <h1 class="text-text-dark-primary text-xl font-bold tracking-tight">HabitFlow</h1>
     </a>
-    <nav class="flex flex-col gap-2">
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 p-4">
+    <div class="space-y-1">
       @for(link of navLinks(); track link.path) {
       <a
         [routerLink]="link.path"
-        routerLinkActive="bg-border-dark"
+        routerLinkActive="bg-primary/10 text-primary"
         [routerLinkActiveOptions]="{ exact: true }"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-border-dark/50 transition-colors"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-border-dark/50 transition-all duration-200 group"
         (click)="onNavClick()"
       >
-        <span class="material-symbols-outlined text-text-dark-primary">{{ link.icon }}</span>
-        <p class="text-text-dark-primary text-sm font-medium leading-normal">{{ link.name }}</p>
+        <span
+          class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform"
+          >{{ link.icon }}</span
+        >
+        <p class="text-sm font-medium leading-normal">{{ link.name }}</p>
       </a>
       }
-    </nav>
-  </div>
-  <div class="flex flex-col gap-4">
-    <a
-      routerLink="/habit/new"
-      class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-card-dark text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity"
-      (click)="onNavClick()"
-    >
-      <span class="truncate">Add New Habit</span>
-    </a>
+    </div>
 
+    <!-- Add New Habit Button -->
+    <button
+      routerLink="/habit/new"
+      (click)="onNavClick()"
+      class="w-full mt-6 flex items-center justify-center gap-2 rounded-lg h-11 px-4 bg-primary text-background-dark text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
+    >
+      <span class="material-symbols-outlined text-base">add</span>
+      <span>Add New Habit</span>
+    </button>
+  </nav>
+
+  <!-- User Profile -->
+  <div class="p-4 border-t border-border-dark">
     <a
-      routerLink="/profile"
-      class="flex gap-3 border-t border-solid border-border-dark pt-4"
+      routerLink="/settings"
+      class="flex items-center gap-3 p-3 rounded-lg hover:bg-border-dark/50 transition-colors group"
       (click)="onNavClick()"
     >
       <div
-        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+        class="bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0 ring-2 ring-border-dark group-hover:ring-primary transition-all"
         style="background-image: url('https://picsum.photos/id/237/100/100')"
       ></div>
-      <div class="flex flex-col">
-        <h1 class="text-text-dark-primary text-base font-medium leading-normal">Alex Doe</h1>
-        <p class="text-text-dark-secondary text-sm font-normal leading-normal">
-          alex.doe@email.com
-        </p>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-text-dark-primary text-sm font-medium leading-tight truncate">Alex Doe</h1>
+        <p class="text-text-dark-secondary text-xs leading-tight truncate">alex.doe@email.com</p>
       </div>
+      <span
+        class="material-symbols-outlined text-text-dark-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        chevron_right
+      </span>
     </a>
   </div>
 </aside>
